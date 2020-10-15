@@ -31,29 +31,26 @@ class MediaMetadataStore {
   MediaMetadataStore._internal(this._box);
 
   Future<void> store(Uuid id, MediaMetadata metadata) async {
-    _assertIdNotExists(id);
+    if (_box.containsKey(id.toString())) {
+      throw MediaMetadataStoreException("$id id already exists.");
+    }
+
     await _box.put(id.toString(), metadata);
   }
 
   Future<MediaMetadata> query(Uuid id) async {
-    _assertIdExists(id);
+    if (!_box.containsKey(id.toString())) {
+      throw MediaMetadataStoreException("$id id does not exist.");
+    }
+
     return _box.get(id.toString());
   }
 
   Future<void> delete(Uuid id) async {
-    _assertIdExists(id);
-    _box.delete(id.toString());
-  }
-
-  void _assertIdNotExists(Uuid id) {
-    if (_box.containsKey(id.toString())) {
-      throw MediaMetadataStoreException("$id id exists.");
-    }
-  }
-
-  void _assertIdExists(Uuid id) {
     if (!_box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id does not exist.");
     }
+
+    _box.delete(id.toString());
   }
 }
