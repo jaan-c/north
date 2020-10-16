@@ -26,7 +26,7 @@ class MediaMetadataStore {
 
   MediaMetadataStore._internal(this._box);
 
-  Future<void> store(Uuid id, MediaMetadata metadata) async {
+  Future<void> put(Uuid id, MediaMetadata metadata) async {
     if (_box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id already exists.");
     }
@@ -34,7 +34,7 @@ class MediaMetadataStore {
     await _box.put(id.toString(), metadata);
   }
 
-  Future<MediaMetadata> query(Uuid id) async {
+  Future<MediaMetadata> get(Uuid id) async {
     if (!_box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id does not exist.");
     }
@@ -51,7 +51,7 @@ class MediaMetadataStore {
   }
 }
 
-extension _HiveInterfaceX on HiveInterface {
+extension _SilentAdapterRegistrar on HiveInterface {
   void silentRegisterAdapter<T>(TypeAdapter<T> adapter) {
     try {
       this.registerAdapter(adapter);
