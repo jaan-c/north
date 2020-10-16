@@ -13,41 +13,45 @@ class MediaMetadataStoreException implements Exception {
 class MediaMetadataStore {
   static const _boxName = "media_metadata";
 
-  static Future<MediaMetadataStore> init() async {
-    await Hive.initFlutter();
-    Hive.silentRegisterAdapter(MediaTypeAdapter());
-    Hive.silentRegisterAdapter(MediaMetadataAdapter());
+  final Future<Box<MediaMetadata>> _futureBox;
 
-    final box = await Hive.openBox<MediaMetadata>(_boxName);
-    return MediaMetadataStore._internal(box);
-  }
+  MediaMetadataStore()
+      : _futureBox = (() async {
+          await Hive.initFlutter();
+          Hive.silentRegisterAdapter(MediaTypeAdapter());
+          Hive.silentRegisterAdapter(MediaMetadataAdapter());
 
-  final Box<MediaMetadata> _box;
-
-  MediaMetadataStore._internal(this._box);
+          return await Hive.openBox<MediaMetadata>(_boxName);
+        })();
 
   Future<void> put(Uuid id, MediaMetadata metadata) async {
-    if (_box.containsKey(id.toString())) {
+    final box = await _futureBox;
+
+    if (box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id already exists.");
     }
 
-    await _box.put(id.toString(), metadata);
+    await box.put(id.toString(), metadata);
   }
 
   Future<MediaMetadata> get(Uuid id) async {
-    if (!_box.containsKey(id.toString())) {
+    final box = await _futureBox;
+
+    if (!box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id does not exist.");
     }
 
-    return _box.get(id.toString());
+    return box.get(id.toString());
   }
 
   Future<void> delete(Uuid id) async {
-    if (!_box.containsKey(id.toString())) {
+    final box = await _futureBox;
+
+    if (!box.containsKey(id.toString())) {
       throw MediaMetadataStoreException("$id id does not exist.");
     }
 
-    _box.delete(id.toString());
+    box.delete(id.toString());
   }
 }
 

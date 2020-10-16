@@ -35,8 +35,8 @@ void main() {
     MediaMetadataStore store;
     MediaMetadata metadata;
 
-    setUp(() async {
-      store = await MediaMetadataStore.init();
+    setUp(() {
+      store = MediaMetadataStore();
       metadata = MediaMetadata(
           album: "Test Album",
           name: "Test Media",
