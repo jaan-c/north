@@ -20,8 +20,7 @@ void main() {
     final salt2 = generateSalt();
 
     expect(salt1, isNot(equals(salt2)));
-    expect(salt1, hasLength(16));
-    expect(salt2, hasLength(16));
+    expect([salt1, salt2], everyElement(hasLength(16)));
   });
 
   test("deriveKeyFromPassword returns the same key for the same inputs.", () {
