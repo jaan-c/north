@@ -23,7 +23,9 @@ void main() {
     expect([salt1, salt2], everyElement(hasLength(16)));
   });
 
-  test("deriveKeyFromPassword returns the same key for the same inputs.", () {
+  test(
+      "deriveKeyFromPassword returns the same 256 bit key for the same inputs.",
+      () {
     final password = "Password";
     final salt1 = generateSalt();
     final salt2 = generateSalt();
@@ -33,5 +35,6 @@ void main() {
 
     expect(sameKey1, sameKey2);
     expect(sameKey1, isNot(equals(otherKey)));
+    expect([sameKey1, sameKey2, otherKey], everyElement(hasLength(32)));
   });
 }

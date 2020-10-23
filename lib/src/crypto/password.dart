@@ -24,5 +24,5 @@ Uint8List generateSalt() {
 /// Derive a secret key from [password] and [salt], for use with other cryptos.
 Uint8List deriveKeyFromPassword(String password, Uint8List salt) {
   return PasswordHash.hashString(password, salt,
-      opslimit: _opsLimit, memlimit: _memLimit);
+      outlen: 32, opslimit: _opsLimit, memlimit: _memLimit);
 }
