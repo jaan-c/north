@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:north/src/crypto/crypto.dart';
 import 'package:north/src/crypto/stream.dart';
 
+import '../utils.dart';
+
 void main() {
   final password = "Password";
   Uint8List salt;
@@ -44,14 +46,8 @@ List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
   final message = <Uint8List>[];
   for (var i = 0; i < length; i++) {
     final size = random.nextInt((maxChunkSize - minChunkSize) + minChunkSize);
-    message.add(randomChunk(size));
+    message.add(randomBytes(size));
   }
 
   return message;
-}
-
-Uint8List randomChunk(int size) {
-  final random = Random();
-  return Uint8List.fromList(
-      [for (var i = 0; i < size; i++) random.nextInt(256)]);
 }
