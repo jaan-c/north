@@ -6,6 +6,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 
 final _headerSize = Sodium.cryptoSecretstreamXchacha20poly1305Headerbytes;
 final _authSize = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+final _chunkSize = 8388608; // 8 MB
 final _messageTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
 final _finalTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
 
@@ -25,7 +26,7 @@ Stream<Uint8List> encryptStream(
   final result = Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
   yield result.header;
 
-  yield* plainStream.rechunk(size: _headerSize - _authSize).withPosition().map(
+  yield* plainStream.rechunk(chunkSize: _chunkSize).withPosition().map(
       (plain) => Sodium.cryptoSecretstreamXchacha20poly1305Push(result.state,
           plain.value, null, plain.isLast ? _finalTag : _messageTag));
 }
@@ -35,8 +36,9 @@ Stream<Uint8List> decryptStream(
   final key = _deriveKeyFromPassword(password, salt);
 
   Pointer<Uint8> state;
-  await for (final cipher
-      in cipherStream.rechunk(size: _headerSize).withPosition()) {
+  await for (final cipher in cipherStream
+      .rechunk(headerSize: _headerSize, chunkSize: _chunkSize + _authSize)
+      .withPosition()) {
     if (state == null) {
       final header = cipher.value;
       state = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
@@ -62,8 +64,8 @@ class _ChunkPosition {
 }
 
 extension _ChunkStreamTransformer on Stream<Uint8List> {
-  Stream<Uint8List> rechunk({@required int size, int headerSize}) async* {
-    headerSize = headerSize ?? size;
+  Stream<Uint8List> rechunk({@required int chunkSize, int headerSize}) async* {
+    headerSize = headerSize ?? chunkSize;
 
     final buffer = <int>[];
     final flatStream = this.expand((bytes) => bytes);
@@ -73,7 +75,7 @@ extension _ChunkStreamTransformer on Stream<Uint8List> {
         yield Uint8List.fromList(buffer);
         buffer.clear();
         isFirstYield = false;
-      } else if (!isFirstYield && buffer.length == size) {
+      } else if (!isFirstYield && buffer.length == chunkSize) {
         yield Uint8List.fromList(buffer);
         buffer.clear();
       }
