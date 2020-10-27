@@ -62,7 +62,7 @@ class _ChunkPosition {
   _ChunkPosition({@required this.value, @required this.isLast});
 }
 
-extension _ChunkStreamX on Stream<Uint8List> {
+extension _ChunkStreamTransformer on Stream<Uint8List> {
   Stream<Uint8List> rechunk(int size) async* {
     final buffer = <int>[];
     final flatStream = this.expand((bytes) => bytes);
