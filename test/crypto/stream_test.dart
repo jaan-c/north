@@ -7,24 +7,9 @@ import 'package:north/src/crypto/stream.dart';
 import '../utils.dart';
 
 void main() {
-  final password = "Password";
-  Uint8List salt;
-  setUpAll(() {
-    initCrypto();
-    salt = generateSalt();
-  });
+  setUpAll(initCrypto);
 
-  test("encryptStream yields ciphers of > 0 and <= 24 length", () async {
-    final message = randomMessage(5, 8, 16);
-    final plainChunks =
-        await encryptStream(password, salt, Stream.fromIterable(message))
-            .collect();
-
-    expect(plainChunks.map((c) => c.length),
-        everyElement(allOf(greaterThan(0), lessThanOrEqualTo(24))));
-  });
-
-  test("Stream test", () async {
+  test("encryptStream and decryptStream.", () async {
     final password = "Password";
     final salt = generateSalt();
     final message = randomMessage(10, 1024, 2048);
