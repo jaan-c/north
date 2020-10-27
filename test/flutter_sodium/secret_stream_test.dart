@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/crypto/password.dart';
 
 import '../utils.dart';
 
@@ -11,7 +10,7 @@ void main() {
 
   setUpAll(() {
     Sodium.init();
-    key = deriveKeyFromPassword("Password", generateSalt());
+    key = Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   });
 
   test("Message tag is 0.", () {

@@ -11,6 +11,9 @@ final _authSize = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 final _messageTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
 final _finalTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
 
+final _opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+final _memLimit = Sodium.cryptoPwhashMemlimitSensitive;
+
 class CryptoException implements Exception {
   final String message;
   CryptoException(this.message);
@@ -19,7 +22,7 @@ class CryptoException implements Exception {
 
 Stream<Uint8List> encryptStream(
     String password, Uint8List salt, Stream<Uint8List> plainStream) async* {
-  final key = deriveKeyFromPassword(password, salt);
+  final key = _deriveKeyFromPassword(password, salt);
 
   final result = Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
   yield result.header;
@@ -31,7 +34,7 @@ Stream<Uint8List> encryptStream(
 
 Stream<Uint8List> decryptStream(
     String password, Uint8List salt, Stream<Uint8List> cipherStream) async* {
-  final key = deriveKeyFromPassword(password, salt);
+  final key = _deriveKeyFromPassword(password, salt);
 
   Pointer<Uint8> state;
   await for (final cipher in cipherStream.rechunk(_headerSize).withPosition()) {
@@ -44,6 +47,13 @@ Stream<Uint8List> decryptStream(
       yield result.m;
     }
   }
+}
+
+Uint8List _deriveKeyFromPassword(String password, Uint8List salt) {
+  return PasswordHash.hashString(password, salt,
+      outlen: Sodium.cryptoSecretstreamXchacha20poly1305Keybytes,
+      opslimit: _opsLimit,
+      memlimit: _memLimit);
 }
 
 class _ChunkPosition {

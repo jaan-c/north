@@ -20,9 +20,3 @@ bool verifyPasswordWithHash(String password, String hash) {
 Uint8List generateSalt() {
   return PasswordHash.randomSalt();
 }
-
-/// Derive a secret key from [password] and [salt], for use with other cryptos.
-Uint8List deriveKeyFromPassword(String password, Uint8List salt) {
-  return PasswordHash.hashString(password, salt,
-      outlen: 32, opslimit: _opsLimit, memlimit: _memLimit);
-}
