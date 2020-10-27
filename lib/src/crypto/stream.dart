@@ -4,8 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 
-import 'crypto.dart';
-
 final _headerSize = Sodium.cryptoSecretstreamXchacha20poly1305Headerbytes;
 final _authSize = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 final _messageTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
