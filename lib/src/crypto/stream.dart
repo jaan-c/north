@@ -78,14 +78,11 @@ extension _ChunkStreamTransformer on Stream<Uint8List> {
   Stream<_ChunkPosition> withPosition() async* {
     Uint8List before;
     await for (final chunk in this) {
-      if (before == null) {
-        before = chunk;
-        continue;
+      if (before != null) {
+        yield _ChunkPosition(value: before, isLast: false);
       }
-      yield _ChunkPosition(value: before, isLast: false);
       before = chunk;
     }
-
     yield _ChunkPosition(value: before, isLast: true);
   }
 }
