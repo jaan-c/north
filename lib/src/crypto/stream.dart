@@ -25,7 +25,7 @@ Stream<Uint8List> encryptStream(
   final result = Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
   yield result.header;
 
-  yield* plainStream.rechunk(_headerSize - _authSize).withPosition().map(
+  yield* plainStream.rechunk(size: _headerSize - _authSize).withPosition().map(
       (plain) => Sodium.cryptoSecretstreamXchacha20poly1305Push(result.state,
           plain.value, null, plain.isLast ? _finalTag : _messageTag));
 }
@@ -35,7 +35,8 @@ Stream<Uint8List> decryptStream(
   final key = _deriveKeyFromPassword(password, salt);
 
   Pointer<Uint8> state;
-  await for (final cipher in cipherStream.rechunk(_headerSize).withPosition()) {
+  await for (final cipher
+      in cipherStream.rechunk(size: _headerSize).withPosition()) {
     if (state == null) {
       final header = cipher.value;
       state = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
@@ -61,11 +62,18 @@ class _ChunkPosition {
 }
 
 extension _ChunkStreamTransformer on Stream<Uint8List> {
-  Stream<Uint8List> rechunk(int size) async* {
+  Stream<Uint8List> rechunk({@required int size, int headerSize}) async* {
+    headerSize = headerSize ?? size;
+
     final buffer = <int>[];
     final flatStream = this.expand((bytes) => bytes);
+    var isFirstYield = true;
     await for (final byte in flatStream) {
-      if (buffer.length == size) {
+      if (isFirstYield && buffer.length == headerSize) {
+        yield Uint8List.fromList(buffer);
+        buffer.clear();
+        isFirstYield = false;
+      } else if (!isFirstYield && buffer.length == size) {
         yield Uint8List.fromList(buffer);
         buffer.clear();
       }
