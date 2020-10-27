@@ -42,10 +42,9 @@ Future<List<T>> collect<T>(Stream<T> stream) async {
 }
 
 List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
-  final random = Random();
   final message = <Uint8List>[];
   for (var i = 0; i < length; i++) {
-    final size = random.nextInt((maxChunkSize - minChunkSize) + minChunkSize);
+    final size = randomInt(min: minChunkSize, max: maxChunkSize);
     message.add(randomBytes(size));
   }
 
