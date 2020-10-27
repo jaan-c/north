@@ -1,3 +1,4 @@
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/src/crypto/crypto.dart';
 
@@ -23,9 +24,7 @@ void main() {
     expect([salt1, salt2], everyElement(hasLength(16)));
   });
 
-  test(
-      "deriveKeyFromPassword returns the same 256 bit key for the same inputs.",
-      () {
+  test("deriveKeyFromPassword returns the same key for the same inputs.", () {
     final password = "Password";
     final salt1 = generateSalt();
     final salt2 = generateSalt();
@@ -35,6 +34,10 @@ void main() {
 
     expect(sameKey1, sameKey2);
     expect(sameKey1, isNot(equals(otherKey)));
-    expect([sameKey1, sameKey2, otherKey], everyElement(hasLength(32)));
+  });
+
+  test("deriveKeyFromPassword is compatible with stream cryptos.", () {
+    expect(deriveKeyFromPassword("Password", generateSalt()),
+        hasLength(Sodium.cryptoSecretstreamXchacha20poly1305Keybytes));
   });
 }
