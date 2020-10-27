@@ -19,13 +19,11 @@ void main() {
       () async {
     final message = randomMessage(10, 1024, 2048);
     final cipher1 =
-        (await encryptStream(password, salt, Stream.fromIterable(message))
-                .collect())
-            .flatten();
+        await encryptStream(password, salt, Stream.fromIterable(message))
+            .collect();
     final cipher2 =
-        (await encryptStream(password, salt, Stream.fromIterable(message))
-                .collect())
-            .flatten();
+        await encryptStream(password, salt, Stream.fromIterable(message))
+            .collect();
 
     expect(cipher1, isNot(equals(cipher2)));
   });
@@ -37,7 +35,7 @@ void main() {
         encryptStream(password, salt, Stream.fromIterable(message));
     final plainStream = decryptStream(password, salt, cipherStream);
 
-    expect((await plainStream.collect()).flatten(), message.flatten());
+    expect(await plainStream.collect(), message.flatten());
   });
 
   test("encryptStream and decryptStream.", () async {
@@ -46,7 +44,7 @@ void main() {
     final cipherStream =
         encryptStream(password, salt, Stream.fromIterable(message));
     final plainStream = decryptStream(password, salt, cipherStream);
-    expect((await plainStream.collect()).flatten(), message.flatten());
+    expect(await plainStream.collect(), message.flatten());
   });
 }
 
@@ -60,9 +58,9 @@ List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
   return message;
 }
 
-extension Collect<T> on Stream<T> {
+extension Collect<T> on Stream<Iterable<T>> {
   Future<List<T>> collect() async {
-    return [await for (final e in this) e];
+    return [await for (final x in this.expand((xs) => xs)) x];
   }
 }
 
