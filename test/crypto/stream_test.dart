@@ -7,11 +7,40 @@ import 'package:north/src/crypto/stream.dart';
 import '../utils.dart';
 
 void main() {
-  setUpAll(initCrypto);
+  final password = "Password";
+  Uint8List salt;
+
+  setUpAll(() {
+    initCrypto();
+    salt = generateSalt();
+  });
+
+  test("encryptStream with the same inputs yields different outputs.",
+      () async {
+    final message = randomMessage(10, 1024, 2048);
+    final cipher1 =
+        (await encryptStream(password, salt, Stream.fromIterable(message))
+                .collect())
+            .flatten();
+    final cipher2 =
+        (await encryptStream(password, salt, Stream.fromIterable(message))
+                .collect())
+            .flatten();
+
+    expect(cipher1, isNot(equals(cipher2)));
+  });
+
+  test("encryptStream and decryptStream handles zero stream properly.",
+      () async {
+    final message = <Uint8List>[];
+    final cipherStream =
+        encryptStream(password, salt, Stream.fromIterable(message));
+    final plainStream = decryptStream(password, salt, cipherStream);
+
+    expect((await plainStream.collect()).flatten(), message.flatten());
+  });
 
   test("encryptStream and decryptStream.", () async {
-    final password = "Password";
-    final salt = generateSalt();
     final message = randomMessage(10, 1024, 2048);
 
     final cipherStream =
