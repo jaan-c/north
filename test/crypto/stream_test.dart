@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,8 +16,9 @@ void main() {
 
   test("encryptStream yields ciphers of > 0 and <= 24 length", () async {
     final message = randomMessage(5, 8, 16);
-    final plainChunks = await collect(
-        encryptStream(password, salt, Stream.fromIterable(message)));
+    final plainChunks =
+        await encryptStream(password, salt, Stream.fromIterable(message))
+            .collect();
 
     expect(plainChunks.map((c) => c.length),
         everyElement(allOf(greaterThan(0), lessThanOrEqualTo(24))));
@@ -32,13 +32,8 @@ void main() {
     final cipherStream =
         encryptStream(password, salt, Stream.fromIterable(message));
     final plainStream = decryptStream(password, salt, cipherStream);
-    expect((await collect(plainStream)).expand((c) => c),
-        message.expand((c) => c));
+    expect((await plainStream.collect()).flatten(), message.flatten());
   });
-}
-
-Future<List<T>> collect<T>(Stream<T> stream) async {
-  return [await for (final value in stream) value];
 }
 
 List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
@@ -49,4 +44,16 @@ List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
   }
 
   return message;
+}
+
+extension Collect<T> on Stream<T> {
+  Future<List<T>> collect() async {
+    return [await for (final e in this) e];
+  }
+}
+
+extension Flatten<T> on Iterable<Iterable<T>> {
+  Iterable<T> flatten() {
+    return this.expand((e) => e);
+  }
 }
