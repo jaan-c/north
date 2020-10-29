@@ -19,8 +19,8 @@ class MediaMetadataStore {
   MediaMetadataStore()
       : _futureBox = (() async {
           await Hive.initFlutter();
-          Hive.silentRegisterAdapter(MediaTypeAdapter());
-          Hive.silentRegisterAdapter(MediaMetadataAdapter());
+          Hive.registerAdapter(MediaTypeAdapter());
+          Hive.registerAdapter(MediaMetadataAdapter());
 
           return await Hive.openBox<MediaMetadata>(_boxName);
         })();
@@ -53,13 +53,5 @@ class MediaMetadataStore {
     }
 
     await box.delete(id.toString());
-  }
-}
-
-extension _SilentAdapterRegistrar on HiveInterface {
-  void silentRegisterAdapter<T>(TypeAdapter<T> adapter) {
-    try {
-      registerAdapter(adapter);
-    } on HiveError {}
   }
 }
