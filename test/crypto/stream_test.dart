@@ -17,12 +17,12 @@ void main() {
 
   test("encryptStream with the same inputs yields different outputs.",
       () async {
-    final message = randomMessage(10, 1024, 2048);
+    final message = randomBytes(2000000);
     final cipher1 =
-        await encryptStream(password, salt, Stream.fromIterable(message))
+        await encryptStream(password, salt, Stream.fromIterable([message]))
             .collect();
     final cipher2 =
-        await encryptStream(password, salt, Stream.fromIterable(message))
+        await encryptStream(password, salt, Stream.fromIterable([message]))
             .collect();
 
     expect(cipher1, isNot(equals(cipher2)));
@@ -39,23 +39,13 @@ void main() {
   });
 
   test("encryptStream and decryptStream.", () async {
-    final message = randomMessage(10, 1024, 2048);
+    final message = randomBytes(2000000);
 
     final cipherStream =
-        encryptStream(password, salt, Stream.fromIterable(message));
+        encryptStream(password, salt, Stream.fromIterable([message]));
     final plainStream = decryptStream(password, salt, cipherStream);
-    expect(await plainStream.collect(), message.flatten());
+    expect(await plainStream.collect(), message);
   });
-}
-
-List<Uint8List> randomMessage(int length, int minChunkSize, int maxChunkSize) {
-  final message = <Uint8List>[];
-  for (var i = 0; i < length; i++) {
-    final size = randomInt(min: minChunkSize, max: maxChunkSize);
-    message.add(randomBytes(size));
-  }
-
-  return message;
 }
 
 extension Collect<T> on Stream<Iterable<T>> {
