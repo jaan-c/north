@@ -19,6 +19,10 @@ class CryptoException implements Exception {
   String toString() => "CryptoException: $message";
 }
 
+/// Encrypt [plainStream] with a key derived from [password] and [salt].
+///
+/// [plainStream] can emit arbitrarily sized chunks. [password] cannot be empty.
+/// [salt] must be 16 bytes at minimum.
 Stream<Uint8List> encryptStream(
     String password, Uint8List salt, Stream<Uint8List> plainStream) async* {
   final key = _deriveKeyFromPassword(password, salt);
@@ -31,6 +35,10 @@ Stream<Uint8List> encryptStream(
           plain.value, null, plain.isLast ? _finalTag : _messageTag));
 }
 
+/// Decrypt [cipherStream] with a key derived from [password] and [salt].
+///
+/// [cipherStream] can emit arbitrarily sized chunks. [password] cannot be
+/// empty. [salt] must be 16 bytes at minimum.
 Stream<Uint8List> decryptStream(
     String password, Uint8List salt, Stream<Uint8List> cipherStream) async* {
   final key = _deriveKeyFromPassword(password, salt);
