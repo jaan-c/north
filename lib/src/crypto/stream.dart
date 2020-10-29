@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:quiver/check.dart';
 
 final _headerSize = Sodium.cryptoSecretstreamXchacha20poly1305Headerbytes;
 final _authSize = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
@@ -53,6 +54,9 @@ Stream<Uint8List> decryptStream(
 }
 
 Uint8List _deriveKeyFromPassword(String password, Uint8List salt) {
+  checkArgument(password.isNotEmpty, message: 'password must not be empty');
+  checkArgument(salt.length >= 16, message: 'salt must be 16 bytes at minimum');
+
   return PasswordHash.hashString(password, salt,
       outlen: Sodium.cryptoSecretstreamXchacha20poly1305Keybytes,
       opslimit: _opsLimit,

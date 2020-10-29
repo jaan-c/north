@@ -15,6 +15,27 @@ void main() {
     salt = generateSalt();
   });
 
+  test('encryptStream and decryptSream rejects empty password', () async {
+    final emptyPassword = '';
+    final stream = Stream.fromIterable([randomBytes(1024)]);
+
+    await expectLater(encryptStream(emptyPassword, salt, stream),
+        emitsError(isInstanceOf<ArgumentError>()));
+    await expectLater(decryptStream(emptyPassword, salt, stream),
+        emitsError(isInstanceOf<ArgumentError>()));
+  });
+
+  test('encryptStream and decryptStream rejects salt shorter than 16 bytes.',
+      () async {
+    final shortSalt = randomBytes(15);
+    final stream = Stream.fromIterable([randomBytes(1024)]);
+
+    await expectLater(encryptStream(password, shortSalt, stream),
+        emitsError(isInstanceOf<ArgumentError>()));
+    await expectLater(decryptStream(password, shortSalt, stream),
+        emitsError(isInstanceOf<ArgumentError>()));
+  });
+
   test('encryptStream with the same inputs yields different outputs.',
       () async {
     final message = randomBytes(2000000);
