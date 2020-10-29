@@ -30,12 +30,10 @@ void main() {
 
   test("encryptStream and decryptStream handles zero stream properly.",
       () async {
-    final message = <Uint8List>[];
-    final cipherStream =
-        encryptStream(password, salt, Stream.fromIterable(message));
+    final cipherStream = encryptStream(password, salt, Stream.fromIterable([]));
     final plainStream = decryptStream(password, salt, cipherStream);
 
-    expect(await plainStream.collect(), message.flatten());
+    expect(await plainStream.collect(), <Uint8List>[]);
   });
 
   test("encryptStream and decryptStream.", () async {
