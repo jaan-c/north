@@ -7,7 +7,7 @@ class Uuid {
 
   factory Uuid.generate() {
     final uuid = uuidlib.Uuid().v4();
-    final stripped = _removeHyphen(uuid);
+    final stripped = _removeHyphens(uuid);
 
     return Uuid._internal(stripped);
   }
@@ -30,7 +30,7 @@ class Uuid {
   String toString() => _uuidString;
 }
 
-String _removeHyphen(String string) {
+String _removeHyphens(String string) {
   final hyphen = RegExp(r'-');
   return string.replaceAll(hyphen, '');
 }
