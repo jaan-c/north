@@ -12,11 +12,12 @@ import '../commons.dart';
 class MediaStoreException implements Exception {
   final String message;
   MediaStoreException(this.message);
-  String toString() => "MediaStoreException: $message";
+  @override
+  String toString() => 'MediaStoreException: $message';
 }
 
 class MediaStore {
-  static const _mediaDirectoryName = ".north";
+  static const _mediaDirectoryName = '.north';
 
   final Future<FileSystem> _futureFileSystem;
   final String _password;
@@ -42,9 +43,9 @@ class MediaStore {
     final fileSystem = await _futureFileSystem;
 
     try {
-      fileSystem.file(id.toString()).delete();
+      await fileSystem.file(id.toString()).delete();
     } on FileSystemException catch (e) {
-      throw MediaStoreException("Failed to delete $id: ${e.message}");
+      throw MediaStoreException('Failed to delete $id: ${e.message}');
     }
   }
 }

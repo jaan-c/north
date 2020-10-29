@@ -54,7 +54,7 @@ class _AlbumTile extends StatelessWidget {
       child: AspectRatio(
           aspectRatio: 1 / 1,
           child: FittedBox(
-              child: Image.asset("assets/haskell.png"), fit: BoxFit.cover)),
+              child: Image.asset('assets/haskell.png'), fit: BoxFit.cover)),
     );
   }
 

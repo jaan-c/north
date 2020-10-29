@@ -13,19 +13,19 @@ void main() {
     key = Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   });
 
-  test("Message tag is 0.", () {
+  test('Message tag is 0.', () {
     expect(Sodium.cryptoSecretstreamXchacha20poly1305TagMessage, 0);
   });
 
-  test("HEADERBYTES is 24", () {
+  test('HEADERBYTES is 24', () {
     expect(Sodium.cryptoSecretstreamXchacha20poly1305Headerbytes, 24);
   });
 
-  test("ABYTES is 16", () {
+  test('ABYTES is 16', () {
     expect(Sodium.cryptoAeadChacha20poly1305Abytes, 16);
   });
 
-  test("push does not throw on subsequent push after final tag.", () {
+  test('push does not throw on subsequent push after final tag.', () {
     final result = Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
     Sodium.cryptoSecretstreamXchacha20poly1305Push(
         result.state,
@@ -46,7 +46,7 @@ void main() {
         returnsNormally);
   });
 
-  test("Full encrypt and decrypt.", () {
+  test('Full encrypt and decrypt.', () {
     final message1 = randomBytes(1024);
     final message2 = randomBytes(1024);
     final message3 = randomBytes(0);

@@ -5,17 +5,17 @@ void main() {
   setUpAll(initCrypto);
 
   test(
-      "derivePasswordHash creates a hash verifiable with verifyPasswordWithHash with the same password.",
+      'derivePasswordHash creates a hash verifiable with verifyPasswordWithHash with the same password.',
       () {
-    final password = "Password";
-    final wrongPassword = "Wrong Password";
+    final password = 'Password';
+    final wrongPassword = 'Wrong Password';
     final hash = derivePasswordHash(password);
 
     expect(verifyPasswordWithHash(password, hash), isTrue);
     expect(verifyPasswordWithHash(wrongPassword, hash), isFalse);
   });
 
-  test("generateSalt returns a 128 bit random salt.", () {
+  test('generateSalt returns a 128 bit random salt.', () {
     final salt1 = generateSalt();
     final salt2 = generateSalt();
 

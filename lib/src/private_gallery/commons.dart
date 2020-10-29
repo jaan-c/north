@@ -16,7 +16,7 @@ class Uuid {
     if (uuidString.length == 32 && _isHex(uuidString)) {
       return Uuid._internal(uuidString);
     } else {
-      throw StateError("Invalid uuid $uuidString.");
+      throw StateError('Invalid uuid $uuidString.');
     }
   }
 
@@ -31,11 +31,11 @@ class Uuid {
 }
 
 String _removeHyphen(String string) {
-  final hyphen = RegExp(r"-");
-  return string.replaceAll(hyphen, "");
+  final hyphen = RegExp(r'-');
+  return string.replaceAll(hyphen, '');
 }
 
 bool _isHex(String uuid) {
-  final hex = RegExp(r"^[0-9a-f]+$", caseSensitive: false);
+  final hex = RegExp(r'^[0-9a-f]+$', caseSensitive: false);
   return hex.hasMatch(uuid);
 }

@@ -5,24 +5,24 @@ import 'package:north/src/private_gallery/media_metadata_store/media_metadata.da
 import 'package:north/src/private_gallery/media_metadata_store/media_metadata_store.dart';
 
 void main() {
-  group("MediaMetadata", () {
-    test("== implements proper structural equality.", () {
+  group('MediaMetadata', () {
+    test('== implements proper structural equality.', () {
       final m1 = MediaMetadata(
-          album: "Test Album",
-          name: "Test Media",
-          salt: "Very salty!",
+          album: 'Test Album',
+          name: 'Test Media',
+          salt: 'Very salty!',
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m2 = MediaMetadata(
-          album: "Test Album",
-          name: "Test Media",
-          salt: "Very salty!",
+          album: 'Test Album',
+          name: 'Test Media',
+          salt: 'Very salty!',
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m3 = MediaMetadata(
-          album: "Test Album",
-          name: "Test Media",
-          salt: "Not salty!",
+          album: 'Test Album',
+          name: 'Test Media',
+          salt: 'Not salty!',
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
 
@@ -31,16 +31,16 @@ void main() {
     });
   });
 
-  group("MediaMetadataStore", () {
+  group('MediaMetadataStore', () {
     MediaMetadataStore store;
     MediaMetadata metadata;
 
     setUp(() {
       store = MediaMetadataStore();
       metadata = MediaMetadata(
-          album: "Test Album",
-          name: "Test Media",
-          salt: "Very salty!",
+          album: 'Test Album',
+          name: 'Test Media',
+          salt: 'Very salty!',
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
     });
@@ -51,7 +51,7 @@ void main() {
       metadata = null;
     });
 
-    test("put throws on existing id.", () async {
+    test('put throws on existing id.', () async {
       final id = Uuid.generate();
 
       await expectLater(store.put(id, metadata), completes);
@@ -59,7 +59,7 @@ void main() {
           throwsA(isInstanceOf<MediaMetadataStoreException>()));
     });
 
-    test("get throws on non-existing id.", () async {
+    test('get throws on non-existing id.', () async {
       final id = Uuid.generate();
       final nonExistingId = Uuid.generate();
 
@@ -70,7 +70,7 @@ void main() {
           throwsA(isInstanceOf<MediaMetadataStoreException>()));
     });
 
-    test("delete throws on non-existing id.", () async {
+    test('delete throws on non-existing id.', () async {
       final id = Uuid.generate();
 
       await store.put(id, metadata);

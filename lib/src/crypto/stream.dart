@@ -70,7 +70,7 @@ extension _ChunkStreamTransformer on Stream<Uint8List> {
     headerSize = headerSize ?? chunkSize;
 
     final buffer = <int>[];
-    final flatStream = this.expand((bytes) => bytes);
+    final flatStream = expand((bytes) => bytes);
     var isFirstYield = true;
     await for (final byte in flatStream) {
       if (isFirstYield && buffer.length == headerSize) {

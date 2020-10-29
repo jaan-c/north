@@ -8,9 +8,9 @@ class NorthApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: "North",
+        title: 'North',
         home: Scaffold(
-            appBar: AppBar(title: Text("North")),
-            body: Center(child: Text("Hello world!"))));
+            appBar: AppBar(title: Text('North')),
+            body: Center(child: Text('Hello world!'))));
   }
 }

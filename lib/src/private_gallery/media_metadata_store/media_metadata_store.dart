@@ -7,11 +7,12 @@ import 'media_metadata.dart';
 class MediaMetadataStoreException implements Exception {
   final String message;
   MediaMetadataStoreException(this.message);
-  String toString() => "MediaMetadataStorageException: $message";
+  @override
+  String toString() => 'MediaMetadataStorageException: $message';
 }
 
 class MediaMetadataStore {
-  static const _boxName = "media_metadata";
+  static const _boxName = 'media_metadata';
 
   final Future<Box<MediaMetadata>> _futureBox;
 
@@ -28,7 +29,7 @@ class MediaMetadataStore {
     final box = await _futureBox;
 
     if (box.containsKey(id.toString())) {
-      throw MediaMetadataStoreException("$id id already exists.");
+      throw MediaMetadataStoreException('$id id already exists.');
     }
 
     await box.put(id.toString(), metadata);
@@ -38,7 +39,7 @@ class MediaMetadataStore {
     final box = await _futureBox;
 
     if (!box.containsKey(id.toString())) {
-      throw MediaMetadataStoreException("$id id does not exist.");
+      throw MediaMetadataStoreException('$id id does not exist.');
     }
 
     return box.get(id.toString());
@@ -48,17 +49,17 @@ class MediaMetadataStore {
     final box = await _futureBox;
 
     if (!box.containsKey(id.toString())) {
-      throw MediaMetadataStoreException("$id id does not exist.");
+      throw MediaMetadataStoreException('$id id does not exist.');
     }
 
-    box.delete(id.toString());
+    await box.delete(id.toString());
   }
 }
 
 extension _SilentAdapterRegistrar on HiveInterface {
   void silentRegisterAdapter<T>(TypeAdapter<T> adapter) {
     try {
-      this.registerAdapter(adapter);
+      registerAdapter(adapter);
     } on HiveError {}
   }
 }
