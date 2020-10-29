@@ -18,10 +18,7 @@ class MediaMetadataStore {
 
   MediaMetadataStore()
       : _futureBox = (() async {
-          await Hive.initFlutter();
-          Hive.registerAdapter(MediaTypeAdapter());
-          Hive.registerAdapter(MediaMetadataAdapter());
-
+          await _HiveInitializer.init();
           return await Hive.openBox<MediaMetadata>(_boxName);
         })();
 
@@ -53,5 +50,24 @@ class MediaMetadataStore {
     }
 
     await box.delete(id.toString());
+  }
+
+  Future<void> close() async {
+    final box = await _futureBox;
+    await box.close();
+  }
+}
+
+class _HiveInitializer {
+  static var _isInitialized = false;
+
+  static Future<void> init() async {
+    if (!_isInitialized) {
+      await Hive.initFlutter();
+      Hive.registerAdapter(MediaTypeAdapter());
+      Hive.registerAdapter(MediaMetadataAdapter());
+
+      _isInitialized = true;
+    }
   }
 }
