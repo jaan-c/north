@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -16,10 +18,10 @@ class MediaMetadataStore {
 
   final Future<Box<MediaMetadata>> _futureBox;
 
-  MediaMetadataStore()
+  MediaMetadataStore([FutureOr<Box<MediaMetadata>> box])
       : _futureBox = (() async {
           await _HiveInitializer.init();
-          return await Hive.openBox<MediaMetadata>(_boxName);
+          return box ?? await Hive.openBox<MediaMetadata>(_boxName);
         })();
 
   Future<void> put(Uuid id, MediaMetadata metadata) async {
