@@ -13,12 +13,6 @@ final _finalTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
 final _opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
 final _memLimit = Sodium.cryptoPwhashMemlimitSensitive;
 
-class CryptoException implements Exception {
-  final String message;
-  CryptoException(this.message);
-  String toString() => "CryptoException: $message";
-}
-
 /// Encrypt [plainStream] with a key derived from [password] and [salt].
 ///
 /// [plainStream] can emit arbitrarily sized chunks. [password] cannot be empty.
