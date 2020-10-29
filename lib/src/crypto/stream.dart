@@ -6,7 +6,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 
 final _headerSize = Sodium.cryptoSecretstreamXchacha20poly1305Headerbytes;
 final _authSize = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
-final _chunkSize = 8388608; // 8 MB
+final _chunkSize = 1048576; // 1 MB
 final _messageTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
 final _finalTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
 
