@@ -33,14 +33,16 @@ class MediaMetadata extends HiveObject {
   final MediaType type;
 
   MediaMetadata(
-      {@required this.album,
-      @required this.name,
+      {@required String album,
+      @required String name,
       @required this.salt,
       @required this.storeDateTime,
       @required this.type})
       : assert(album.trim().isNotEmpty),
         assert(name.trim().isNotEmpty),
-        assert(salt.isNotEmpty);
+        assert(salt.isNotEmpty),
+        album = album.trim(),
+        name = name.trim();
 
   @override
   bool operator ==(dynamic other) =>
