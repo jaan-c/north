@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:quiver/core.dart';
@@ -22,7 +24,7 @@ class MediaMetadata extends HiveObject {
   final String name;
 
   @HiveField(2)
-  final String salt;
+  final Uint8List salt;
 
   @HiveField(3)
   final DateTime storeDateTime;
@@ -42,12 +44,12 @@ class MediaMetadata extends HiveObject {
       other is MediaMetadata && hashCode == other.hashCode;
 
   @override
-  int get hashCode => hashObjects([album, name, salt, storeDateTime, type]);
+  int get hashCode => hashObjects([album, name, ...salt, storeDateTime, type]);
 
   MediaMetadata copy(
       {String album,
       String name,
-      String salt,
+      Uint8List salt,
       DateTime storeDateTime,
       MediaType type}) {
     return MediaMetadata(

@@ -58,7 +58,7 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
     return MediaMetadata(
       album: fields[0] as String,
       name: fields[1] as String,
-      salt: fields[2] as String,
+      salt: fields[2] as Uint8List,
       storeDateTime: fields[3] as DateTime,
       type: fields[4] as MediaType,
     );
