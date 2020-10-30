@@ -19,11 +19,11 @@ class MediaMetadataStore {
 
   final Future<Box<MediaMetadata>> _futureBox;
 
-  MediaMetadataStore({bool persist = false})
+  MediaMetadataStore({bool shouldPersist = true})
       : _futureBox = (() async {
           await _HiveInitializer.init();
           return await Hive.openBox<MediaMetadata>(_boxName,
-              bytes: persist ? null : Uint8List.fromList([]));
+              bytes: shouldPersist ? null : Uint8List.fromList([]));
         })();
 
   Future<void> put(Uuid id, MediaMetadata metadata) async {
