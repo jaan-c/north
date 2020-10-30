@@ -24,14 +24,19 @@ class MediaStore {
   final Future<FileSystem> _futureFileSystem;
   final String _password;
 
-  MediaStore({@required String password, FileSystem fileSystem})
-      : _password = password,
-        _futureFileSystem = fileSystem != null
-            ? Future.value(fileSystem)
-            : _joinPathParts(ExtStorage.getExternalStorageDirectory(),
-                    _mediaDirectoryName)
-                .then((mediaDir) =>
-                    ChrootFileSystem(LocalFileSystem(), mediaDir));
+  MediaStore._internal(this._password, this._futureFileSystem);
+
+  factory MediaStore({@required String password, FileSystem fileSystem}) {
+    if (fileSystem != null) {
+      return MediaStore._internal(password, Future.value(fileSystem));
+    }
+
+    return MediaStore._internal(password, (() async {
+      final encryptedRoot = pathlib.join(
+          await ExtStorage.getExternalStorageDirectory(), _mediaDirectoryName);
+      return ChrootFileSystem(LocalFileSystem(), encryptedRoot);
+    })());
+  }
 
   Future<Uint8List> put(Uuid id, Stream<List<int>> content) async {
     final fileSystem = await _futureFileSystem;
@@ -75,12 +80,4 @@ class MediaStore {
       throw MediaStoreException('Failed to delete media $id: ${e.message}');
     }
   }
-}
-
-Future<String> _joinPathParts(
-    FutureOr<String> part1, FutureOr<String> part2) async {
-  final p1 = await part1;
-  final p2 = await part2;
-
-  return pathlib.join(p1, p2);
 }
