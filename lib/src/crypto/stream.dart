@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -92,13 +93,19 @@ extension _ChunkStreamTransformer on Stream<Uint8List> {
   }
 
   Stream<_ChunkPosition> withPosition() async* {
-    Uint8List before;
-    await for (final chunk in this) {
-      if (before != null) {
-        yield _ChunkPosition(value: before, isLast: false);
-      }
-      before = chunk;
+    final streamIter = StreamIterator(this);
+    if (!await streamIter.moveNext()) {
+      return;
     }
-    yield _ChunkPosition(value: before, isLast: true);
+
+    while (true) {
+      final before = streamIter.current;
+      if (await streamIter.moveNext()) {
+        yield _ChunkPosition(value: before, isLast: false);
+      } else {
+        yield _ChunkPosition(value: before, isLast: true);
+        break;
+      }
+    }
   }
 }
