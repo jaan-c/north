@@ -1,2 +1,2 @@
 # north
-A private gallery.
+A private gallery app for Android.
