@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:ext_storage/ext_storage.dart';
 import 'package:file/chroot.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
+import 'package:north/crypto.dart';
 import 'package:path/path.dart' as pathlib;
 
 import '../commons.dart';
@@ -31,12 +33,37 @@ class MediaStore {
                 .then((mediaDir) =>
                     ChrootFileSystem(LocalFileSystem(), mediaDir));
 
-  Future<String> put(Uuid id, Stream<List<int>> content) async {
-    throw UnimplementedError(_password);
+  Future<Uint8List> put(Uuid id, Stream<List<int>> content) async {
+    final fileSystem = await _futureFileSystem;
+    final file = fileSystem.file(id.toString());
+
+    if (await file.exists()) {
+      throw MediaStoreException('Media $id already exists.');
+    }
+
+    final sink = file.openWrite();
+    final salt = generateSalt();
+    try {
+      final cipherStream = encryptStream(_password, salt, content);
+      await sink.addStream(cipherStream);
+      await sink.flush(); // Call only if addStream completes.
+    } finally {
+      await sink.close();
+    }
+
+    return salt;
   }
 
-  Stream<List<int>> get(Uuid id, String salt) async* {
-    throw UnimplementedError();
+  Stream<List<int>> get(Uuid id, Uint8List salt) async* {
+    final fileSystem = await _futureFileSystem;
+    final file = fileSystem.file(id.toString());
+
+    if (!await file.exists()) {
+      throw MediaStoreException('Media $id does not exist.');
+    }
+
+    final cipherStream = file.openRead();
+    yield* decryptStream(_password, salt, cipherStream);
   }
 
   Future<void> delete(Uuid id) async {
@@ -45,7 +72,7 @@ class MediaStore {
     try {
       await fileSystem.file(id.toString()).delete();
     } on FileSystemException catch (e) {
-      throw MediaStoreException('Failed to delete $id: ${e.message}');
+      throw MediaStoreException('Failed to delete media $id: ${e.message}');
     }
   }
 }
