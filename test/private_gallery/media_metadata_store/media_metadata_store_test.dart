@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
 import 'package:north/src/private_gallery/commons.dart';
 import 'package:north/src/private_gallery/media_metadata_store/media_metadata.dart';
 import 'package:north/src/private_gallery/media_metadata_store/media_metadata_store.dart';
@@ -41,8 +38,7 @@ void main() {
     MediaMetadata metadata;
 
     setUp(() {
-      store = MediaMetadataStore(Hive.openBox<MediaMetadata>('test_box',
-          bytes: Uint8List.fromList([])));
+      store = MediaMetadataStore(persist: false);
       metadata = MediaMetadata(
           album: 'Test Album',
           name: 'Test Media',
