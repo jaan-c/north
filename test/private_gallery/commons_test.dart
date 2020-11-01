@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/commons.dart';
+import 'package:north/src/private_gallery/commons/commons.dart';
 
 void main() {
   group('Uuid', () {

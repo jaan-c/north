@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
 import 'package:path/path.dart' as pathlib;
 
-import '../commons.dart';
+import '../commons/commons.dart';
 
 class MediaStoreException implements Exception {
   final String message;

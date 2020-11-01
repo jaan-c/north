@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/commons.dart';
+import 'package:north/src/private_gallery/commons/commons.dart';
 import 'package:north/src/private_gallery/media_metadata_store/media_metadata.dart';
 import 'package:north/src/private_gallery/media_metadata_store/media_metadata_store.dart';
 
@@ -38,7 +38,7 @@ void main() {
     MediaMetadata metadata;
 
     setUp(() {
-      store = MediaMetadataStore(persist: false);
+      store = MediaMetadataStore(shouldPersist: false);
       metadata = MediaMetadata(
           album: 'Test Album',
           name: 'Test Media',
