@@ -38,7 +38,7 @@ class MediaStore {
     })());
   }
 
-  Future<Uint8List> put(Uuid id, Stream<List<int>> content) async {
+  Future<Uint8List> put(Uuid id, Stream<Uint8List> content) async {
     final fileSystem = await _futureFileSystem;
     final file = fileSystem.file(id.toString());
 
@@ -59,7 +59,7 @@ class MediaStore {
     return salt;
   }
 
-  Stream<List<int>> get(Uuid id, Uint8List salt) async* {
+  Stream<Uint8List> get(Uuid id, Uint8List salt) async* {
     final fileSystem = await _futureFileSystem;
     final file = fileSystem.file(id.toString());
 
