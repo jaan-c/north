@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/src/private_gallery/commons/commons.dart';
+import 'package:path/path.dart' as pathlib;
 
 void main() {
   group('Uuid', () {
@@ -33,6 +36,31 @@ void main() {
       final uuid = Uuid.generate();
 
       expect(uuid, isNot(equals(uuid.toString())));
+    });
+  });
+
+  test('createCacheDir returns a Directory within cacheRoot', () async {
+    final tempDir = Directory.systemTemp;
+    final cacheDir = await createCacheDir('test', cacheRoot: tempDir);
+
+    expect(pathlib.isWithin(tempDir.path, cacheDir.path), isTrue);
+
+    await cacheDir.delete();
+  });
+
+  group('FileSystemEntityWithin', () {
+    test('file returns a File within this.', () {
+      final tempDir = Directory.systemTemp;
+      final file = tempDir.file('test');
+
+      expect(pathlib.isWithin(tempDir.path, file.path), isTrue);
+    });
+
+    test('directory returns a Directory within this.', () {
+      final tempDir = Directory.systemTemp;
+      final dir = tempDir.directory('test');
+
+      expect(pathlib.isWithin(tempDir.path, dir.path), isTrue);
     });
   });
 }
