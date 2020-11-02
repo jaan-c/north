@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/commons/commons.dart';
+import 'package:north/src/private_gallery/commons.dart';
 import 'package:path/path.dart' as pathlib;
 
 void main() {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/crypto/crypto.dart';
+import 'package:north/crypto.dart';
 
 void main() {
   setUpAll(initCrypto);

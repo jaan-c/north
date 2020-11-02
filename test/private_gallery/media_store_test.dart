@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/commons/uuid.dart';
-import 'package:north/src/private_gallery/media_store/media_store.dart';
+// Hide FileSystemEntityWithin because it collides with utils.dart FileWithin
+// extension method.
+import 'package:north/src/private_gallery/commons.dart'
+    hide FileSystemEntityWithin;
+import 'package:north/src/private_gallery/media_store.dart';
 
-import '../../utils.dart';
+import '../utils.dart';
 
 void main() {
   final throwsMediaStoreException =
