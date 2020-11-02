@@ -56,9 +56,7 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return MediaMetadata(
-      album: fields[0] as String,
-      name: fields[1] as String,
-      salt: fields[2] as Uint8List,
+      salt: (fields[2] as List)?.cast<int>(),
       storeDateTime: fields[3] as DateTime,
       type: fields[4] as MediaType,
     );

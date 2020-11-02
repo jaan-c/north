@@ -24,7 +24,7 @@ class MediaMetadata extends HiveObject {
   final String name;
 
   @HiveField(2)
-  final Uint8List salt;
+  final List<int> salt;
 
   @HiveField(3)
   final DateTime storeDateTime;
