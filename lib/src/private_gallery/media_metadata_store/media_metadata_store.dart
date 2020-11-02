@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../commons.dart';
+import '../uuid.dart';
 import 'media_metadata.dart';
 
 class MediaMetadataStoreException implements Exception {

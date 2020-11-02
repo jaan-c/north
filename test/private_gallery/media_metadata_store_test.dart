@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/commons.dart';
-import 'package:north/src/private_gallery/media_metadata_store.dart';
+import 'package:north/private_gallery.dart';
 
 import '../utils.dart';
 

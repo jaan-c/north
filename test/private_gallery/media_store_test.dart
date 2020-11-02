@@ -1,11 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-// Hide FileSystemEntityWithin because it collides with utils.dart FileWithin
-// extension method.
-import 'package:north/src/private_gallery/commons.dart'
-    hide FileSystemEntityWithin;
-import 'package:north/src/private_gallery/media_store.dart';
+import 'package:north/private_gallery.dart';
 
 import '../utils.dart';
 
