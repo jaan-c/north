@@ -48,7 +48,7 @@ class MediaStore {
     })(), cacheDir);
   }
 
-  Future<Uint8List> put(Uuid id, File file) async {
+  Future<List<int>> put(Uuid id, File file) async {
     final mediaDir = await _futureMediaDir;
     final inFile = file;
     final outFile = mediaDir.file(id.toString());
