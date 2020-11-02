@@ -72,7 +72,7 @@ class _ChunkPosition {
 
 extension _ChunkStreamTransformer on Stream<Uint8List> {
   Stream<Uint8List> rechunk({@required int chunkSize, int headerSize}) async* {
-    headerSize = headerSize ?? chunkSize;
+    headerSize ??= chunkSize;
 
     final buffer = <int>[];
     final flatStream = expand((bytes) => bytes);

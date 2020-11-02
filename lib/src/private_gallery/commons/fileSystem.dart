@@ -4,9 +4,8 @@ import 'package:path/path.dart' as pathlib;
 import 'package:path_provider/path_provider.dart';
 
 Future<Directory> createCacheDir(String name, {Directory cacheRoot}) async {
-  cacheRoot = cacheRoot ??
-      (await getExternalCacheDirectories())
-          .firstWhere((dir) => pathlib.isWithin('/storage/emulated', dir.path));
+  cacheRoot ??= (await getExternalCacheDirectories())
+      .firstWhere((dir) => pathlib.isWithin('/storage/emulated', dir.path));
 
   return cacheRoot.directory(name).create();
 }
