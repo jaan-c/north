@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as pathlib;
 
-List<int> randomBytes(int size) {
+Uint8List randomBytes(int size) {
   final random = Random();
-  return [for (var i = 0; i < size; i++) random.nextInt(256)];
+  return Uint8List.fromList(
+      [for (var i = 0; i < size; i++) random.nextInt(256)]);
 }
 
 int randomInt({int min = 0, @required int max}) {

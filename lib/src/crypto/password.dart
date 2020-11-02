@@ -16,5 +16,5 @@ bool verifyPasswordWithHash(String password, String hash) {
 
 /// Generate a 128 bit random salt.
 List<int> generateSalt() {
-  return PasswordHash.randomSalt().toList();
+  return PasswordHash.randomSalt();
 }
