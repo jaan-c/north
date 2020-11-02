@@ -60,7 +60,7 @@ class MediaStore {
     final outSink = outFile.openWrite();
     final salt = generateSalt();
     final plainStream = inFile.openRead();
-    final cipherStream = encryptStream(_password, salt, plainStream.cast());
+    final cipherStream = encryptStream(_password, salt, plainStream);
     try {
       await outSink.addStream(cipherStream);
       await outSink.flush(); // Call only if addStream completes.
@@ -87,7 +87,7 @@ class MediaStore {
     }
 
     final cipherStream = cipherFile.openRead();
-    final plainStream = decryptStream(_password, salt, cipherStream.cast());
+    final plainStream = decryptStream(_password, salt, cipherStream);
     final cacheSink = cacheFile.openWrite();
     try {
       await cacheSink.addStream(plainStream);

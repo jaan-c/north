@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 
@@ -7,7 +5,7 @@ import '../utils.dart';
 
 void main() {
   final password = 'Password';
-  Uint8List salt;
+  List<int> salt;
 
   setUpAll(() {
     initCrypto();
@@ -53,7 +51,7 @@ void main() {
     final cipherStream = encryptStream(password, salt, Stream.fromIterable([]));
     final plainStream = decryptStream(password, salt, cipherStream);
 
-    expect(await plainStream.collect(), <Uint8List>[]);
+    expect(await plainStream.collect(), <List<int>>[]);
   });
 
   test('encryptStream and decryptStream.', () async {

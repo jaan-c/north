@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter_sodium/flutter_sodium.dart';
 
 final _opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -17,6 +15,6 @@ bool verifyPasswordWithHash(String password, String hash) {
 }
 
 /// Generate a 128 bit random salt.
-Uint8List generateSalt() {
-  return PasswordHash.randomSalt();
+List<int> generateSalt() {
+  return PasswordHash.randomSalt().toList();
 }

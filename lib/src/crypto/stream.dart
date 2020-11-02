@@ -19,7 +19,27 @@ final _memLimit = Sodium.cryptoPwhashMemlimitSensitive;
 ///
 /// [plainStream] can emit arbitrarily sized chunks. [password] cannot be empty.
 /// [salt] must be 16 bytes at minimum.
-Stream<Uint8List> encryptStream(
+Stream<List<int>> encryptStream(
+    String password, List<int> salt, Stream<List<int>> plainStream) async* {
+  // No need to cast Stream<Uint8List> to Stream<List<int>> as Uint8List
+  // implements List<int>.
+  yield* _encryptStream(
+      password, Uint8List.fromList(salt), plainStream.map(_toUint8List));
+}
+
+/// Decrypt [cipherStream] with a key derived from [password] and [salt].
+///
+/// [cipherStream] can emit arbitrarily sized chunks. [password] cannot be
+/// empty. [salt] must be 16 bytes at minimum.
+Stream<List<int>> decryptStream(
+    String password, List<int> salt, Stream<List<int>> cipherStream) async* {
+  // No need to cast Stream<Uint8List> to Stream<List<int>> as Uint8List
+  // implements List<int>.
+  yield* _decryptStream(
+      password, Uint8List.fromList(salt), cipherStream.map(_toUint8List));
+}
+
+Stream<Uint8List> _encryptStream(
     String password, Uint8List salt, Stream<Uint8List> plainStream) async* {
   final key = _deriveKeyFromPassword(password, salt);
 
@@ -31,11 +51,7 @@ Stream<Uint8List> encryptStream(
           plain.value, null, plain.isLast ? _finalTag : _messageTag));
 }
 
-/// Decrypt [cipherStream] with a key derived from [password] and [salt].
-///
-/// [cipherStream] can emit arbitrarily sized chunks. [password] cannot be
-/// empty. [salt] must be 16 bytes at minimum.
-Stream<Uint8List> decryptStream(
+Stream<Uint8List> _decryptStream(
     String password, Uint8List salt, Stream<Uint8List> cipherStream) async* {
   final key = _deriveKeyFromPassword(password, salt);
 
@@ -52,6 +68,10 @@ Stream<Uint8List> decryptStream(
       yield result.m;
     }
   }
+}
+
+Uint8List _toUint8List(List<int> bytes) {
+  return Uint8List.fromList(bytes);
 }
 
 Uint8List _deriveKeyFromPassword(String password, Uint8List salt) {
