@@ -16,7 +16,7 @@ class UuidAdapter extends TypeAdapter<Uuid> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Uuid(fields[0]);
+    return Uuid(fields[0] as String);
   }
 
   @override
