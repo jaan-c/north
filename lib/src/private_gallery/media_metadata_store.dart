@@ -72,7 +72,7 @@ class MediaMetadataStore {
     await box.delete(id.asString);
   }
 
-  Future<void> close() async {
+  Future<void> dispose() async {
     final box = await _futureBox;
     await box.close();
   }

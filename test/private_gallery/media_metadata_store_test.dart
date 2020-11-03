@@ -51,7 +51,7 @@ void main() {
     });
 
     tearDown(() async {
-      await store.close();
+      await store.dispose();
     });
 
     test('put throws on existing id.', () async {
