@@ -6,8 +6,7 @@ import 'package:north/private_gallery.dart';
 import '../utils.dart';
 
 void main() {
-  final throwsMediaStoreException =
-      throwsA(isInstanceOf<MediaStoreException>());
+  final throwsFileStoreException = throwsA(isInstanceOf<FileStoreException>());
 
   Directory tempDir;
   Directory mediaDir;
@@ -36,14 +35,14 @@ void main() {
     await file.writeAsBytes(content);
     await store.put(id, file);
 
-    await expectLater(store.put(id, file), throwsMediaStoreException);
+    await expectLater(store.put(id, file), throwsFileStoreException);
   });
 
   test('get throws MediaStoreException on non-existent id.', () async {
     final id = Uuid.generate();
     final salt = randomBytes(16);
 
-    await expectLater(store.get(id, salt), throwsMediaStoreException);
+    await expectLater(store.get(id, salt), throwsFileStoreException);
   });
 
   test('get retrieves inserted file with put.', () async {
