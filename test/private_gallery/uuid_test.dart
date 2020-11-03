@@ -7,8 +7,8 @@ void main() {
     final nonHex = 'TheQuickBrownFoxJumpsOverTheLazy'; // 32 length.
     final validHex = '123e4567e89b12d3a456426614174000';
 
-    expect(() => Uuid(shortHex), throwsStateError);
-    expect(() => Uuid(nonHex), throwsStateError);
+    expect(() => Uuid(shortHex), throwsAssertionError);
+    expect(() => Uuid(nonHex), throwsAssertionError);
     expect(() => Uuid(validHex), returnsNormally);
   });
 
@@ -23,12 +23,12 @@ void main() {
 
   test('constructor and asString are inverse.', () {
     final uuid1 = Uuid.generate();
-    final uuid2 = Uuid(uuid1.toString());
+    final uuid2 = Uuid(uuid1.asString);
 
     expect(uuid1, uuid2);
   });
 
-  test('== rejects input String with the same Uuid.toString value.', () {
+  test('== rejects input String with the same Uuid.asString value.', () {
     final uuid = Uuid.generate();
 
     expect(uuid, isNot(equals(uuid.asString)));
