@@ -9,8 +9,8 @@ import 'file_store.dart';
 import 'utils.dart';
 
 class MediaStore with FileStore {
-  static const _mediaDirectoryName = '.north';
-  static const _mediaCacheDirectoryName = 'media_cache';
+  static const _mediaDirName = '.north';
+  static const _cacheDirName = 'media_cache';
 
   @override
   final String password;
@@ -27,8 +27,7 @@ class MediaStore with FileStore {
       {@required String password,
       Directory externalRoot,
       Directory cacheRoot}) {
-    final cacheDir =
-        createCacheDir(_mediaCacheDirectoryName, cacheRoot: cacheRoot);
+    final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
     if (externalRoot != null) {
       return MediaStore._internal(
@@ -38,7 +37,7 @@ class MediaStore with FileStore {
     return MediaStore._internal(password, (() async {
       externalRoot ??=
           Directory(await ExtStorage.getExternalStorageDirectory());
-      return Directory(pathlib.join(externalRoot.path, _mediaDirectoryName))
+      return Directory(pathlib.join(externalRoot.path, _mediaDirName))
           .create(recursive: true);
     })(), cacheDir);
   }
