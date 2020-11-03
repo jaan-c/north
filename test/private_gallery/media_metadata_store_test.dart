@@ -6,20 +6,24 @@ import '../utils.dart';
 void main() {
   group('MediaMetadata', () {
     test('== implements proper structural equality.', () {
+      final id = Uuid.generate();
       final salt = randomBytes(16);
       final m1 = MediaMetadata(
+          id: id,
           album: 'Test Album',
           name: 'Test Media',
           salt: salt,
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m2 = MediaMetadata(
+          id: id,
           album: 'Test Album',
           name: 'Test Media',
           salt: salt,
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m3 = MediaMetadata(
+          id: Uuid.generate(),
           album: 'Test Album',
           name: 'Test Media',
           salt: randomBytes(16),
@@ -32,22 +36,22 @@ void main() {
   });
 
   group('MediaMetadataStore', () {
+    final metadata = MediaMetadata(
+        id: Uuid.generate(),
+        album: 'Test Album',
+        name: 'Test Media',
+        salt: randomBytes(16),
+        storeDateTime: DateTime(2020, 12, 25),
+        type: MediaType.image);
+
     MediaMetadataStore store;
-    MediaMetadata metadata;
 
     setUp(() {
       store = MediaMetadataStore(shouldPersist: false);
-      metadata = MediaMetadata(
-          album: 'Test Album',
-          name: 'Test Media',
-          salt: randomBytes(16),
-          storeDateTime: DateTime(2020, 12, 25),
-          type: MediaType.image);
     });
 
     tearDown(() async {
-      store = null;
-      metadata = null;
+      await store.close();
     });
 
     test('put throws on existing id.', () async {

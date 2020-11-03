@@ -1,6 +1,11 @@
+import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart' as uuidlib;
 
+part 'uuid.g.dart';
+
+@HiveType(typeId: 1)
 class Uuid {
+  @HiveField(0)
   final String asString;
 
   Uuid(String uuidString)

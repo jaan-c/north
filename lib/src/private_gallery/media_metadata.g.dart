@@ -8,7 +8,7 @@ part of 'media_metadata.dart';
 
 class MediaTypeAdapter extends TypeAdapter<MediaType> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
   MediaType read(BinaryReader reader) {
@@ -47,7 +47,7 @@ class MediaTypeAdapter extends TypeAdapter<MediaType> {
 
 class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
   MediaMetadata read(BinaryReader reader) {
@@ -56,25 +56,28 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return MediaMetadata(
-      salt: (fields[2] as List)?.cast<int>(),
-      storeDateTime: fields[3] as DateTime,
-      type: fields[4] as MediaType,
+      id: fields[0] as Uuid,
+      salt: (fields[3] as List)?.cast<int>(),
+      storeDateTime: fields[4] as DateTime,
+      type: fields[5] as MediaType,
     );
   }
 
   @override
   void write(BinaryWriter writer, MediaMetadata obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
-      ..write(obj.album)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.name)
+      ..write(obj.album)
       ..writeByte(2)
-      ..write(obj.salt)
+      ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.storeDateTime)
+      ..write(obj.salt)
       ..writeByte(4)
+      ..write(obj.storeDateTime)
+      ..writeByte(5)
       ..write(obj.type);
   }
 
