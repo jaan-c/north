@@ -36,18 +36,18 @@ void main() {
   });
 
   group('MediaMetadataStore', () {
-    final metadata = MediaMetadata(
-        id: Uuid.generate(),
-        album: 'Test Album',
-        name: 'Test Media',
-        salt: randomBytes(16),
-        storeDateTime: DateTime(2020, 12, 25),
-        type: MediaType.image);
-
     MediaMetadataStore store;
+    MediaMetadata metadata;
 
     setUp(() {
       store = MediaMetadataStore(shouldPersist: false);
+      metadata = MediaMetadata(
+          id: Uuid.generate(),
+          album: 'Test Album',
+          name: 'Test Media',
+          salt: randomBytes(16),
+          storeDateTime: DateTime(2020, 12, 25),
+          type: MediaType.image);
     });
 
     tearDown(() async {
