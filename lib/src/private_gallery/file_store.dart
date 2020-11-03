@@ -17,14 +17,19 @@ mixin FileStore {
   @protected
   Future<Directory> get futureCacheDir;
 
+  Future<bool> has(Uuid id) async {
+    final mediaDir = await futureMediaDir;
+    return mediaDir.file(id.toString()).exists();
+  }
+
   Future<List<int>> put(Uuid id, File file) async {
+    if (await has(id)) {
+      throw FileStoreException('File $id already exists.');
+    }
+
     final mediaDir = await futureMediaDir;
     final inFile = file;
     final outFile = mediaDir.file(id.toString());
-
-    if (await outFile.exists()) {
-      throw FileStoreException('File $id already exists.');
-    }
 
     final outSink = outFile.openWrite();
     final salt = generateSalt();
@@ -41,15 +46,15 @@ mixin FileStore {
   }
 
   Future<File> get(Uuid id, List<int> salt) async {
+    if (!await has(id)) {
+      throw FileStoreException('File $id does not exist.');
+    }
+
     final mediaDir = await futureMediaDir;
     final cacheDir = await futureCacheDir;
 
     final cipherFile = mediaDir.file(id.toString());
     final cacheFile = await cacheDir.file(id.toString());
-
-    if (!await cipherFile.exists()) {
-      throw FileStoreException('File $id does not exist.');
-    }
 
     if (await cacheFile.exists()) {
       return cacheFile;
