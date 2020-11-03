@@ -39,7 +39,7 @@ class MediaStore with FileStore {
       externalRoot ??=
           Directory(await ExtStorage.getExternalStorageDirectory());
       return Directory(pathlib.join(externalRoot.path, _mediaDirectoryName))
-          .create();
+          .create(recursive: true);
     })(), cacheDir);
   }
 }
