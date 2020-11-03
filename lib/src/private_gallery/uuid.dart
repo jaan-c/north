@@ -1,33 +1,24 @@
 import 'package:uuid/uuid.dart' as uuidlib;
 
 class Uuid {
-  final String _uuidString;
+  final String asString;
 
-  Uuid._internal(String uuidString) : _uuidString = uuidString.toLowerCase();
+  Uuid(String uuidString)
+      : assert(uuidString.length == 32 && _isHex(uuidString)),
+        asString = uuidString.toLowerCase();
 
   factory Uuid.generate() {
     final uuid = uuidlib.Uuid().v4();
-    final stripped = _removeHyphens(uuid);
+    final clean = _removeHyphens(uuid);
 
-    return Uuid._internal(stripped);
-  }
-
-  factory Uuid.fromString(String uuidString) {
-    if (uuidString.length == 32 && _isHex(uuidString)) {
-      return Uuid._internal(uuidString);
-    } else {
-      throw StateError('Invalid uuid $uuidString.');
-    }
+    return Uuid(clean);
   }
 
   @override
   bool operator ==(Object other) => other is Uuid && hashCode == other.hashCode;
 
   @override
-  int get hashCode => _uuidString.hashCode;
-
-  @override
-  String toString() => _uuidString;
+  int get hashCode => asString.hashCode;
 }
 
 String _removeHyphens(String string) {

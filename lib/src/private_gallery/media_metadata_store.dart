@@ -29,31 +29,42 @@ class MediaMetadataStore {
   Future<void> put(Uuid id, MediaMetadata metadata) async {
     final box = await _futureBox;
 
-    if (box.containsKey(id.toString())) {
+    if (box.containsKey(id.asString)) {
       throw MediaMetadataStoreException('$id id already exists.');
     }
 
-    await box.put(id.toString(), metadata);
+    await box.put(id.asString, metadata);
   }
 
   Future<MediaMetadata> get(Uuid id) async {
     final box = await _futureBox;
 
-    if (!box.containsKey(id.toString())) {
+    if (!box.containsKey(id.asString)) {
       throw MediaMetadataStoreException('$id id does not exist.');
     }
 
-    return box.get(id.toString());
+    return box.get(id.asString);
+  }
+
+  Future<List<String>> getAllAlbums() async {
+    final box = await _futureBox;
+    return box.values.map((m) => m.album).toSet().toList()..sort();
+  }
+
+  Future<List<MediaMetadata>> getByAlbum(String name) async {
+    final box = await _futureBox;
+    return box.values.where((m) => m.album == name).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   Future<void> delete(Uuid id) async {
     final box = await _futureBox;
 
-    if (!box.containsKey(id.toString())) {
+    if (!box.containsKey(id.asString)) {
       throw MediaMetadataStoreException('$id id does not exist.');
     }
 
-    await box.delete(id.toString());
+    await box.delete(id.asString);
   }
 
   Future<void> close() async {

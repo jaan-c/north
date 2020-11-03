@@ -19,7 +19,7 @@ mixin FileStore {
 
   Future<bool> has(Uuid id) async {
     final mediaDir = await futureMediaDir;
-    return mediaDir.file(id.toString()).exists();
+    return mediaDir.file(id.asString).exists();
   }
 
   Future<List<int>> put(Uuid id, File file) async {
@@ -29,7 +29,7 @@ mixin FileStore {
 
     final mediaDir = await futureMediaDir;
     final inFile = file;
-    final outFile = mediaDir.file(id.toString());
+    final outFile = mediaDir.file(id.asString);
 
     final outSink = outFile.openWrite();
     final salt = generateSalt();
@@ -53,8 +53,8 @@ mixin FileStore {
     final mediaDir = await futureMediaDir;
     final cacheDir = await futureCacheDir;
 
-    final cipherFile = mediaDir.file(id.toString());
-    final cacheFile = await cacheDir.file(id.toString());
+    final cipherFile = mediaDir.file(id.asString);
+    final cacheFile = await cacheDir.file(id.asString);
 
     if (await cacheFile.exists()) {
       return cacheFile;
@@ -77,8 +77,8 @@ mixin FileStore {
     final mediaDir = await futureMediaDir;
     final cacheDir = await futureCacheDir;
 
-    final cipherFile = mediaDir.file(id.toString());
-    final cacheFile = await cacheDir.file(id.toString());
+    final cipherFile = mediaDir.file(id.asString);
+    final cacheFile = await cacheDir.file(id.asString);
 
     await cipherFile.delete();
     await cacheFile.delete();

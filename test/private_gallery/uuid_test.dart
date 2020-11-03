@@ -7,23 +7,23 @@ void main() {
     final nonHex = 'TheQuickBrownFoxJumpsOverTheLazy'; // 32 length.
     final validHex = '123e4567e89b12d3a456426614174000';
 
-    expect(() => Uuid.fromString(shortHex), throwsStateError);
-    expect(() => Uuid.fromString(nonHex), throwsStateError);
-    expect(() => Uuid.fromString(validHex), returnsNormally);
+    expect(() => Uuid(shortHex), throwsStateError);
+    expect(() => Uuid(nonHex), throwsStateError);
+    expect(() => Uuid(validHex), returnsNormally);
   });
 
   test('toString returns a string with 32 length lowercased hex.', () {
     final uuid = Uuid.generate();
     final hex = RegExp(r'^[0-9a-f]+$', caseSensitive: false);
 
-    expect(uuid.toString(), hasLength(32));
-    expect(uuid.toString(), matches(hex));
-    expect(uuid.toString(), equals(uuid.toString().toLowerCase()));
+    expect(uuid.asString, hasLength(32));
+    expect(uuid.asString, matches(hex));
+    expect(uuid.asString, equals(uuid.asString.toLowerCase()));
   });
 
-  test('fromString and toString are inverse.', () {
+  test('constructor and asString are inverse.', () {
     final uuid1 = Uuid.generate();
-    final uuid2 = Uuid.fromString(uuid1.toString());
+    final uuid2 = Uuid(uuid1.toString());
 
     expect(uuid1, uuid2);
   });
@@ -31,6 +31,6 @@ void main() {
   test('== rejects input String with the same Uuid.toString value.', () {
     final uuid = Uuid.generate();
 
-    expect(uuid, isNot(equals(uuid.toString())));
+    expect(uuid, isNot(equals(uuid.asString)));
   });
 }
