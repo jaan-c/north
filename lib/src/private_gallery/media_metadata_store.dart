@@ -26,10 +26,15 @@ class MediaMetadataStore {
               bytes: shouldPersist ? null : Uint8List.fromList([]));
         })();
 
+  Future<bool> has(Uuid id) async {
+    final box = await _futureBox;
+    return box.containsKey(id.asString);
+  }
+
   Future<void> put(Uuid id, MediaMetadata metadata) async {
     final box = await _futureBox;
 
-    if (box.containsKey(id.asString)) {
+    if (await has(id)) {
       throw MediaMetadataStoreException('$id id already exists.');
     }
 
@@ -39,7 +44,7 @@ class MediaMetadataStore {
   Future<MediaMetadata> get(Uuid id) async {
     final box = await _futureBox;
 
-    if (!box.containsKey(id.asString)) {
+    if (!await has(id)) {
       throw MediaMetadataStoreException('$id id does not exist.');
     }
 
