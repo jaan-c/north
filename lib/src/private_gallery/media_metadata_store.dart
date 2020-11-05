@@ -51,15 +51,16 @@ class MediaMetadataStore {
     return box.get(id.asString);
   }
 
-  Future<List<String>> getAllAlbums() async {
+  Future<List<String>> getAlbumNames() async {
     final box = await _futureBox;
     return box.values.map((m) => m.album).toSet().toList()..sort();
   }
 
-  Future<List<MediaMetadata>> getByAlbum(String name) async {
+  Future<List<MediaMetadata>> getByAlbum(String name,
+      {Comparator<MediaMetadata> sortBy}) async {
     final box = await _futureBox;
-    return box.values.where((m) => m.album == name).toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+    final metas = box.values.where((m) => m.album == name).toList();
+    return sortBy != null ? (metas..sort(sortBy)) : metas;
   }
 
   Future<void> delete(Uuid id) async {
