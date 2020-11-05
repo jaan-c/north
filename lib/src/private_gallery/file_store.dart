@@ -3,9 +3,15 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
 
-import 'file_store_exception.dart';
 import 'utils.dart';
 import 'uuid.dart';
+
+class FileStoreException implements Exception {
+  final String message;
+  FileStoreException(this.message);
+  @override
+  String toString() => 'FileStoreException: $message';
+}
 
 mixin FileStore {
   @protected

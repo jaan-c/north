@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/private_gallery.dart';
 import 'package:north/src/private_gallery/file_store.dart';
+import 'package:north/src/private_gallery/uuid.dart';
 
 import '../utils.dart';
 

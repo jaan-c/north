@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/private_gallery.dart';
+import 'package:north/src/private_gallery/media_metadata.dart';
+import 'package:north/src/private_gallery/media_metadata_store.dart';
 
 import '../utils.dart';
 
