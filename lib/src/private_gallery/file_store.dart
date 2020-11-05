@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
 
-import 'utils.dart';
+import 'file_system_utils.dart';
 import 'uuid.dart';
 
 class FileStoreException implements Exception {

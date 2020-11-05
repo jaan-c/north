@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as pathlib;
 
 import 'file_store.dart';
-import 'utils.dart';
+import 'file_system_utils.dart';
 
 class ThumbnailStore with FileStore {
   static const _thumbnailDirPath = '.north/thumbnails';
