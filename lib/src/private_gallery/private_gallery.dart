@@ -6,6 +6,7 @@ import 'media_metadata.dart';
 import 'media_metadata_store.dart';
 import 'media_store.dart';
 import 'thumbnail_store.dart';
+import 'uuid.dart';
 
 enum MediaOrder { nameAscending, nameDescending, newest, oldest }
 
@@ -31,6 +32,21 @@ class Album {
   final File thumbnail;
 
   Album({@required this.name, @required this.thumbnail});
+}
+
+class Media {
+  final Uuid id;
+  final String name;
+  final DateTime storeDateTime;
+  final MediaType type;
+  final File thumbnail;
+
+  Media(
+      {@required this.id,
+      @required this.name,
+      @required this.storeDateTime,
+      @required this.type,
+      @required this.thumbnail});
 }
 
 /// A private encrypted gallery.
@@ -80,6 +96,29 @@ class PrivateGallery {
     final all = await _metadataStore.getByAlbum(name,
         sortBy: MediaOrder.newest.asComparator);
     return all.first;
+  }
+
+  /// Get [Media]s of album sorted by [orderBy].
+  ///
+  /// This will create a cache of decrypted thumbnails for the returned medias.
+  Future<List<Media>> getMediasInAlbum(String name,
+      {MediaOrder orderBy = MediaOrder.newest}) async {
+    final metas =
+        await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
+    final medias = <Media>[];
+    for (final meta in metas) {
+      final thumbnail = await _thumbnailStore.get(meta.id, meta.salt);
+      final media = Media(
+          id: meta.id,
+          name: meta.name,
+          storeDateTime: meta.storeDateTime,
+          type: meta.type,
+          thumbnail: thumbnail);
+
+      medias.add(media);
+    }
+
+    return medias;
   }
 
   /// Clear all media cache. This is also called by [dispose].
