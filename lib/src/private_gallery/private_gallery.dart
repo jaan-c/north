@@ -33,6 +33,12 @@ class Album {
   Album({@required this.name, @required this.thumbnail});
 }
 
+/// A private encrypted gallery.
+///
+/// Files are stored encrypted in a .north directory inside [externalRoot].
+/// Media and thumbnail on access will be decrypted and cached inside
+/// [cacheRoot] with respective directories media_cache and thumbnail_cache;
+/// which should be cleared at some point before the program closes.
 class PrivateGallery {
   final MediaMetadataStore _metadataStore;
   final MediaStore _mediaStore;
@@ -50,6 +56,9 @@ class PrivateGallery {
         _thumbnailStore =
             ThumbnailStore(password: password, cacheRoot: cacheRoot);
 
+  /// Get all [Album]s ordered alphabetically.
+  ///
+  /// This will create a cache of decrypted thumbnails for the returned albums.
   Future<List<Album>> getAllAlbums() async {
     final albums = <Album>[];
     for (final albumName in await _metadataStore.getAlbumNames()) {
@@ -73,14 +82,17 @@ class PrivateGallery {
     return all.first;
   }
 
+  /// Clear all media cache. This is also called by [dispose].
   Future<void> clearMediaCache() async {
     await _mediaStore.clearCache();
   }
 
+  /// Clear all thumbnail cache. This is also called by [dispose].
   Future<void> clearThumbnailCache() async {
     await _thumbnailStore.clearCache();
   }
 
+  /// Dispose of this object and all caches.
   Future<void> dispose() async {
     await _metadataStore.dispose();
     await clearMediaCache();
