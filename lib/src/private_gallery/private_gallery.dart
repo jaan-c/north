@@ -121,6 +121,14 @@ class PrivateGallery {
     return medias;
   }
 
+  /// Get media with [id].
+  ///
+  /// This will create a cache of the full decrypted media returned.
+  Future<File> getMedia(Uuid id) async {
+    final meta = await _metadataStore.get(id);
+    return _mediaStore.get(id, meta.salt);
+  }
+
   /// Clear all media cache. This is also called by [dispose].
   Future<void> clearMediaCache() async {
     await _mediaStore.clearCache();
