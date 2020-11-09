@@ -67,7 +67,7 @@ void main() {
     final invalidCipherStream = Stream.fromIterable([randomBytes(2000000)]);
 
     await expectLater(
-        decryptStream(password, salt, invalidCipherStream).collect(),
+        decryptStream(password, salt, invalidCipherStream),
         emitsInOrder(
             [emits(anything), emitsError(isInstanceOf<CryptoException>())]));
   });
