@@ -118,7 +118,6 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
 
   await channel.sink.addStream(outStream);
   await channel.sink.add(null); // Signal that crypto is done.
-  await channel.sink.close();
 }
 
 /// Encrypt [plainStream] with key derived from [password] and [salt].
