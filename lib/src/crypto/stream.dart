@@ -67,10 +67,7 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   final args = _CryptoArgs(password, salt, mode, receivePort.sendPort);
 
   final cryptoResult = runner.run(_cryptoInIsolate, args);
-  unawaited(channel.sink.addStream(concat([
-    inStream,
-    Stream.fromIterable([null])
-  ])));
+  unawaited(channel.sink.addStream(concat([inStream, Stream.value(null)])));
 
   try {
     yield* channel.stream.takeWhile((chunk) => chunk != null);
@@ -116,8 +113,7 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  await channel.sink.addStream(outStream);
-  await channel.sink.add(null); // Signal that crypto is done.
+  await channel.sink.addStream(concat([outStream, Stream.value(null)]));
 }
 
 /// Encrypt [plainStream] with key derived from [password] and [salt].
