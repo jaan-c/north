@@ -116,12 +116,9 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  try {
-    await channel.sink.addStream(outStream);
-    await channel.sink.add(null); // Signal that crypto is done.
-  } on SodiumException catch (e) {
-    throw CryptoException('Crypto failed with mode ${args.mode}: $e');
-  }
+  await channel.sink.addStream(outStream);
+  await channel.sink.add(null); // Signal that crypto is done.
+  await channel.sink.close();
 }
 
 /// Encrypt [plainStream] with key derived from [password] and [salt].
