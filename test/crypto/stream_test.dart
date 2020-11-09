@@ -62,6 +62,13 @@ void main() {
     final plainStream = decryptStream(password, salt, cipherStream);
     expect(await plainStream.collect(), message);
   });
+
+  test('decryptStream throws CryptoException on failure.', () async {
+    final invalidCipherStream = Stream.fromIterable([randomBytes(2000000)]);
+
+    expect(decryptStream(password, salt, invalidCipherStream),
+        emitsError(isInstanceOf<CryptoException>()));
+  });
 }
 
 extension Collect<T> on Stream<Iterable<T>> {
