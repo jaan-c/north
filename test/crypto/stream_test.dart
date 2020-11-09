@@ -66,8 +66,10 @@ void main() {
   test('decryptStream throws CryptoException on failure.', () async {
     final invalidCipherStream = Stream.fromIterable([randomBytes(2000000)]);
 
-    expect(decryptStream(password, salt, invalidCipherStream),
-        emitsError(isInstanceOf<CryptoException>()));
+    await expectLater(
+        decryptStream(password, salt, invalidCipherStream).collect(),
+        emitsInOrder(
+            [emits(anything), emitsError(isInstanceOf<CryptoException>())]));
   });
 }
 
