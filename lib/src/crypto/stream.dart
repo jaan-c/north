@@ -70,8 +70,7 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   unawaited(channel.sink.addStream(concat([inStream, Stream.value(null)])));
 
   try {
-    await for (final chunk
-        in channel.stream.takeWhile((chunk) => chunk != null)) {
+    await for (final chunk in channel.stream.takeWhileNotNull()) {
       if (chunk is SodiumException) {
         throw chunk;
       }
@@ -108,7 +107,7 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
   final channel = IsolateChannel.connectSend(args.sendPort);
   final salt = Uint8List.fromList(args.salt);
   final inStream = channel.stream
-      .takeWhile((chunk) => chunk != null)
+      .takeWhileNotNull()
       .map((chunk) => Uint8List.fromList(chunk));
   Stream<Uint8List> outStream;
 
@@ -131,6 +130,13 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
     channel.sink.add(e);
   } finally {
     channel.sink.add(null);
+  }
+}
+
+extension StreamHelper<T> on Stream<T> {
+  /// Re-emit [this] values up until a null is encountered.
+  Stream<T> takeWhileNotNull() async* {
+    yield* takeWhile((value) => value != null);
   }
 }
 
