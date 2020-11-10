@@ -1,3 +1,4 @@
+import 'package:file/file.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 
@@ -67,9 +68,19 @@ void main() {
     final invalidCipherStream = Stream.fromIterable([randomBytes(2000000)]);
 
     await expectLater(
-        decryptStream(password, salt, invalidCipherStream),
-        emitsInOrder(
-            [emits(anything), emitsError(isInstanceOf<CryptoException>())]));
+        decryptStream(password, salt, invalidCipherStream).collect(),
+        throwsA(isInstanceOf<CryptoException>()));
+  });
+
+  test('encryptStream and decryptStream handles error streams properly.',
+      () async {
+    final errorStream = () => Stream<List<int>>.error(
+        FileSystemException('Terrible things happened.'));
+
+    await expectLater(encryptStream(password, salt, errorStream()).collect(),
+        throwsA(isInstanceOf<CryptoException>()));
+    await expectLater(decryptStream(password, salt, errorStream()).collect(),
+        throwsA(isInstanceOf<CryptoException>()));
   });
 }
 
