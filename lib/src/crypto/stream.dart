@@ -62,7 +62,7 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   checkArgument(salt.length >= 16, message: 'salt must be 16 bytes at minimum');
 
   final receivePort = ReceivePort();
-  final channel = IsolateChannel<List<int>>.connectReceive(receivePort);
+  final channel = IsolateChannel.connectReceive(receivePort);
   final runner = await IsolateRunner.spawn();
   final args = _CryptoArgs(password, salt, mode, receivePort.sendPort);
 
@@ -70,8 +70,18 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   unawaited(channel.sink.addStream(concat([inStream, Stream.value(null)])));
 
   try {
-    yield* channel.stream.takeWhile((chunk) => chunk != null);
+    await for (final chunk
+        in channel.stream.takeWhile((chunk) => chunk != null)) {
+      if (chunk is SodiumException) {
+        throw chunk;
+      }
+
+      yield chunk;
+    }
+
     await cryptoResult;
+  } catch (e) {
+    throw CryptoException(e.toString());
   } finally {
     receivePort.close();
     await runner.close();
@@ -95,7 +105,7 @@ class _CryptoArgs {
 /// the channel will only be consumed up until a null is encountered and the
 /// [Sink] from the channel will be null terminated.
 Future<void> _cryptoInIsolate(_CryptoArgs args) async {
-  final channel = IsolateChannel<List<int>>.connectSend(args.sendPort);
+  final channel = IsolateChannel.connectSend(args.sendPort);
   final salt = Uint8List.fromList(args.salt);
   final inStream = channel.stream
       .takeWhile((chunk) => chunk != null)
@@ -113,7 +123,15 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  await channel.sink.addStream(concat([outStream, Stream.value(null)]));
+  try {
+    await for (final chunk in outStream) {
+      channel.sink.add(chunk);
+    }
+  } catch (e) {
+    channel.sink.add(e);
+  } finally {
+    channel.sink.add(null);
+  }
 }
 
 /// Encrypt [plainStream] with key derived from [password] and [salt].
