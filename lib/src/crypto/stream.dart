@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:isolate/isolate.dart';
-import 'package:quiver/async.dart';
 import 'package:quiver/check.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:pedantic/pedantic.dart';
@@ -67,7 +66,8 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   final args = _CryptoArgs(password, salt, mode, receivePort.sendPort);
 
   final cryptoResult = runner.run(_cryptoInIsolate, args);
-  unawaited(channel.sink.addStream(inStream.nullTerminated()));
+  unawaited(
+      channel.sink.addStream(inStream.errorAsLastValue().nullTerminated()));
 
   try {
     await for (final chunk in channel.stream.takeWhileNotNull()) {
@@ -122,7 +122,19 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  await channel.sink.addStream(outStream.errorAsLastValue().nullTerminated());
+  // await channel.sink.addStream(outStream.errorAsLastValue().nullTerminated());
+
+  try {
+    await for (final chunk in outStream) {
+      channel.sink.add(chunk);
+    }
+  } on Exception catch (e) {
+    channel.sink.add(e);
+  } on SodiumException catch (e) {
+    channel.sink.add(e);
+  } finally {
+    channel.sink.add(null);
+  }
 }
 
 /// Methods for handling null terminated and error as value pattern used by
