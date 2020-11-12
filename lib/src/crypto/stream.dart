@@ -67,11 +67,11 @@ Stream<List<int>> _cryptoStream(String password, List<int> salt,
   final args = _CryptoArgs(password, salt, mode, receivePort.sendPort);
 
   final cryptoResult = runner.run(_cryptoInIsolate, args);
-  unawaited(channel.sink.addStream(concat([inStream, Stream.value(null)])));
+  unawaited(channel.sink.addStream(inStream.nullTerminated()));
 
   try {
     await for (final chunk in channel.stream.takeWhileNotNull()) {
-      if (chunk is SodiumException) {
+      if (chunk is Exception || chunk is SodiumException) {
         throw chunk;
       }
 
@@ -122,21 +122,33 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  try {
-    await for (final chunk in outStream) {
-      channel.sink.add(chunk);
-    }
-  } catch (e) {
-    channel.sink.add(e);
-  } finally {
-    channel.sink.add(null);
-  }
+  await channel.sink.addStream(outStream.errorAsLastValue().nullTerminated());
 }
 
-extension StreamHelper<T> on Stream<T> {
-  /// Re-emit [this] values up until a null is encountered.
-  Stream<T> takeWhileNotNull() async* {
+/// Methods for handling null terminated and error as value pattern used by
+/// [_cryptoInIsolate].
+extension StreamSignal on Stream {
+  /// Re-emit [this] up until a null is encountered.
+  Stream takeWhileNotNull() async* {
     yield* takeWhile((value) => value != null);
+  }
+
+  /// Emit encountered errors from [this] as the last value. Otherwise re-emit
+  /// values as-is.
+  Stream errorAsLastValue() async* {
+    try {
+      await for (final value in this) {
+        yield value;
+      }
+    } catch (e) {
+      yield e;
+    }
+  }
+
+  /// Re-emit [this] and null as the last value.
+  Stream nullTerminated() async* {
+    yield* this;
+    yield null;
   }
 }
 
