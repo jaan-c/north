@@ -122,8 +122,6 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
       throw StateError('Unhandled ${args.mode}.');
   }
 
-  // await channel.sink.addStream(outStream.errorAsLastValue().nullTerminated());
-
   try {
     await for (final chunk in outStream) {
       channel.sink.add(chunk);
