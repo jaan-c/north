@@ -11,4 +11,12 @@ void main() {
   test('cryptoSecretstreamXchacha20poly1305Keybytes is 256 bits', () {
     expect(Sodium.cryptoSecretstreamXchacha20poly1305Keybytes, 32);
   });
+
+  test('SodiumException is caught by catch without specified type.', () {
+    try {
+      throw SodiumException('Terrible things happened.');
+    } catch (e) {
+      expect(e, isInstanceOf<SodiumException>());
+    }
+  });
 }
