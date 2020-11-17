@@ -82,6 +82,21 @@ void main() {
     await expectLater(decryptStream(password, salt, errorStream()).collect(),
         throwsA(isInstanceOf<CryptoException>()));
   });
+
+  test('encryptStream cleans up properly on partial consumption.', () async {
+    final plainStream = Stream.fromIterable([randomBytes(8000000)]);
+    final cipherStream = encryptStream(password, salt, plainStream);
+
+    await expectLater(cipherStream.take(2).collect(), completes);
+  });
+
+  test('decryptStream cleans up properly on partial consumption.', () async {
+    final plainStream = Stream.fromIterable([randomBytes(8000000)]);
+    final cipherStream = encryptStream(password, salt, plainStream);
+    final decryptedStream = decryptStream(password, salt, cipherStream);
+
+    await expectLater(decryptedStream.take(2).collect(), completes);
+  });
 }
 
 extension Collect<T> on Stream<Iterable<T>> {
