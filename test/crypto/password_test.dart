@@ -22,4 +22,16 @@ void main() {
     expect(salt1, isNot(equals(salt2)));
     expect([salt1, salt2], everyElement(hasLength(16)));
   });
+
+  test('deriveKeyFromPassword creates a 256 bit key from password and salt.',
+      () {
+    final password = 'Password';
+    final salt = generateSalt();
+    final key1 = deriveKeyFromPassword(password, salt);
+    final key2 = deriveKeyFromPassword(password, salt);
+
+    expect(key1, hasLength(32));
+    expect(key2, hasLength(32));
+    expect(key1, key2);
+  });
 }
