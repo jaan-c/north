@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_sodium/flutter_sodium.dart';
 
 final _opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -17,4 +19,13 @@ bool verifyPasswordWithHash(String password, String hash) {
 /// Generate a 128 bit random salt.
 List<int> generateSalt() {
   return PasswordHash.randomSalt();
+}
+
+/// Generate a key from [password] and [salt] for use in [encryptStream] and
+/// [decryptStream].
+Uint8List deriveKeyFromPassword(String password, List<int> salt) {
+  return PasswordHash.hashString(password, Uint8List.fromList(salt),
+      outlen: Sodium.cryptoSecretstreamXchacha20poly1305Keybytes,
+      opslimit: _opsLimit,
+      memlimit: _memLimit);
 }
