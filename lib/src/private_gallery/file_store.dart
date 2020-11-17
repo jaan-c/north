@@ -74,11 +74,11 @@ mixin FileStore {
         outSink.add(cipher);
       }
       await outSink.flush();
-      await outSink.close();
     } on CancelledOperationException catch (_) {
-      await outSink.close();
       await outFile.delete();
       rethrow;
+    } finally {
+      await outSink.close();
     }
 
     return salt;
@@ -115,11 +115,11 @@ mixin FileStore {
         cacheSink.add(plain);
       }
       await cacheSink.flush();
-      await cacheSink.close();
     } on CancelledOperationException catch (_) {
-      await cacheSink.close();
       await cacheFile.delete();
       rethrow;
+    } finally {
+      await cacheSink.close();
     }
 
     return cacheFile;
