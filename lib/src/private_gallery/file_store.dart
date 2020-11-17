@@ -48,7 +48,14 @@ mixin FileStore {
     return mediaDir.file(id.asString).exists();
   }
 
-  Future<List<int>> put(Uuid id, File file) async {
+  CancelableOperation<List<int>> put(Uuid id, File file) {
+    final state = _CancelState();
+    return CancelableOperation.fromFuture(_encryptAndStore(id, file, state),
+        onCancel: state.cancel);
+  }
+
+  Future<List<int>> _encryptAndStore(
+      Uuid id, File file, _CancelState state) async {
     if (await has(id)) {
       throw FileStoreException('File $id already exists.');
     }
@@ -62,10 +69,16 @@ mixin FileStore {
     final plainStream = inFile.openRead();
     final cipherStream = encryptStream(password, salt, plainStream);
     try {
-      await outSink.addStream(cipherStream);
-      await outSink.flush(); // Call only if addStream completes.
-    } finally {
+      await for (final cipher in cipherStream) {
+        state.checkIsCancelled();
+        outSink.add(cipher);
+      }
+      await outSink.flush();
       await outSink.close();
+    } on CancelledOperationException catch (_) {
+      await outSink.close();
+      await outFile.delete();
+      rethrow;
     }
 
     return salt;
@@ -73,11 +86,8 @@ mixin FileStore {
 
   CancelableOperation<File> get(Uuid id, List<int> salt) {
     final state = _CancelState();
-    final operation = CancelableOperation.fromFuture(
-        _decryptAndCache(id, salt, state),
+    return CancelableOperation.fromFuture(_decryptAndCache(id, salt, state),
         onCancel: state.cancel);
-
-    return operation;
   }
 
   Future<File> _decryptAndCache(
