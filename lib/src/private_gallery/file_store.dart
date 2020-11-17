@@ -109,6 +109,7 @@ mixin FileStore {
     } on CancelledOperationException catch (_) {
       await cacheSink.close();
       await cacheFile.delete();
+      rethrow;
     }
 
     return cacheFile;
