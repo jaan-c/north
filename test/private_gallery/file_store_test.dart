@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:north/src/private_gallery/cancelable_future.dart';
 import 'package:north/src/private_gallery/file_store.dart';
 import 'package:north/src/private_gallery/uuid.dart';
 
@@ -19,6 +20,8 @@ class TestFileStore with FileStore {
 
 void main() {
   final throwsFileStoreException = throwsA(isInstanceOf<FileStoreException>());
+  final throwsCancelledOperationException =
+      throwsA(isInstanceOf<CancelledOperationException>());
 
   TestFileStore store;
   Directory tempDir;
@@ -40,16 +43,16 @@ void main() {
     final file = tempDir.file();
 
     await file.writeAsBytes(content);
-    await store.put(id, file).value;
+    await store.put(id, file);
 
-    await expectLater(store.put(id, file).value, throwsFileStoreException);
+    await expectLater(store.put(id, file), throwsFileStoreException);
   });
 
   test('get throws FileStoreException on non-existent id.', () async {
     final id = Uuid.generate();
     final salt = randomBytes(16);
 
-    await expectLater(store.get(id, salt).value, throwsFileStoreException);
+    await expectLater(store.get(id, salt), throwsFileStoreException);
   });
 
   test('get retrieves inserted file with put.', () async {
@@ -58,10 +61,35 @@ void main() {
     final file = tempDir.file();
     await file.writeAsBytes(content);
 
-    final salt = await store.put(id, file).value;
-    final retrievedFile = await store.get(id, salt).value;
+    final salt = await store.put(id, file);
+    final retrievedFile = await store.get(id, salt);
     final retrievedContent = await retrievedFile.readAsBytes();
 
     expect(content, retrievedContent);
+  });
+
+  test('put throws CancelledOperationException on cancel.', () async {
+    final id = Uuid.generate();
+    final content = randomBytes(2048);
+    final file = tempDir.file();
+    await file.writeAsBytes(content);
+
+    final putResult = store.put(id, file);
+    await putResult.cancel();
+
+    await expectLater(putResult, throwsCancelledOperationException);
+  });
+
+  test('get throws CancelledOperationException on cancel.', () async {
+    final id = Uuid.generate();
+    final content = randomBytes(2048);
+    final file = tempDir.file();
+    await file.writeAsBytes(content);
+
+    final salt = await store.put(id, file);
+    final getResult = store.get(id, salt);
+    await getResult.cancel();
+
+    await expectLater(getResult, throwsCancelledOperationException);
   });
 }

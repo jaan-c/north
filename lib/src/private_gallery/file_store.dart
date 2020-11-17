@@ -1,30 +1,11 @@
 import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
+import 'package:north/src/private_gallery/cancelable_future.dart';
 
 import 'file_system_utils.dart';
 import 'uuid.dart';
-
-class CancelledOperationException implements Exception {
-  @override
-  String toString() => '${(CancelledOperationException)}';
-}
-
-class _CancelState {
-  var _isCancelled = false;
-
-  void checkIsCancelled() {
-    if (_isCancelled) {
-      throw CancelledOperationException();
-    }
-  }
-
-  void cancel() {
-    _isCancelled = true;
-  }
-}
 
 class FileStoreException implements Exception {
   final String message;
@@ -48,14 +29,12 @@ mixin FileStore {
     return mediaDir.file(id.asString).exists();
   }
 
-  CancelableOperation<List<int>> put(Uuid id, File file) {
-    final state = _CancelState();
-    return CancelableOperation.fromFuture(_encryptAndStore(id, file, state),
-        onCancel: state.cancel);
+  CancelableFuture<List<int>> put(Uuid id, File file) {
+    return CancelableFuture((state) => _encryptAndStore(id, file, state));
   }
 
   Future<List<int>> _encryptAndStore(
-      Uuid id, File file, _CancelState state) async {
+      Uuid id, File file, CancelState state) async {
     if (await has(id)) {
       throw FileStoreException('File $id already exists.');
     }
@@ -84,14 +63,12 @@ mixin FileStore {
     return salt;
   }
 
-  CancelableOperation<File> get(Uuid id, List<int> salt) {
-    final state = _CancelState();
-    return CancelableOperation.fromFuture(_decryptAndCache(id, salt, state),
-        onCancel: state.cancel);
+  CancelableFuture<File> get(Uuid id, List<int> salt) {
+    return CancelableFuture((state) => _decryptAndCache(id, salt, state));
   }
 
   Future<File> _decryptAndCache(
-      Uuid id, List<int> salt, _CancelState state) async {
+      Uuid id, List<int> salt, CancelState state) async {
     if (!await has(id)) {
       throw FileStoreException('File $id does not exist.');
     }
