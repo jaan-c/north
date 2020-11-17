@@ -23,7 +23,7 @@ List<int> generateSalt() {
 
 /// Generate a key from [password] and [salt] for use in [encryptStream] and
 /// [decryptStream].
-Uint8List deriveKeyFromPassword(String password, List<int> salt) {
+Uint8List deriveKey(String password, List<int> salt) {
   return PasswordHash.hashString(password, Uint8List.fromList(salt),
       outlen: Sodium.cryptoSecretstreamXchacha20poly1305Keybytes,
       opslimit: _opsLimit,

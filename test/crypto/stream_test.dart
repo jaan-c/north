@@ -5,7 +5,7 @@ import 'package:north/crypto.dart';
 import '../utils.dart';
 
 void main() {
-  final key = deriveKeyFromPassword('Password', generateSalt());
+  final key = deriveKey('Password', generateSalt());
 
   setUpAll(initCrypto);
 
