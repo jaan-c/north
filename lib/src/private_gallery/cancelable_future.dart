@@ -1,8 +1,8 @@
 import 'package:async/async.dart';
 
-class CancelledOperationException implements Exception {
+class CancelledException implements Exception {
   @override
-  String toString() => '${(CancelledOperationException)}';
+  String toString() => '${(CancelledException)}';
 }
 
 class CancelState {
@@ -10,7 +10,7 @@ class CancelState {
 
   void checkIsCancelled() {
     if (_isCancelled) {
-      throw CancelledOperationException();
+      throw CancelledException();
     }
   }
 

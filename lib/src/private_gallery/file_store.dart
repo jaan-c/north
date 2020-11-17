@@ -53,7 +53,7 @@ mixin FileStore {
         outSink.add(cipher);
       }
       await outSink.flush();
-    } on CancelledOperationException catch (_) {
+    } on CancelledException catch (_) {
       await outFile.delete();
       rethrow;
     } finally {
@@ -92,7 +92,7 @@ mixin FileStore {
         cacheSink.add(plain);
       }
       await cacheSink.flush();
-    } on CancelledOperationException catch (_) {
+    } on CancelledException catch (_) {
       await cacheFile.delete();
       rethrow;
     } finally {

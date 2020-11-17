@@ -20,8 +20,7 @@ class TestFileStore with FileStore {
 
 void main() {
   final throwsFileStoreException = throwsA(isInstanceOf<FileStoreException>());
-  final throwsCancelledOperationException =
-      throwsA(isInstanceOf<CancelledOperationException>());
+  final throwsCancelledException = throwsA(isInstanceOf<CancelledException>());
 
   TestFileStore store;
   Directory tempDir;
@@ -77,7 +76,7 @@ void main() {
     final putResult = store.put(id, file);
     await putResult.cancel();
 
-    await expectLater(putResult, throwsCancelledOperationException);
+    await expectLater(putResult, throwsCancelledException);
   });
 
   test('get throws CancelledOperationException on cancel.', () async {
@@ -90,6 +89,6 @@ void main() {
     final getResult = store.get(id, salt);
     await getResult.cancel();
 
-    await expectLater(getResult, throwsCancelledOperationException);
+    await expectLater(getResult, throwsCancelledException);
   });
 }
