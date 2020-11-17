@@ -1,16 +1,36 @@
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
 
 import 'file_system_utils.dart';
 import 'uuid.dart';
 
+class CancelledOperationException implements Exception {
+  @override
+  String toString() => '${(CancelledOperationException)}';
+}
+
+class _CancelState {
+  var _isCancelled = false;
+
+  void checkIsCancelled() {
+    if (_isCancelled) {
+      throw CancelledOperationException();
+    }
+  }
+
+  void cancel() {
+    _isCancelled = true;
+  }
+}
+
 class FileStoreException implements Exception {
   final String message;
   FileStoreException(this.message);
   @override
-  String toString() => 'FileStoreException: $message';
+  String toString() => '${(FileStoreException)}: $message';
 }
 
 mixin FileStore {
@@ -51,7 +71,17 @@ mixin FileStore {
     return salt;
   }
 
-  Future<File> get(Uuid id, List<int> salt) async {
+  CancelableOperation<File> get(Uuid id, List<int> salt) {
+    final state = _CancelState();
+    final operation = CancelableOperation.fromFuture(
+        _decryptAndCache(id, salt, state),
+        onCancel: state.cancel);
+
+    return operation;
+  }
+
+  Future<File> _decryptAndCache(
+      Uuid id, List<int> salt, _CancelState state) async {
     if (!await has(id)) {
       throw FileStoreException('File $id does not exist.');
     }
@@ -70,10 +100,15 @@ mixin FileStore {
     final plainStream = decryptStream(password, salt, cipherStream);
     final cacheSink = cacheFile.openWrite();
     try {
-      await cacheSink.addStream(plainStream);
+      await for (final plain in plainStream) {
+        state.checkIsCancelled();
+        cacheSink.add(plain);
+      }
       await cacheSink.flush();
-    } finally {
       await cacheSink.close();
+    } on CancelledOperationException catch (_) {
+      await cacheSink.close();
+      await cacheFile.delete();
     }
 
     return cacheFile;
