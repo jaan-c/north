@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
-import 'album_grid.dart';
+import 'thumbnail_grid.dart';
 
 class PrivateGalleryScreen extends StatefulWidget {
   final PrivateGallery gallery;
@@ -46,6 +46,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
       return LinearProgressIndicator();
     }
 
-    return AlbumGrid(albums);
+    return ThumbnailGrid(
+        albums.map((a) => ThumbnailData.fromAlbum(a)).toList());
   }
 }
