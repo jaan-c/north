@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
+import 'loader.dart';
 import 'media_metadata.dart';
 import 'media_metadata_store.dart';
 import 'media_store.dart';
@@ -29,9 +31,9 @@ extension _MediaOrderAsComparator on MediaOrder {
 
 class Album {
   final String name;
-  final File thumbnail;
+  final ThumbnailLoader thumbnailLoader;
 
-  Album({@required this.name, @required this.thumbnail});
+  Album({@required this.name, @required this.thumbnailLoader});
 }
 
 class Media {
@@ -39,14 +41,16 @@ class Media {
   final String name;
   final DateTime storeDateTime;
   final MediaType type;
-  final File thumbnail;
+  final ThumbnailLoader thumbnailLoader;
+  final MediaLoader mediaLoader;
 
   Media(
       {@required this.id,
       @required this.name,
       @required this.storeDateTime,
       @required this.type,
-      @required this.thumbnail});
+      @required this.thumbnailLoader,
+      @required this.mediaLoader});
 }
 
 /// A private encrypted gallery.
@@ -61,16 +65,14 @@ class PrivateGallery {
   final ThumbnailStore _thumbnailStore;
 
   PrivateGallery(
-      {@required String password,
+      {@required Uint8List key,
       bool shouldPersistMetadata = true,
       Directory externalRoot,
       Directory cacheRoot})
       : _metadataStore =
             MediaMetadataStore(shouldPersist: shouldPersistMetadata),
-        _mediaStore =
-            MediaStore(password: password, externalRoot: externalRoot),
-        _thumbnailStore =
-            ThumbnailStore(password: password, cacheRoot: cacheRoot);
+        _mediaStore = MediaStore(key: key, externalRoot: externalRoot),
+        _thumbnailStore = ThumbnailStore(key: key, cacheRoot: cacheRoot);
 
   /// Get all [Album]s ordered alphabetically.
   ///
@@ -78,8 +80,8 @@ class PrivateGallery {
   Future<List<Album>> getAllAlbums() async {
     final albums = <Album>[];
     for (final albumName in await _metadataStore.getAlbumNames()) {
-      final thumbnail = await _getThumbnailOfAlbum(albumName);
-      final album = Album(name: albumName, thumbnail: thumbnail);
+      final thumbnailLoader = await _getThumbnailLoaderOfAlbum(albumName);
+      final album = Album(name: albumName, thumbnailLoader: thumbnailLoader);
 
       albums.add(album);
     }
@@ -87,9 +89,9 @@ class PrivateGallery {
     return albums;
   }
 
-  Future<File> _getThumbnailOfAlbum(String name) async {
+  Future<ThumbnailLoader> _getThumbnailLoaderOfAlbum(String name) async {
     final newestMeta = await _getNewestMetaOfAlbum(name);
-    return _thumbnailStore.get(newestMeta.id, newestMeta.salt);
+    return ThumbnailLoader(newestMeta.id, newestMeta.salt, _thumbnailStore);
   }
 
   Future<MediaMetadata> _getNewestMetaOfAlbum(String name) async {
@@ -107,13 +109,16 @@ class PrivateGallery {
         await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
     final medias = <Media>[];
     for (final meta in metas) {
-      final thumbnail = await _thumbnailStore.get(meta.id, meta.salt);
+      final thumbnailLoader =
+          ThumbnailLoader(meta.id, meta.salt, _thumbnailStore);
+      final mediaLoader = MediaLoader(meta.id, meta.salt, _mediaStore);
       final media = Media(
           id: meta.id,
           name: meta.name,
           storeDateTime: meta.storeDateTime,
           type: meta.type,
-          thumbnail: thumbnail);
+          thumbnailLoader: thumbnailLoader,
+          mediaLoader: mediaLoader);
 
       medias.add(media);
     }
