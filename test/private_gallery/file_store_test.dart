@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:north/crypto.dart';
 import 'package:north/src/private_gallery/cancelable_future.dart';
 import 'package:north/src/private_gallery/file_store.dart';
 import 'package:north/src/private_gallery/uuid.dart';
@@ -9,7 +10,7 @@ import '../utils.dart';
 
 class TestFileStore with FileStore {
   @override
-  final password = 'Password';
+  final key = deriveKey('Password', generateSalt());
 
   @override
   final futureMediaDir = createTempDir();

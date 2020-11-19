@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
@@ -16,7 +17,7 @@ class FileStoreException implements Exception {
 
 mixin FileStore {
   @protected
-  String get password;
+  Uint8List get key;
 
   @protected
   Future<Directory> get futureMediaDir;
@@ -46,7 +47,7 @@ mixin FileStore {
     final outSink = outFile.openWrite();
     final salt = generateSalt();
     final plainStream = inFile.openRead();
-    final cipherStream = encryptStream(password, salt, plainStream);
+    final cipherStream = encryptStream(key, plainStream);
     try {
       await for (final cipher in cipherStream) {
         state.checkIsCancelled();
@@ -84,7 +85,7 @@ mixin FileStore {
     }
 
     final cipherStream = cipherFile.openRead();
-    final plainStream = decryptStream(password, salt, cipherStream);
+    final plainStream = decryptStream(key, cipherStream);
     final cacheSink = cacheFile.openWrite();
     try {
       await for (final plain in plainStream) {

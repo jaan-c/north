@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +13,7 @@ class ThumbnailStore with FileStore {
   static const _cacheDirName = 'media_thumbnails';
 
   @override
-  final String password;
+  final Uint8List key;
 
   @override
   final Future<Directory> futureMediaDir;
@@ -20,21 +21,18 @@ class ThumbnailStore with FileStore {
   @override
   final Future<Directory> futureCacheDir;
 
-  ThumbnailStore._internal(
-      this.password, this.futureMediaDir, this.futureCacheDir);
+  ThumbnailStore._internal(this.key, this.futureMediaDir, this.futureCacheDir);
 
   factory ThumbnailStore(
-      {@required String password,
-      Directory externalRoot,
-      Directory cacheRoot}) {
+      {@required Uint8List key, Directory externalRoot, Directory cacheRoot}) {
     final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
     if (externalRoot != null) {
       return ThumbnailStore._internal(
-          password, Future.value(externalRoot), cacheDir);
+          key, Future.value(externalRoot), cacheDir);
     }
 
-    return ThumbnailStore._internal(password, (() async {
+    return ThumbnailStore._internal(key, (() async {
       externalRoot ??=
           Directory(await ExtStorage.getExternalStorageDirectory());
 

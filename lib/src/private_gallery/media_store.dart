@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,7 @@ class MediaStore with FileStore {
   static const _cacheDirName = 'media_cache';
 
   @override
-  final String password;
+  final Uint8List key;
 
   @override
   final Future<Directory> futureMediaDir;
@@ -21,20 +22,18 @@ class MediaStore with FileStore {
   @override
   final Future<Directory> futureCacheDir;
 
-  MediaStore._internal(this.password, this.futureMediaDir, this.futureCacheDir);
+  MediaStore._internal(this.key, this.futureMediaDir, this.futureCacheDir);
 
   factory MediaStore(
-      {@required String password,
-      Directory externalRoot,
-      Directory cacheRoot}) {
+      {@required Uint8List key, Directory externalRoot, Directory cacheRoot}) {
     final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
     if (externalRoot != null) {
       return MediaStore._internal(
-          password, Future.value(externalRoot), cacheDir);
+          key, Future.value(externalRoot), cacheDir);
     }
 
-    return MediaStore._internal(password, (() async {
+    return MediaStore._internal(key, (() async {
       externalRoot ??=
           Directory(await ExtStorage.getExternalStorageDirectory());
       return Directory(pathlib.join(externalRoot.path, _mediaDirName))
