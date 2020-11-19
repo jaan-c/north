@@ -15,9 +15,9 @@ class GenerateThumbnailException implements Exception {
 /// JPG encoded and returned as bytes.
 Future<List<int>> generateThumbnail(File media,
     {int size = 200, quality = 80}) async {
-  if (await _isVideoOrGif(media)) {
+  if (await isVideo(media) || await _isGif(media)) {
     return _generateVideoThumbnail(media, size, quality);
-  } else if (await _isImage(media)) {
+  } else if (await isImage(media)) {
     return _generateImageThumbnail(media, size, quality);
   } else {
     throw GenerateThumbnailException('media is neither an image or video');
@@ -40,16 +40,22 @@ Future<List<int>> _generateVideoThumbnail(
   return encodeJpg(thumbnail, quality: quality);
 }
 
-Future<bool> _isImage(File media) async {
+Future<bool> isImage(File media) async {
   final header = await _readHeader(media);
   final mime = lookupMimeType(media.path, headerBytes: header);
   return mime.startsWith('image');
 }
 
-Future<bool> _isVideoOrGif(File media) async {
+Future<bool> isVideo(File media) async {
   final header = await _readHeader(media);
   final mime = lookupMimeType(media.path, headerBytes: header);
-  return mime.startsWith('video') || mime == 'image/gif';
+  return mime.startsWith('video');
+}
+
+Future<bool> _isGif(File media) async {
+  final header = await _readHeader(media);
+  final mime = lookupMimeType(media.path, headerBytes: header);
+  return mime == 'image/gif';
 }
 
 Future<List<int>> _readHeader(File media) async {
