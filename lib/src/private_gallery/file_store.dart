@@ -31,20 +31,25 @@ mixin FileStore {
   }
 
   CancelableFuture<void> put(Uuid id, File file) {
-    return CancelableFuture((state) => _encryptAndStore(id, file, state));
+    final chunkStream = file.openRead();
+    return putStream(id, chunkStream);
   }
 
-  Future<void> _encryptAndStore(Uuid id, File file, CancelState state) async {
+  CancelableFuture<void> putStream(Uuid id, Stream<List<int>> chunkStream) {
+    return CancelableFuture(
+        (state) => _encryptAndStore(id, chunkStream, state));
+  }
+
+  Future<void> _encryptAndStore(
+      Uuid id, Stream<List<int>> plainStream, CancelState state) async {
     if (await has(id)) {
       throw FileStoreException('File $id already exists.');
     }
 
     final mediaDir = await futureMediaDir;
-    final inFile = file;
     final outFile = mediaDir.file(id.asString);
 
     final outSink = outFile.openWrite();
-    final plainStream = inFile.openRead();
     final cipherStream = encryptStream(key, plainStream);
     try {
       await for (final cipher in cipherStream) {

@@ -37,7 +37,7 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  test('put throws FileStoreException on existing id.', () async {
+  test('put and putBytes throws FileStoreException on existing id.', () async {
     final id = Uuid.generate();
     final content = randomBytes(2048);
     final file = tempDir.file();
@@ -46,6 +46,16 @@ void main() {
     await store.put(id, file);
 
     await expectLater(store.put(id, file), throwsFileStoreException);
+  });
+
+  test('putStream throws FileStoreException on existing id.', () async {
+    final id = Uuid.generate();
+    final content = randomBytes(2048);
+
+    await store.putStream(id, Stream.fromIterable([content]));
+
+    await expectLater(store.putStream(id, Stream.fromIterable([content])),
+        throwsFileStoreException);
   });
 
   test('get throws FileStoreException on non-existent id.', () async {
@@ -67,6 +77,17 @@ void main() {
     expect(content, retrievedContent);
   });
 
+  test('get retrieves inserted file with putStream.', () async {
+    final id = Uuid.generate();
+    final content = randomBytes(2048);
+
+    await store.putStream(id, Stream.fromIterable([content]));
+    final retrievedFile = await store.get(id);
+    final retrievedContent = await retrievedFile.readAsBytes();
+
+    expect(content, retrievedContent);
+  });
+
   test('put throws CancelledOperationException on cancel.', () async {
     final id = Uuid.generate();
     final content = randomBytes(2048);
@@ -74,6 +95,16 @@ void main() {
     await file.writeAsBytes(content);
 
     final putResult = store.put(id, file);
+    await putResult.cancel();
+
+    await expectLater(putResult, throwsCancelledException);
+  });
+
+  test('putStream throws CancelledOperationException on cancel.', () async {
+    final id = Uuid.generate();
+    final content = randomBytes(2048);
+
+    final putResult = store.putStream(id, Stream.fromIterable([content]));
     await putResult.cancel();
 
     await expectLater(putResult, throwsCancelledException);
