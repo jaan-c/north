@@ -134,6 +134,16 @@ class PrivateGallery {
     return _mediaStore.get(id, meta.salt);
   }
 
+  /// Delete media with [id].
+  Future<void> delete(Uuid id) async {
+    final metaResult = _metadataStore.delete(id);
+    final thumbnailResult = _thumbnailStore.delete(id);
+    final mediaResult = _mediaStore.delete(id);
+
+    await Future.wait([metaResult, thumbnailResult, mediaResult],
+        eagerError: true);
+  }
+
   /// Clear all media cache. This is also called by [dispose].
   Future<void> clearMediaCache() async {
     await _mediaStore.clearCache();
