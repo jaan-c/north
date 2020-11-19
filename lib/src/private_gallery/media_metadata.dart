@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:quiver/core.dart';
@@ -29,24 +27,19 @@ class MediaMetadata extends HiveObject {
   final String name;
 
   @HiveField(3)
-  final List<int> salt;
-
-  @HiveField(4)
   final DateTime storeDateTime;
 
-  @HiveField(5)
+  @HiveField(4)
   final MediaType type;
 
   MediaMetadata(
       {@required this.id,
       @required String album,
       @required String name,
-      @required this.salt,
       @required this.storeDateTime,
       @required this.type})
       : assert(album.trim().isNotEmpty),
         assert(name.trim().isNotEmpty),
-        assert(salt.isNotEmpty),
         album = album.trim(),
         name = name.trim();
 
@@ -55,20 +48,18 @@ class MediaMetadata extends HiveObject {
       other is MediaMetadata && hashCode == other.hashCode;
 
   @override
-  int get hashCode => hashObjects([album, name, ...salt, storeDateTime, type]);
+  int get hashCode => hashObjects([album, name, storeDateTime, type]);
 
   MediaMetadata copy(
       {Uuid id,
       String album,
       String name,
-      Uint8List salt,
       DateTime storeDateTime,
       MediaType type}) {
     return MediaMetadata(
         id: id ?? this.id,
         album: album ?? this.album,
         name: name ?? this.name,
-        salt: salt ?? this.salt,
         storeDateTime: storeDateTime ?? this.storeDateTime,
         type: type ?? this.type);
   }

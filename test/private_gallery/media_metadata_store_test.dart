@@ -3,33 +3,27 @@ import 'package:north/private_gallery.dart';
 import 'package:north/src/private_gallery/media_metadata.dart';
 import 'package:north/src/private_gallery/media_metadata_store.dart';
 
-import '../utils.dart';
-
 void main() {
   group('MediaMetadata', () {
     test('== implements proper structural equality.', () {
       final id = Uuid.generate();
-      final salt = randomBytes(16);
       final m1 = MediaMetadata(
           id: id,
           album: 'Test Album',
           name: 'Test Media',
-          salt: salt,
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m2 = MediaMetadata(
           id: id,
           album: 'Test Album',
           name: 'Test Media',
-          salt: salt,
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
       final m3 = MediaMetadata(
           id: Uuid.generate(),
           album: 'Test Album',
           name: 'Test Media',
-          salt: randomBytes(16),
-          storeDateTime: DateTime(2020, 12, 25),
+          storeDateTime: DateTime(2021, 1, 1),
           type: MediaType.image);
 
       expect(m1, m2);
@@ -47,7 +41,6 @@ void main() {
           id: Uuid.generate(),
           album: 'Test Album',
           name: 'Test Media',
-          salt: randomBytes(16),
           storeDateTime: DateTime(2020, 12, 25),
           type: MediaType.image);
     });

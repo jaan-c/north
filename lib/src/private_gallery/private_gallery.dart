@@ -91,7 +91,7 @@ class PrivateGallery {
 
   Future<ThumbnailLoader> _getThumbnailLoaderOfAlbum(String name) async {
     final newestMeta = await _getNewestMetaOfAlbum(name);
-    return ThumbnailLoader(newestMeta.id, newestMeta.salt, _thumbnailStore);
+    return ThumbnailLoader(newestMeta.id, _thumbnailStore);
   }
 
   Future<MediaMetadata> _getNewestMetaOfAlbum(String name) async {
@@ -109,9 +109,8 @@ class PrivateGallery {
         await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
     final medias = <Media>[];
     for (final meta in metas) {
-      final thumbnailLoader =
-          ThumbnailLoader(meta.id, meta.salt, _thumbnailStore);
-      final mediaLoader = MediaLoader(meta.id, meta.salt, _mediaStore);
+      final thumbnailLoader = ThumbnailLoader(meta.id, _thumbnailStore);
+      final mediaLoader = MediaLoader(meta.id, _mediaStore);
       final media = Media(
           id: meta.id,
           name: meta.name,
@@ -130,8 +129,7 @@ class PrivateGallery {
   ///
   /// This will create a cache of the full decrypted media returned.
   Future<File> getMedia(Uuid id) async {
-    final meta = await _metadataStore.get(id);
-    return _mediaStore.get(id, meta.salt);
+    return _mediaStore.get(id);
   }
 
   /// Delete media with [id].

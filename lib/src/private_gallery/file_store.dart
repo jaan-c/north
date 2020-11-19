@@ -30,12 +30,11 @@ mixin FileStore {
     return mediaDir.file(id.asString).exists();
   }
 
-  CancelableFuture<List<int>> put(Uuid id, File file) {
+  CancelableFuture<void> put(Uuid id, File file) {
     return CancelableFuture((state) => _encryptAndStore(id, file, state));
   }
 
-  Future<List<int>> _encryptAndStore(
-      Uuid id, File file, CancelState state) async {
+  Future<void> _encryptAndStore(Uuid id, File file, CancelState state) async {
     if (await has(id)) {
       throw FileStoreException('File $id already exists.');
     }
@@ -45,7 +44,6 @@ mixin FileStore {
     final outFile = mediaDir.file(id.asString);
 
     final outSink = outFile.openWrite();
-    final salt = generateSalt();
     final plainStream = inFile.openRead();
     final cipherStream = encryptStream(key, plainStream);
     try {
@@ -60,16 +58,13 @@ mixin FileStore {
     } finally {
       await outSink.close();
     }
-
-    return salt;
   }
 
-  CancelableFuture<File> get(Uuid id, List<int> salt) {
-    return CancelableFuture((state) => _decryptAndCache(id, salt, state));
+  CancelableFuture<File> get(Uuid id) {
+    return CancelableFuture((state) => _decryptAndCache(id, state));
   }
 
-  Future<File> _decryptAndCache(
-      Uuid id, List<int> salt, CancelState state) async {
+  Future<File> _decryptAndCache(Uuid id, CancelState state) async {
     if (!await has(id)) {
       throw FileStoreException('File $id does not exist.');
     }

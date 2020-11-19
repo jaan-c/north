@@ -50,9 +50,8 @@ void main() {
 
   test('get throws FileStoreException on non-existent id.', () async {
     final id = Uuid.generate();
-    final salt = randomBytes(16);
 
-    await expectLater(store.get(id, salt), throwsFileStoreException);
+    await expectLater(store.get(id), throwsFileStoreException);
   });
 
   test('get retrieves inserted file with put.', () async {
@@ -61,8 +60,8 @@ void main() {
     final file = tempDir.file();
     await file.writeAsBytes(content);
 
-    final salt = await store.put(id, file);
-    final retrievedFile = await store.get(id, salt);
+    await store.put(id, file);
+    final retrievedFile = await store.get(id);
     final retrievedContent = await retrievedFile.readAsBytes();
 
     expect(content, retrievedContent);
@@ -86,8 +85,8 @@ void main() {
     final file = tempDir.file();
     await file.writeAsBytes(content);
 
-    final salt = await store.put(id, file);
-    final getResult = store.get(id, salt);
+    await store.put(id, file);
+    final getResult = store.get(id);
     await getResult.cancel();
 
     await expectLater(getResult, throwsCancelledException);

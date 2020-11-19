@@ -59,16 +59,15 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       id: fields[0] as Uuid,
       album: fields[1] as String,
       name: fields[2] as String,
-      salt: (fields[3] as List)?.cast<int>(),
-      storeDateTime: fields[4] as DateTime,
-      type: fields[5] as MediaType,
+      storeDateTime: fields[3] as DateTime,
+      type: fields[4] as MediaType,
     );
   }
 
   @override
   void write(BinaryWriter writer, MediaMetadata obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -76,10 +75,8 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       ..writeByte(2)
       ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.salt)
-      ..writeByte(4)
       ..write(obj.storeDateTime)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.type);
   }
 
