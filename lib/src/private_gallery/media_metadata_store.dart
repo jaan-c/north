@@ -11,7 +11,7 @@ class MediaMetadataStoreException implements Exception {
   final String message;
   MediaMetadataStoreException(this.message);
   @override
-  String toString() => 'MediaMetadataStorageException: $message';
+  String toString() => '${(MediaMetadataStoreException)}: $message';
 }
 
 class MediaMetadataStore {
