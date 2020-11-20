@@ -2,7 +2,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:mime/mime.dart';
+import 'package:north/src/private_gallery/thumbnail_generator.dart';
+import 'package:path/path.dart' as pathlib;
 
+import 'cancelable_future.dart';
 import 'loader.dart';
 import 'media_metadata.dart';
 import 'media_metadata_store.dart';
@@ -53,6 +57,13 @@ class Media {
       @required this.mediaLoader});
 }
 
+class MediaTypeException implements Exception {
+  final String message;
+  MediaTypeException(this.message);
+  @override
+  String toString() => '${(MediaTypeException)}: $message';
+}
+
 /// A private encrypted gallery.
 ///
 /// Files are stored encrypted in a .north directory inside [externalRoot].
@@ -73,6 +84,39 @@ class PrivateGallery {
             MediaMetadataStore(shouldPersist: shouldPersistMetadata),
         _mediaStore = MediaStore(key: key, externalRoot: externalRoot),
         _thumbnailStore = ThumbnailStore(key: key, cacheRoot: cacheRoot);
+
+  CancelableFuture<void> put(Uuid id, String album, File media) {
+    return CancelableFuture((state) => _putInStores(id, album, media, state));
+  }
+
+  Future<void> _putInStores(
+      Uuid id, String album, File media, CancelState state) async {
+    try {
+      state.checkIsCancelled();
+
+      final meta = MediaMetadata(
+          id: id,
+          album: album,
+          name: pathlib.basename(media.path),
+          storeDateTime: DateTime.now(),
+          type: await _getMediaType(media));
+      await _metadataStore.put(id, meta);
+
+      state.checkIsCancelled();
+
+      final thumbnailBytes = await generateThumbnail(media);
+      await _thumbnailStore
+          .putStream(id, Stream.fromIterable([thumbnailBytes]))
+          .rebindState(state);
+
+      await _mediaStore.put(id, media).rebindState(state);
+    } catch (e) {
+      await _metadataStore.delete(id);
+      await _thumbnailStore.delete(id);
+      await _mediaStore.delete(id);
+      rethrow;
+    }
+  }
 
   /// Get all [Album]s ordered alphabetically.
   ///
@@ -157,5 +201,27 @@ class PrivateGallery {
     await _metadataStore.dispose();
     await clearMediaCache();
     await clearThumbnailCache();
+  }
+}
+
+Future<MediaType> _getMediaType(File media) async {
+  final header = await _readMediaHeader(media);
+  final mime = lookupMimeType(media.path, headerBytes: header);
+  if (mime.startsWith('image')) {
+    return MediaType.image;
+  } else if (mime.startsWith('video')) {
+    return MediaType.video;
+  } else {
+    throw MediaTypeException('${media.path} is neither an image or a video.');
+  }
+}
+
+Future<List<int>> _readMediaHeader(File media) async {
+  final ram = await media.open();
+  try {
+    final header = await ram.read(defaultMagicNumbersMaxLength);
+    return header;
+  } finally {
+    await ram.close();
   }
 }
