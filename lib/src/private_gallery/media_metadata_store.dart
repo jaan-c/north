@@ -31,14 +31,14 @@ class MediaMetadataStore {
     return box.containsKey(id.asString);
   }
 
-  Future<void> put(Uuid id, MediaMetadata metadata) async {
+  Future<void> put(MediaMetadata metadata) async {
     final box = await _futureBox;
 
-    if (await has(id)) {
-      throw MediaMetadataStoreException('$id id already exists.');
+    if (await has(metadata.id)) {
+      throw MediaMetadataStoreException('${metadata.id} id already exists.');
     }
 
-    await box.put(id.asString, metadata);
+    await box.put(metadata.id.asString, metadata);
   }
 
   Future<MediaMetadata> get(Uuid id) async {

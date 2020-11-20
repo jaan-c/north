@@ -100,7 +100,7 @@ class PrivateGallery {
           name: pathlib.basename(media.path),
           storeDateTime: DateTime.now(),
           type: await _getMediaType(media));
-      await _metadataStore.put(id, meta);
+      await _metadataStore.put(meta);
 
       state.checkIsCancelled();
 

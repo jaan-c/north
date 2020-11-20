@@ -50,31 +50,18 @@ void main() {
     });
 
     test('put throws on existing id.', () async {
-      final id = Uuid.generate();
-
-      await expectLater(store.put(id, metadata), completes);
-      await expectLater(store.put(id, metadata),
+      await expectLater(store.put(metadata), completes);
+      await expectLater(store.put(metadata),
           throwsA(isInstanceOf<MediaMetadataStoreException>()));
     });
 
     test('get throws on non-existing id.', () async {
-      final id = Uuid.generate();
       final nonExistingId = Uuid.generate();
 
-      await store.put(id, metadata);
+      await store.put(metadata);
 
-      await expectLater(store.get(id), completion(metadata));
+      await expectLater(store.get(metadata.id), completion(metadata));
       await expectLater(store.get(nonExistingId),
-          throwsA(isInstanceOf<MediaMetadataStoreException>()));
-    });
-
-    test('delete throws on non-existing id.', () async {
-      final id = Uuid.generate();
-
-      await store.put(id, metadata);
-
-      await expectLater(store.delete(id), completes);
-      await expectLater(store.delete(id),
           throwsA(isInstanceOf<MediaMetadataStoreException>()));
     });
   });
