@@ -65,11 +65,6 @@ class MediaMetadataStore {
 
   Future<void> delete(Uuid id) async {
     final box = await _futureBox;
-
-    if (!box.containsKey(id.asString)) {
-      throw MediaMetadataStoreException('$id id does not exist.');
-    }
-
     await box.delete(id.asString);
   }
 
