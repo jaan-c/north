@@ -37,7 +37,7 @@ void main() {
         throwsA(isInstanceOf<MediaMetadataStoreException>()));
   });
 
-  test('renameAlbum renames all media with old album to new.', () async {
+  test('update overrides entries.', () async {
     final oldAlbum = 'Photos';
     final newAlbum = 'Pictures';
     final oldMeta1 = MediaMetadata(
@@ -76,7 +76,7 @@ void main() {
     await store.put(oldMeta2);
     await store.put(oldMeta3);
 
-    await store.renameAlbum(oldAlbum, newAlbum);
+    await store.update([newMeta1, newMeta2]);
 
     await expectLater(store.get(oldMeta1.id), completion(newMeta1));
     await expectLater(store.get(oldMeta2.id), completion(newMeta2));

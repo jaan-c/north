@@ -63,21 +63,17 @@ class MediaMetadataStore {
     return sortBy != null ? (metas..sort(sortBy)) : metas;
   }
 
+  Future<void> update(List<MediaMetadata> metadatas) async {
+    final box = await _futureBox;
+
+    final entries =
+        Map.fromEntries(metadatas.map((m) => MapEntry(m.id.asString, m)));
+    await box.putAll(entries);
+  }
+
   Future<void> delete(Uuid id) async {
     final box = await _futureBox;
     await box.delete(id.asString);
-  }
-
-  Future<void> renameAlbum(String oldName, String newName) async {
-    final mediasInOldAlbum = await getByAlbum(oldName);
-    final mediasInNewAlbum =
-        mediasInOldAlbum.map((m) => m.copy(album: newName));
-
-    // Batch update to prevent race condition.
-    final box = await _futureBox;
-    final entries = Map.fromEntries(
-        mediasInNewAlbum.map((m) => MapEntry(m.id.asString, m)));
-    await box.putAll(entries);
   }
 
   Future<void> dispose() async {
