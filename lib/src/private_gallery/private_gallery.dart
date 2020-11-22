@@ -182,7 +182,15 @@ class PrivateGallery {
   Future<void> renameAlbum(String oldName, String newName) async {
     final oldMetas = await _metadataStore.getByAlbum(oldName);
     final newMetas = oldMetas.map((m) => m.copy(album: newName));
+
     await _metadataStore.update(newMetas);
+  }
+
+  Future<void> renameMedia(Uuid id, String newName) async {
+    final oldMeta = await _metadataStore.get(id);
+    final newMeta = oldMeta.copy(name: newName);
+
+    await _metadataStore.update([newMeta]);
   }
 
   /// Clear all media cache. This is also called by [dispose].
