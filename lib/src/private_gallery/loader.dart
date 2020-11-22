@@ -5,6 +5,7 @@ import 'media_store.dart';
 import 'uuid.dart';
 import 'thumbnail_store.dart';
 
+/// A handle for loading a thumbnail [File] from [ThumbnailStore].
 class ThumbnailLoader {
   final Uuid _id;
   final ThumbnailStore _store;
@@ -16,6 +17,7 @@ class ThumbnailLoader {
   }
 }
 
+/// A handle for loading a media [File] from [MediaStore].
 class MediaLoader {
   final Uuid _id;
   final MediaStore _store;

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:north/src/private_gallery/thumbnail_generator.dart';
 import 'package:path/path.dart' as pathlib;
+import 'package:quiver/check.dart';
 
 import 'cancelable_future.dart';
 import 'loader.dart';
@@ -57,11 +58,11 @@ class Media {
       @required this.mediaLoader});
 }
 
-class MediaTypeException implements Exception {
+class PrivateGalleryException implements Exception {
   final String message;
-  MediaTypeException(this.message);
+  PrivateGalleryException(this.message);
   @override
-  String toString() => '${(MediaTypeException)}: $message';
+  String toString() => '${(PrivateGalleryException)}: $message';
 }
 
 /// A private encrypted gallery.
@@ -70,6 +71,10 @@ class MediaTypeException implements Exception {
 /// Media and thumbnail on access will be decrypted and cached inside
 /// [cacheRoot] with respective directories media_cache and thumbnail_cache;
 /// which should be cleared at some point before the program closes.
+///
+/// By default [externalRoot] is [ExtStorage.getExternalStorageDirectory] and
+/// [cacheRoot] is [getExternalCacheDirectories]. If [shouldPersistMetadata] is
+/// false, metadata is only stored in memory.
 class PrivateGallery {
   final MediaMetadataStore _metadataStore;
   final MediaStore _mediaStore;
@@ -85,6 +90,12 @@ class PrivateGallery {
         _mediaStore = MediaStore(key: key, externalRoot: externalRoot),
         _thumbnailStore = ThumbnailStore(key: key, cacheRoot: cacheRoot);
 
+  /// Store [media] inside [album].
+  ///
+  /// Throws [PrivateGalleryException] if there is already a media with [id] or
+  /// [media] is neither an image or a video.
+  ///
+  /// Throws [CancelledException] if [CancelableFuture.cancel] is called.
   CancelableFuture<void> put(Uuid id, String album, File media) {
     return CancelableFuture((state) => _putInStores(id, album, media, state));
   }
@@ -147,10 +158,18 @@ class PrivateGallery {
   /// Get [Media]s of album sorted by [orderBy].
   ///
   /// This will create a cache of decrypted thumbnails for the returned medias.
+  ///
+  /// Throws [ArgumentError] if [name] is empty or there is no album with
+  /// [name].
   Future<List<Media>> getMediasInAlbum(String name,
       {MediaOrder orderBy = MediaOrder.newest}) async {
+    checkArgument(name.isNotEmpty, message: 'name is empty.');
+
     final metas =
         await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
+
+    checkArgument(metas.isNotEmpty, message: 'Album "$name" does not exist.');
+
     final medias = <Media>[];
     for (final meta in metas) {
       final thumbnailLoader = ThumbnailLoader(meta.id, _thumbnailStore);
@@ -170,6 +189,9 @@ class PrivateGallery {
   }
 
   /// Delete media with [id].
+  ///
+  /// If the album the media is contained in only has this media, it is also
+  /// deleted.
   Future<void> delete(Uuid id) async {
     final metaResult = _metadataStore.delete(id);
     final thumbnailResult = _thumbnailStore.delete(id);
@@ -179,7 +201,14 @@ class PrivateGallery {
         eagerError: true);
   }
 
+  /// Rename album with [oldName] to [newName].
+  ///
+  /// Throws [ArgumentError] if [oldName] or [newName] is empty or if there is
+  /// no album named [oldName].
   Future<void> renameAlbum(String oldName, String newName) async {
+    checkArgument(oldName.isNotEmpty, message: 'oldName is empty.');
+    checkArgument(newName.isNotEmpty, message: 'newName is empty.');
+
     if (oldName == newName) {
       return;
     }
@@ -187,11 +216,24 @@ class PrivateGallery {
     final oldMetas = await _metadataStore.getByAlbum(oldName);
     final newMetas = oldMetas.map((m) => m.copy(album: newName));
 
+    checkArgument(oldMetas.isNotEmpty, message: 'No album named $oldName.');
+
     await _metadataStore.update(newMetas);
   }
 
+  /// Rename media with [id] to [newName].
+  ///
+  /// Throws [ArgumentError] if [newName] is empty or or there is no media with
+  /// [id].
   Future<void> renameMedia(Uuid id, String newName) async {
-    final oldMeta = await _metadataStore.get(id);
+    checkArgument(newName.isNotEmpty, message: 'newName is empty');
+
+    MediaMetadata oldMeta;
+    try {
+      oldMeta = await _metadataStore.get(id);
+    } on MediaMetadataStoreException catch (_) {
+      throw ArgumentError('No media with id $id.');
+    }
     final newMeta = oldMeta.copy(name: newName);
 
     if (oldMeta.name == newMeta.name) {
@@ -201,8 +243,20 @@ class PrivateGallery {
     await _metadataStore.update([newMeta]);
   }
 
+  /// Move media with [id] to [destinationAlbum].
+  ///
+  /// Throws [ArgumentError] if [destinationAlbum] is empty or there is no media
+  /// with [id].
   Future<void> moveMediaToAlbum(Uuid id, String destinationAlbum) async {
-    final oldMeta = await _metadataStore.get(id);
+    checkArgument(destinationAlbum.isNotEmpty,
+        message: 'destinationAlbum is empty');
+
+    MediaMetadata oldMeta;
+    try {
+      oldMeta = await _metadataStore.get(id);
+    } on MediaMetadataStoreException catch (_) {
+      throw ArgumentError('No media with id $id.');
+    }
     final newMeta = oldMeta.copy(album: destinationAlbum);
 
     if (oldMeta.album == destinationAlbum) {
@@ -238,7 +292,8 @@ Future<MediaType> _getMediaType(File media) async {
   } else if (mime.startsWith('video')) {
     return MediaType.video;
   } else {
-    throw MediaTypeException('${media.path} is neither an image or a video.');
+    throw PrivateGalleryException(
+        '${media.path} is neither an image or a video.');
   }
 }
 
