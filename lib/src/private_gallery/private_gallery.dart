@@ -201,6 +201,17 @@ class PrivateGallery {
     await _metadataStore.update([newMeta]);
   }
 
+  Future<void> moveMediaToAlbum(Uuid id, String destinationAlbum) async {
+    final oldMeta = await _metadataStore.get(id);
+    final newMeta = oldMeta.copy(album: destinationAlbum);
+
+    if (oldMeta.album == destinationAlbum) {
+      return;
+    }
+
+    await _metadataStore.update([newMeta]);
+  }
+
   /// Clear all media cache. This is also called by [dispose].
   Future<void> clearMediaCache() async {
     await _mediaStore.clearCache();
