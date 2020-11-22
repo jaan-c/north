@@ -24,6 +24,9 @@ class Uuid {
 
   @override
   int get hashCode => asString.hashCode;
+
+  @override
+  String toString() => asString;
 }
 
 String _removeHyphens(String string) {
