@@ -180,6 +180,10 @@ class PrivateGallery {
   }
 
   Future<void> renameAlbum(String oldName, String newName) async {
+    if (oldName == newName) {
+      return;
+    }
+
     final oldMetas = await _metadataStore.getByAlbum(oldName);
     final newMetas = oldMetas.map((m) => m.copy(album: newName));
 
@@ -189,6 +193,10 @@ class PrivateGallery {
   Future<void> renameMedia(Uuid id, String newName) async {
     final oldMeta = await _metadataStore.get(id);
     final newMeta = oldMeta.copy(name: newName);
+
+    if (oldMeta.name == newMeta.name) {
+      return;
+    }
 
     await _metadataStore.update([newMeta]);
   }
