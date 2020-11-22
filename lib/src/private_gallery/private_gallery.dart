@@ -179,6 +179,10 @@ class PrivateGallery {
         eagerError: true);
   }
 
+  Future<void> renameAlbum(String oldName, String newName) async {
+    await _metadataStore.renameAlbum(oldName, newName);
+  }
+
   /// Clear all media cache. This is also called by [dispose].
   Future<void> clearMediaCache() async {
     await _mediaStore.clearCache();
