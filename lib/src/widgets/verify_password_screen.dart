@@ -1,23 +1,21 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:north/shared_preferences.dart';
+import 'package:north/src/crypto/password.dart';
 
-typedef CheckPasswordCallback = FutureOr<bool> Function(String password);
 typedef SubmitPasswordCallback = void Function(String password);
 
-class PasswordScreen extends StatefulWidget {
-  final CheckPasswordCallback onCheckPassword;
+class VerifyPasswordScreen extends StatefulWidget {
   final SubmitPasswordCallback onSubmitPassword;
 
-  PasswordScreen(
-      {@required this.onCheckPassword, @required this.onSubmitPassword});
+  VerifyPasswordScreen({@required this.onSubmitPassword});
 
   @override
-  _PasswordScreenState createState() => _PasswordScreenState();
+  _VerifyPasswordScreenState createState() => _VerifyPasswordScreenState();
 }
 
-class _PasswordScreenState extends State<PasswordScreen> {
+class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
   final passwordController = TextEditingController(text: '');
+  final prefs = SharedPreferences.getInstance();
 
   var isCheckingPassword = false;
 
@@ -81,7 +79,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
     _showSnackBar(context, 'Checking password.');
     isCheckingPassword = true;
 
-    if (await widget.onCheckPassword(password)) {
+    if (verifyPasswordWithHash(password, await prefs.getPasswordHash())) {
       widget.onSubmitPassword(password);
     } else {
       _showSnackBar(context, 'Wrong password.');
