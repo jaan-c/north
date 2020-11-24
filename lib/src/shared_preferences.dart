@@ -22,4 +22,9 @@ class SharedPreferences {
     final prefs = await sp.SharedPreferences.getInstance();
     return prefs.setString(_passwordHashKey, hash);
   }
+
+  Future<void> clear() async {
+    final prefs = await sp.SharedPreferences.getInstance();
+    await prefs.clear();
+  }
 }
