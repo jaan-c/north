@@ -6,10 +6,14 @@ typedef SubmitPasswordCallback = FutureOr<void> Function(String password);
 typedef CheckPasswordCallback = FutureOr<bool> Function(String password);
 
 class PasswordScreen extends StatefulWidget {
+  final String title;
   final SubmitPasswordCallback onSubmitPassword;
   final CheckPasswordCallback onCheckPassword;
 
-  PasswordScreen({@required this.onSubmitPassword, this.onCheckPassword});
+  PasswordScreen(
+      {@required this.onSubmitPassword,
+      this.title = 'Enter Password',
+      this.onCheckPassword});
 
   @override
   _PasswordScreenState createState() => _PasswordScreenState();
@@ -35,7 +39,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
       child: Padding(
         child: Column(
           children: [
-            Text('Enter Password', style: textTheme.headline5),
+            Text(widget.title, style: textTheme.headline5),
             SizedBox(height: 16),
             _passwordField(context),
           ],
