@@ -16,7 +16,6 @@ class VerifyPasswordScreen extends StatefulWidget {
 }
 
 class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
-  final passwordController = TextEditingController(text: '');
   final prefs = SharedPreferences.getInstance();
 
   var isCheckingPassword = false;
