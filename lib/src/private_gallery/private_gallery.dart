@@ -80,9 +80,8 @@ class PrivateGallery {
   final MediaStore _mediaStore;
   final ThumbnailStore _thumbnailStore;
 
-  PrivateGallery(
-      {@required Uint8List key,
-      bool shouldPersistMetadata = true,
+  PrivateGallery(Uint8List key,
+      {bool shouldPersistMetadata = true,
       Directory externalRoot,
       Directory cacheRoot})
       : _metadataStore =
