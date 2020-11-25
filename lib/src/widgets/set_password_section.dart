@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
 import 'package:north/crypto.dart';
 
 import 'password_section.dart';
 
+typedef DoneCallback = FutureOr<void> Function();
+
 /// A section for accepting a password from user and setting password hash in
 /// [AppPreferences] unconditionally.
 class SetPasswordSection extends StatefulWidget {
+  final DoneCallback onDone;
+
+  SetPasswordSection({this.onDone});
+
   @override
   _SetPasswordSectionState createState() => _SetPasswordSectionState();
 }
@@ -25,5 +33,6 @@ class _SetPasswordSectionState extends State<SetPasswordSection> {
   Future<void> _setPassword(String password) async {
     final hash = await derivePasswordHash(password);
     await prefs.setPasswordHash(hash);
+    await widget.onDone?.call();
   }
 }
