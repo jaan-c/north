@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Wrapper over [SharedPreferences] only exposing preferences that will
 /// actually be used by the app.
 class AppPreferences {
-  static const _passwordHashKey = 'passwordHashKey';
+  static const _passwordHashKey = 'passwordHash';
+  static const _saltKey = 'salt';
 
   static AppPreferences _instance;
 
@@ -25,6 +26,18 @@ class AppPreferences {
   Future<void> setPasswordHash(String hash) async {
     final prefs = await _futurePrefs;
     return prefs.setString(_passwordHashKey, hash);
+  }
+
+  Future<List<int>> getSalt() async {
+    final prefs = await _futurePrefs;
+    final saltString = prefs.getStringList(_saltKey);
+    return saltString.map((s) => int.parse(s));
+  }
+
+  Future<void> setSalt(List<int> newSalt) async {
+    final prefs = await _futurePrefs;
+    final newSaltString = newSalt.map((i) => i.toString());
+    return prefs.setStringList(_saltKey, newSaltString);
   }
 
   Future<void> clear() async {
