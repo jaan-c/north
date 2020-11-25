@@ -43,14 +43,14 @@ class _PrivateGallerySectionState extends State<PrivateGallerySection> {
             throw StateError('Failed to load albums: ${snapshot.error}');
           }
 
-          if (snapshot.hasData) {
-            return Padding(
-              child: _albumGrid(snapshot.data),
-              padding: EdgeInsets.symmetric(horizontal: 16),
-            );
-          } else {
+          if (!snapshot.hasData) {
             return LinearProgressIndicator();
           }
+
+          return Padding(
+            child: _albumGrid(snapshot.data),
+            padding: EdgeInsets.symmetric(horizontal: 16),
+          );
         },
       ),
     );
