@@ -23,9 +23,9 @@ class AppPreferences {
     return prefs.getString(_passwordHashKey) ?? '';
   }
 
-  Future<void> setPasswordHash(String hash) async {
+  Future<void> setPasswordHash(String newHash) async {
     final prefs = await _futurePrefs;
-    return prefs.setString(_passwordHashKey, hash);
+    return prefs.setString(_passwordHashKey, newHash);
   }
 
   Future<List<int>> getSalt() async {
