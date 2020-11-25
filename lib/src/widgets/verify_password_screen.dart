@@ -32,6 +32,6 @@ class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
 
   Future<bool> _onCheckPassword(String password) async {
     final hash = await prefs.getPasswordHash();
-    return verifyPasswordWithHash(password, hash);
+    return verifyPassword(password, hash);
   }
 }

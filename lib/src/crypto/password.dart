@@ -5,14 +5,14 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 final _opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
 final _memLimit = Sodium.cryptoPwhashMemlimitInteractive;
 
-/// Compute a hash for verifying [password] with [verifyPasswordWithHash].
+/// Compute a hash for verifying [password] with [verifyPassword].
 String derivePasswordHash(String password) {
   return PasswordHash.hashStringStorage(password,
       opslimit: _opsLimit, memlimit: _memLimit);
 }
 
 /// Verify [password] if it matches the [hash] produced by [derivePasswordHash].
-bool verifyPasswordWithHash(String password, String hash) {
+bool verifyPassword(String password, String hash) {
   return PasswordHash.verifyStorage(hash, password);
 }
 

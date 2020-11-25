@@ -11,8 +11,8 @@ void main() {
     final wrongPassword = 'Wrong Password';
     final hash = derivePasswordHash(password);
 
-    expect(verifyPasswordWithHash(password, hash), isTrue);
-    expect(verifyPasswordWithHash(wrongPassword, hash), isFalse);
+    expect(verifyPassword(password, hash), isTrue);
+    expect(verifyPassword(wrongPassword, hash), isFalse);
   });
 
   test('generateSalt returns a 128 bit random salt.', () {
