@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
@@ -10,13 +11,15 @@ import '../utils.dart';
 
 class TestFileStore with FileStore {
   @override
-  final key = deriveKey('Password', generateSalt());
+  final Uint8List key;
 
   @override
   final futureMediaDir = createTempDir();
 
   @override
   final futureCacheDir = createTempDir();
+
+  TestFileStore(this.key);
 }
 
 void main() {
@@ -27,7 +30,7 @@ void main() {
   Directory tempDir;
 
   setUp(() async {
-    store = TestFileStore();
+    store = TestFileStore(await deriveKey('Password', generateSalt()));
     tempDir = await createTempDir();
   });
 

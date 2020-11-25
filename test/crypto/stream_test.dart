@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:file/file.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
@@ -5,9 +7,12 @@ import 'package:north/crypto.dart';
 import '../utils.dart';
 
 void main() {
-  final key = deriveKey('Password', generateSalt());
+  Uint8List key;
 
-  setUpAll(initCrypto);
+  setUpAll(() async {
+    initCrypto();
+    key = await deriveKey('Password', generateSalt());
+  });
 
   test(
       'encryptStream with the same key and plainStream yields different outputs.',
