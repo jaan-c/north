@@ -32,7 +32,11 @@ class _SetPasswordSectionState extends State<SetPasswordSection> {
 
   Future<void> _setPassword(String password) async {
     final hash = await derivePasswordHash(password);
+    final salt = generateSalt();
+
     await prefs.setPasswordHash(hash);
+    await prefs.setSalt(salt);
+
     await widget.onDone?.call();
   }
 }
