@@ -14,37 +14,49 @@ class PrivateGallerySection extends StatefulWidget {
 class _PrivateGallerySectionState extends State<PrivateGallerySection> {
   PrivateGallery get gallery => widget.gallery;
 
-  List<Album> albums;
+  Future<List<Album>> futureAlbums;
 
   @override
   void initState() {
     super.initState();
-    _initAlbums();
-  }
-
-  Future<void> _initAlbums() async {
-    final allAlbums = await gallery.getAllAlbums();
-    setState(() => albums = allAlbums);
+    futureAlbums = gallery.getAllAlbums();
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
+    _clearCaches();
+    super.dispose();
+  }
+
+  Future<void> _clearCaches() async {
     await gallery.clearThumbnailCache();
     await gallery.clearMediaCache();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Padding(
-        child: albums != null ? _albumGrid() : LinearProgressIndicator(),
-        padding: EdgeInsets.symmetric(horizontal: 16),
+      child: FutureBuilder(
+        future: futureAlbums,
+        builder: (_, AsyncSnapshot<List<Album>> snapshot) {
+          if (snapshot.hasError) {
+            throw StateError('Failed to load albums: ${snapshot.error}');
+          }
+
+          if (snapshot.hasData) {
+            return Padding(
+              child: _albumGrid(snapshot.data),
+              padding: EdgeInsets.symmetric(horizontal: 16),
+            );
+          } else {
+            return LinearProgressIndicator();
+          }
+        },
       ),
     );
   }
 
-  Widget _albumGrid() {
+  Widget _albumGrid(List<Album> albums) {
     final datas = albums.map((a) => ThumbnailData.fromAlbum(a));
     return ThumbnailGrid(datas);
   }
