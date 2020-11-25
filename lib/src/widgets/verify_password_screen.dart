@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:north/shared_preferences.dart';
+import 'package:north/app_preferences.dart';
 import 'package:north/src/crypto/password.dart';
 
 import 'password_screen.dart';
@@ -16,7 +16,7 @@ class VerifyPasswordScreen extends StatefulWidget {
 }
 
 class _VerifyPasswordScreenState extends State<VerifyPasswordScreen> {
-  final prefs = SharedPreferences.getInstance();
+  final prefs = AppPreferences.getInstance();
 
   var isCheckingPassword = false;
 
