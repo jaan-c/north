@@ -32,6 +32,7 @@ class ThumbnailGrid extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
+      shrinkWrap: true,
     );
   }
 }
