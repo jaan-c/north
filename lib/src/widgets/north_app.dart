@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:north/src/widgets/verify_password_screen.dart';
+
+import 'private_gallery_screen.dart';
 
 class NorthApp extends StatefulWidget {
   @override
@@ -9,10 +10,6 @@ class NorthApp extends StatefulWidget {
 class _NorthAppState extends State<NorthApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: VerifyPasswordScreen(
-        onSubmitPassword: (password) => debugPrint('Correct password!'),
-      ),
-    );
+    return MaterialApp(home: PrivateGalleryScreen());
   }
 }
