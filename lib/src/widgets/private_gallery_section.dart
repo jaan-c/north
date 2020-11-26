@@ -57,7 +57,7 @@ class _PrivateGallerySectionState extends State<PrivateGallerySection> {
   }
 
   Widget _albumGrid(List<Album> albums) {
-    final datas = albums.map((a) => ThumbnailData.fromAlbum(a));
+    final datas = albums.map((a) => ThumbnailData.fromAlbum(a)).toList();
     return ThumbnailGrid(datas);
   }
 }
