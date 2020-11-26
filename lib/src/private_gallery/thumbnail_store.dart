@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as pathlib;
+import 'package:path_provider/path_provider.dart';
 
 import 'file_store.dart';
 import 'file_system_utils.dart';
 
 class ThumbnailStore with FileStore {
-  static const _thumbnailDirPath = '.north/thumbnails';
-  static const _cacheDirName = 'media_thumbnails';
+  static const _thumbnailDirName = 'thumbnails';
+  static const _cacheDirName = 'thumbnail_cache';
 
   @override
   final Uint8List key;
@@ -33,10 +33,9 @@ class ThumbnailStore with FileStore {
     }
 
     return ThumbnailStore._internal(key, (() async {
-      externalRoot ??=
-          Directory(await ExtStorage.getExternalStorageDirectory());
+      externalRoot ??= await getExternalStorageDirectory();
 
-      return Directory(pathlib.join(externalRoot.path, _thumbnailDirPath))
+      return Directory(pathlib.join(externalRoot.path, _thumbnailDirName))
           .create(recursive: true);
     })(), cacheDir);
   }
