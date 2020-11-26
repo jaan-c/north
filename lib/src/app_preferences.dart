@@ -31,12 +31,12 @@ class AppPreferences {
   Future<List<int>> getSalt() async {
     final prefs = await _futurePrefs;
     final saltString = prefs.getStringList(_saltKey);
-    return saltString.map((s) => int.parse(s));
+    return saltString.map((s) => int.parse(s)).toList();
   }
 
   Future<void> setSalt(List<int> newSalt) async {
     final prefs = await _futurePrefs;
-    final newSaltString = newSalt.map((i) => i.toString());
+    final newSaltString = newSalt.map((i) => i.toString()).toList();
     return prefs.setStringList(_saltKey, newSaltString);
   }
 
