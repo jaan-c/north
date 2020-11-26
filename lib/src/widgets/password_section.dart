@@ -50,11 +50,14 @@ class _PasswordSectionState extends State<PasswordSection> {
         child: Column(
           children: [
             _titleText(context),
+            SizedBox(height: 32),
             if (isCheckingPassword) ...[
               LinearProgressIndicator(),
+              SizedBox(height: 8),
               _checkingPasswordText(context),
             ] else ...[
               _passwordField(context),
+              SizedBox(height: 8),
               _submitButton(context),
             ],
           ],
