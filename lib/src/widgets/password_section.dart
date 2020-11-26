@@ -24,8 +24,24 @@ class _PasswordSectionState extends State<PasswordSection> {
   final passwordController = TextEditingController();
   var obscurePassword = true;
   var isCheckingPassword = false;
+  var isPasswordValid = false;
 
-  bool get isPasswordValid => passwordController.text.isNotEmpty;
+  @override
+  void initState() {
+    super.initState();
+    passwordController.addListener(_setIsPasswordValidState);
+  }
+
+  @override
+  void dispose() {
+    passwordController.removeListener(_setIsPasswordValidState);
+    super.dispose();
+  }
+
+  void _setIsPasswordValidState() {
+    final password = passwordController.text;
+    setState(() => isPasswordValid = password.isNotEmpty);
+  }
 
   @override
   Widget build(BuildContext context) {
