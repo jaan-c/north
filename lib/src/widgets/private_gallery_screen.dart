@@ -68,9 +68,9 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
 
   Widget _setPasswordSection() {
     return SetPasswordSection(
-      onDone: () {
-        setState(() => futureState = _determineState());
-      },
+      onDone: () => setState(() {
+        futureState = _determineState();
+      }),
     );
   }
 
