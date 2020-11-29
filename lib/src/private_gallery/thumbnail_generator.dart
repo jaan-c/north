@@ -4,9 +4,9 @@ import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-class GenerateThumbnailException implements Exception {
+class ThumbnailGeneratorException implements Exception {
   final String message;
-  GenerateThumbnailException(this.message);
+  ThumbnailGeneratorException(this.message);
   @override
   String toString() => 'GenerateThumbnailException: $message';
 }
@@ -23,7 +23,8 @@ Future<List<int>> generateThumbnail(File media,
   } else if (mime.startsWith('image')) {
     return _generateImageThumbnail(media, size, quality);
   } else {
-    throw GenerateThumbnailException('${media.path} is neither image or video');
+    throw ThumbnailGeneratorException(
+        '${media.path} is neither image or video');
   }
 }
 
