@@ -86,11 +86,11 @@ class PrivateGallery {
   PrivateGallery(Uint8List key,
       {this.thumbnailGenerator = generateThumbnail,
       bool shouldPersistMetadata = true,
-      Directory externalRoot,
+      Directory appRoot,
       Directory cacheRoot})
       : _metadataStore =
             MediaMetadataStore(shouldPersist: shouldPersistMetadata),
-        _mediaStore = MediaStore(key: key, externalRoot: externalRoot),
+        _mediaStore = MediaStore(key: key, appRoot: appRoot),
         _thumbnailStore = ThumbnailStore(key: key, cacheRoot: cacheRoot);
 
   /// Store [media] inside [album].

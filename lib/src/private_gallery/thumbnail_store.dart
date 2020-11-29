@@ -24,18 +24,17 @@ class ThumbnailStore with FileStore {
   ThumbnailStore._internal(this.key, this.futureFileDir, this.futureCacheDir);
 
   factory ThumbnailStore(
-      {@required Uint8List key, Directory externalRoot, Directory cacheRoot}) {
+      {@required Uint8List key, Directory appRoot, Directory cacheRoot}) {
     final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
-    if (externalRoot != null) {
-      return ThumbnailStore._internal(
-          key, Future.value(externalRoot), cacheDir);
+    if (appRoot != null) {
+      return ThumbnailStore._internal(key, Future.value(appRoot), cacheDir);
     }
 
     return ThumbnailStore._internal(key, (() async {
-      externalRoot ??= await getExternalStorageDirectory();
+      appRoot ??= await getExternalStorageDirectory();
 
-      return Directory(pathlib.join(externalRoot.path, _thumbnailDirName))
+      return Directory(pathlib.join(appRoot.path, _thumbnailDirName))
           .create(recursive: true);
     })(), cacheDir);
   }

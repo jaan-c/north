@@ -25,16 +25,16 @@ class MediaStore with FileStore {
   MediaStore._internal(this.key, this.futureFileDir, this.futureCacheDir);
 
   factory MediaStore(
-      {@required Uint8List key, Directory externalRoot, Directory cacheRoot}) {
+      {@required Uint8List key, Directory appRoot, Directory cacheRoot}) {
     final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
-    if (externalRoot != null) {
-      return MediaStore._internal(key, Future.value(externalRoot), cacheDir);
+    if (appRoot != null) {
+      return MediaStore._internal(key, Future.value(appRoot), cacheDir);
     }
 
     return MediaStore._internal(key, (() async {
-      externalRoot ??= await getExternalStorageDirectory();
-      return Directory(pathlib.join(externalRoot.path, _mediaDirName))
+      appRoot ??= await getExternalStorageDirectory();
+      return Directory(pathlib.join(appRoot.path, _mediaDirName))
           .create(recursive: true);
     })(), cacheDir);
   }
