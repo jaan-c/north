@@ -25,11 +25,13 @@ class MediaStore with FileStore {
 
   factory MediaStore(
       {@required Uint8List key, Directory appRoot, Directory cacheRoot}) {
-    final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
-
-    return MediaStore._internal(key, (() async {
-      appRoot ??= await getExternalStorageDirectory();
-      return appRoot.directory(_mediaDirName).create(recursive: true);
-    })(), cacheDir);
+    return MediaStore._internal(
+      key,
+      (() async {
+        appRoot ??= await getExternalStorageDirectory();
+        return appRoot.directory(_mediaDirName).create(recursive: true);
+      })(),
+      createCacheDir(_cacheDirName, cacheRoot: cacheRoot),
+    );
   }
 }
