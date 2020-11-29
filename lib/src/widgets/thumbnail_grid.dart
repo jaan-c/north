@@ -92,7 +92,7 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
         if (snapshot.hasData) {
           return FittedBox(child: Image.file(snapshot.data));
         } else {
-          return Center(child: CircularProgressIndicator(value: null));
+          return Center(child: CircularProgressIndicator());
         }
       },
     );
