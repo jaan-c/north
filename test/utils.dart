@@ -29,8 +29,8 @@ String randomString({int length = 16}) {
       .join('');
 }
 
-Future<Directory> createTempDir() async {
-  return Directory.systemTemp.createTemp('temp_dir');
+Future<Directory> createTempDir([String prefix = 'temp_dir']) async {
+  return Directory.systemTemp.createTemp(prefix);
 }
 
 extension FileWithin on Directory {
