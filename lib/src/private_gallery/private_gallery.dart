@@ -65,6 +65,8 @@ class PrivateGalleryException implements Exception {
   String toString() => '${(PrivateGalleryException)}: $message';
 }
 
+typedef ThumbnailGenerator = Future<List<int>> Function(File media);
+
 /// A private encrypted gallery.
 ///
 /// Files are stored encrypted in a .north directory inside [externalRoot].
@@ -76,12 +78,14 @@ class PrivateGalleryException implements Exception {
 /// [cacheRoot] is [getExternalCacheDirectories]. If [shouldPersistMetadata] is
 /// false, metadata is only stored in memory.
 class PrivateGallery {
+  final ThumbnailGenerator thumbnailGenerator;
   final MediaMetadataStore _metadataStore;
   final MediaStore _mediaStore;
   final ThumbnailStore _thumbnailStore;
 
   PrivateGallery(Uint8List key,
-      {bool shouldPersistMetadata = true,
+      {this.thumbnailGenerator = generateThumbnail,
+      bool shouldPersistMetadata = true,
       Directory externalRoot,
       Directory cacheRoot})
       : _metadataStore =
@@ -114,7 +118,7 @@ class PrivateGallery {
 
       state.checkIsCancelled();
 
-      final thumbnailBytes = await generateThumbnail(media);
+      final thumbnailBytes = await thumbnailGenerator(media);
       await _thumbnailStore
           .putStream(id, Stream.fromIterable([thumbnailBytes]))
           .rebindState(state);
