@@ -24,13 +24,8 @@ class _PrivateGallerySectionState extends State<PrivateGallerySection> {
 
   @override
   void dispose() {
-    _clearCaches();
+    gallery.dispose();
     super.dispose();
-  }
-
-  Future<void> _clearCaches() async {
-    await gallery.clearThumbnailCache();
-    await gallery.clearMediaCache();
   }
 
   @override
