@@ -271,21 +271,11 @@ class PrivateGallery {
     await _metadataStore.update([newMeta]);
   }
 
-  /// Clear all media cache. This is also called by [dispose].
-  Future<void> clearMediaCache() async {
-    await _mediaStore.clearCache();
-  }
-
-  /// Clear all thumbnail cache. This is also called by [dispose].
-  Future<void> clearThumbnailCache() async {
-    await _thumbnailStore.clearCache();
-  }
-
   /// Dispose of this object and all caches.
   Future<void> dispose() async {
     await _metadataStore.dispose();
-    await clearMediaCache();
-    await clearThumbnailCache();
+    await _mediaStore.clearCache();
+    await _thumbnailStore.clearCache();
   }
 }
 
