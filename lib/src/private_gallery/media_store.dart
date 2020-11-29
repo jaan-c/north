@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as pathlib;
 import 'package:path_provider/path_provider.dart';
 
 import 'file_store.dart';
@@ -34,8 +33,7 @@ class MediaStore with FileStore {
 
     return MediaStore._internal(key, (() async {
       appRoot ??= await getExternalStorageDirectory();
-      return Directory(pathlib.join(appRoot.path, _mediaDirName))
-          .create(recursive: true);
+      return appRoot.directory(_mediaDirName).create(recursive: true);
     })(), cacheDir);
   }
 }
