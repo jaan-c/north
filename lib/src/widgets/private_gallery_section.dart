@@ -49,7 +49,7 @@ class _PrivateGallerySectionState extends State<PrivateGallerySection> {
 
           return Padding(
             child: _albumGrid(snapshot.data),
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.all(8),
           );
         },
       ),
