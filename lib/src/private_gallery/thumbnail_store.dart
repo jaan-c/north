@@ -26,10 +26,6 @@ class ThumbnailStore with FileStore {
       {@required Uint8List key, Directory appRoot, Directory cacheRoot}) {
     final cacheDir = createCacheDir(_cacheDirName, cacheRoot: cacheRoot);
 
-    if (appRoot != null) {
-      return ThumbnailStore._internal(key, Future.value(appRoot), cacheDir);
-    }
-
     return ThumbnailStore._internal(key, (() async {
       appRoot ??= await getExternalStorageDirectory();
       return appRoot.directory(_thumbnailDirName).create(recursive: true);
