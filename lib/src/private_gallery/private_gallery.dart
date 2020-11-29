@@ -90,8 +90,10 @@ class PrivateGallery {
       Directory cacheRoot})
       : _metadataStore =
             MediaMetadataStore(shouldPersist: shouldPersistMetadata),
-        _mediaStore = MediaStore(key: key, appRoot: appRoot),
-        _thumbnailStore = ThumbnailStore(key: key, cacheRoot: cacheRoot);
+        _mediaStore =
+            MediaStore(key: key, appRoot: appRoot, cacheRoot: cacheRoot),
+        _thumbnailStore =
+            ThumbnailStore(key: key, appRoot: appRoot, cacheRoot: cacheRoot);
 
   /// Store [media] inside [album].
   ///
