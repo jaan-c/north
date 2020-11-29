@@ -16,12 +16,12 @@ class ThumbnailStore with FileStore {
   final Uint8List key;
 
   @override
-  final Future<Directory> futureMediaDir;
+  final Future<Directory> futureFileDir;
 
   @override
   final Future<Directory> futureCacheDir;
 
-  ThumbnailStore._internal(this.key, this.futureMediaDir, this.futureCacheDir);
+  ThumbnailStore._internal(this.key, this.futureFileDir, this.futureCacheDir);
 
   factory ThumbnailStore(
       {@required Uint8List key, Directory externalRoot, Directory cacheRoot}) {

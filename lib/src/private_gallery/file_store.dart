@@ -20,14 +20,14 @@ mixin FileStore {
   Uint8List get key;
 
   @protected
-  Future<Directory> get futureMediaDir;
+  Future<Directory> get futureFileDir;
 
   @protected
   Future<Directory> get futureCacheDir;
 
   Future<bool> has(Uuid id) async {
-    final mediaDir = await futureMediaDir;
-    return mediaDir.file(id.asString).exists();
+    final fileDir = await futureFileDir;
+    return fileDir.file(id.asString).exists();
   }
 
   CancelableFuture<void> put(Uuid id, File file) {
@@ -46,8 +46,8 @@ mixin FileStore {
       throw FileStoreException('File $id already exists.');
     }
 
-    final mediaDir = await futureMediaDir;
-    final outFile = mediaDir.file(id.asString);
+    final fileDir = await futureFileDir;
+    final outFile = fileDir.file(id.asString);
 
     final outSink = outFile.openWrite();
     final cipherStream = encryptStream(key, plainStream);
@@ -74,10 +74,10 @@ mixin FileStore {
       throw FileStoreException('File $id does not exist.');
     }
 
-    final mediaDir = await futureMediaDir;
+    final fileDir = await futureFileDir;
     final cacheDir = await futureCacheDir;
 
-    final cipherFile = mediaDir.file(id.asString);
+    final cipherFile = fileDir.file(id.asString);
     final cacheFile = await cacheDir.file(id.asString);
 
     if (await cacheFile.exists()) {
@@ -104,10 +104,10 @@ mixin FileStore {
   }
 
   Future<void> delete(Uuid id) async {
-    final mediaDir = await futureMediaDir;
+    final fileDir = await futureFileDir;
     final cacheDir = await futureCacheDir;
 
-    final cipherFile = mediaDir.file(id.asString);
+    final cipherFile = fileDir.file(id.asString);
     final cacheFile = await cacheDir.file(id.asString);
 
     await cipherFile.delete();
