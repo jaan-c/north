@@ -68,7 +68,7 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
     return ClipRRect(
       child: AspectRatio(
         aspectRatio: 1 / 1,
-        child: FittedBox(child: child, fit: BoxFit.cover),
+        child: child,
       ),
       borderRadius: BorderRadius.all(Radius.circular(16)),
     );
@@ -80,13 +80,19 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
       builder: (context, AsyncSnapshot<File> snapshot) {
         if (snapshot.hasError) {
           final textTheme = Theme.of(context).textTheme;
-          return Text('No thumbnail', style: textTheme.subtitle2);
+          return Center(
+            child: Text(
+              'No thumbnail',
+              style: textTheme.subtitle2,
+              textAlign: TextAlign.center,
+            ),
+          );
         }
 
         if (snapshot.hasData) {
-          return Image.file(snapshot.data);
+          return FittedBox(child: Image.file(snapshot.data));
         } else {
-          return CircularProgressIndicator(value: null);
+          return Center(child: CircularProgressIndicator(value: null));
         }
       },
     );
