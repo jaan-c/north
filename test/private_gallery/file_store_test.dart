@@ -14,7 +14,7 @@ class TestFileStore with FileStore {
   final Uint8List key;
 
   @override
-  final futureMediaDir = createTempDir();
+  final futureFileDir = createTempDir();
 
   @override
   final futureCacheDir = createTempDir();
@@ -35,7 +35,7 @@ void main() {
   });
 
   tearDown(() async {
-    await (await store.futureMediaDir).delete(recursive: true);
+    await (await store.futureFileDir).delete(recursive: true);
     await (await store.futureCacheDir).delete(recursive: true);
     await tempDir.delete(recursive: true);
   });
