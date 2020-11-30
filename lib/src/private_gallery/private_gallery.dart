@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:north/src/private_gallery/thumbnail_generator.dart';
 import 'package:path/path.dart' as pathlib;
+import 'package:path_provider/path_provider.dart';
 import 'package:quiver/check.dart';
 
 import 'cancelable_future.dart';
@@ -14,6 +15,7 @@ import 'media_metadata_store.dart';
 import 'media_store.dart';
 import 'thumbnail_store.dart';
 import 'uuid.dart';
+import 'file_system_utils.dart';
 
 enum MediaOrder { nameAscending, nameDescending, newest, oldest }
 
@@ -78,22 +80,54 @@ typedef ThumbnailGenerator = Future<List<int>> Function(File media);
 /// [cacheRoot] is [getExternalCacheDirectories]. If [shouldPersistMetadata] is
 /// false, metadata is only stored in memory.
 class PrivateGallery {
-  final ThumbnailGenerator thumbnailGenerator;
+  static const _mediaDirName = 'medias';
+  static const _thumbnailDirName = 'thumbnails';
+  static const _mediaCacheDirName = 'media_cache';
+  static const _thumbnailCacheDirName = 'thumbnail_cache';
+
+  static Future<PrivateGallery> instantiate(Uint8List key,
+      {ThumbnailGenerator thumbnailGenerator = generateThumbnail,
+      bool shouldPersistMetadata = true,
+      Directory appRoot,
+      Directory cacheRoot}) async {
+    appRoot ??= await getExternalStorageDirectory();
+    cacheRoot ??= (await getExternalCacheDirectories())
+        .firstWhere((dir) => pathlib.isWithin('/storage/emulated', dir.path));
+
+    final mediaDir =
+        await appRoot.directory(_mediaDirName).create(recursive: true);
+    final thumbnailDir =
+        await appRoot.directory(_thumbnailDirName).create(recursive: true);
+    final mediaCacheDir =
+        await cacheRoot.directory(_mediaCacheDirName).create(recursive: true);
+    final thumbnailCacheDir = await cacheRoot
+        .directory(_thumbnailCacheDirName)
+        .create(recursive: true);
+
+    return PrivateGallery._internal(
+        thumbnailGenerator: thumbnailGenerator,
+        metadataStore: await MediaMetadataStore.instantiate(
+            shouldPersist: shouldPersistMetadata),
+        mediaStore: await MediaStore(
+            key: key, mediaDir: mediaDir, cacheDir: mediaCacheDir),
+        thumbnailStore: await ThumbnailStore(
+            key: key, thumbnailDir: thumbnailDir, cacheDir: thumbnailCacheDir));
+  }
+
+  final ThumbnailGenerator _thumbnailGenerator;
   final MediaMetadataStore _metadataStore;
   final MediaStore _mediaStore;
   final ThumbnailStore _thumbnailStore;
 
-  PrivateGallery(Uint8List key,
-      {this.thumbnailGenerator = generateThumbnail,
-      bool shouldPersistMetadata = true,
-      Directory appRoot,
-      Directory cacheRoot})
-      : _metadataStore =
-            MediaMetadataStore(shouldPersist: shouldPersistMetadata),
-        _mediaStore =
-            MediaStore(key: key, appRoot: appRoot, cacheRoot: cacheRoot),
-        _thumbnailStore =
-            ThumbnailStore(key: key, appRoot: appRoot, cacheRoot: cacheRoot);
+  PrivateGallery._internal(
+      {@required ThumbnailGenerator thumbnailGenerator,
+      @required MediaMetadataStore metadataStore,
+      @required MediaStore mediaStore,
+      @required ThumbnailStore thumbnailStore})
+      : _thumbnailGenerator = thumbnailGenerator,
+        _metadataStore = metadataStore,
+        _mediaStore = mediaStore,
+        _thumbnailStore = thumbnailStore;
 
   /// Store [media] inside [album].
   ///
@@ -120,7 +154,7 @@ class PrivateGallery {
 
       state.checkIsCancelled();
 
-      final thumbnailBytes = await thumbnailGenerator(media);
+      final thumbnailBytes = await _thumbnailGenerator(media);
       await _thumbnailStore
           .putStream(id, Stream.fromIterable([thumbnailBytes]))
           .rebindState(state);
