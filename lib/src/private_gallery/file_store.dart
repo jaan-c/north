@@ -20,13 +20,12 @@ mixin FileStore {
   Uint8List get key;
 
   @protected
-  Future<Directory> get futureFileDir;
+  Directory get fileDir;
 
   @protected
-  Future<Directory> get futureCacheDir;
+  Directory get cacheDir;
 
   Future<bool> has(Uuid id) async {
-    final fileDir = await futureFileDir;
     return fileDir.file(id.asString).exists();
   }
 
@@ -46,7 +45,6 @@ mixin FileStore {
       throw FileStoreException('File $id already exists.');
     }
 
-    final fileDir = await futureFileDir;
     final outFile = fileDir.file(id.asString);
 
     final outSink = outFile.openWrite();
@@ -73,9 +71,6 @@ mixin FileStore {
     if (!await has(id)) {
       throw FileStoreException('File $id does not exist.');
     }
-
-    final fileDir = await futureFileDir;
-    final cacheDir = await futureCacheDir;
 
     final cipherFile = fileDir.file(id.asString);
     final cacheFile = await cacheDir.file(id.asString);
@@ -104,9 +99,6 @@ mixin FileStore {
   }
 
   Future<void> delete(Uuid id) async {
-    final fileDir = await futureFileDir;
-    final cacheDir = await futureCacheDir;
-
     final cipherFile = fileDir.file(id.asString);
     final cacheFile = await cacheDir.file(id.asString);
 
@@ -115,7 +107,6 @@ mixin FileStore {
   }
 
   Future<void> clearCache() async {
-    final cacheDir = await futureCacheDir;
     await cacheDir.delete(recursive: true);
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 import 'package:north/src/private_gallery/cancelable_future.dart';
@@ -14,12 +15,13 @@ class TestFileStore with FileStore {
   final Uint8List key;
 
   @override
-  final futureFileDir = createTempDir();
+  final Directory fileDir;
 
   @override
-  final futureCacheDir = createTempDir();
+  final Directory cacheDir;
 
-  TestFileStore(this.key);
+  TestFileStore(
+      {@required this.key, @required this.fileDir, @required this.cacheDir});
 }
 
 void main() {
@@ -30,13 +32,16 @@ void main() {
   Directory tempDir;
 
   setUp(() async {
-    store = TestFileStore(await deriveKey('Password', generateSalt()));
+    store = TestFileStore(
+        key: await deriveKey('Password', generateSalt()),
+        fileDir: await createTempDir('file_dir'),
+        cacheDir: await createTempDir('cache_dir'));
     tempDir = await createTempDir();
   });
 
   tearDown(() async {
-    await (await store.futureFileDir).delete(recursive: true);
-    await (await store.futureCacheDir).delete(recursive: true);
+    await store.fileDir.delete(recursive: true);
+    await store.cacheDir.delete(recursive: true);
     await tempDir.delete(recursive: true);
   });
 
