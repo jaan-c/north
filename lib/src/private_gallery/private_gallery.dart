@@ -316,6 +316,11 @@ class PrivateGallery {
 Future<MediaType> _getMediaType(File media) async {
   final header = await _readMediaHeader(media);
   final mime = lookupMimeType(media.path, headerBytes: header);
+  if (mime == null) {
+    throw PrivateGalleryException(
+        'Cannot determine mime type of ${media.path}.');
+  }
+
   if (mime.startsWith('image')) {
     return MediaType.image;
   } else if (mime.startsWith('video')) {
