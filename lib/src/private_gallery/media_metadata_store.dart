@@ -84,7 +84,6 @@ class _HiveInitializer {
     if (!_isInitialized) {
       await Hive.initFlutter();
       Hive.registerAdapter(UuidAdapter());
-      Hive.registerAdapter(MediaTypeAdapter());
       Hive.registerAdapter(MediaMetadataAdapter());
 
       _isInitialized = true;

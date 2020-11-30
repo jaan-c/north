@@ -6,45 +6,6 @@ part of 'media_metadata.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class MediaTypeAdapter extends TypeAdapter<MediaType> {
-  @override
-  final int typeId = 2;
-
-  @override
-  MediaType read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return MediaType.image;
-      case 1:
-        return MediaType.video;
-      default:
-        return null;
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, MediaType obj) {
-    switch (obj) {
-      case MediaType.image:
-        writer.writeByte(0);
-        break;
-      case MediaType.video:
-        writer.writeByte(1);
-        break;
-    }
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MediaTypeAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
   @override
   final int typeId = 3;
@@ -60,14 +21,13 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       album: fields[1] as String,
       name: fields[2] as String,
       storeDateTime: fields[3] as DateTime,
-      type: fields[4] as MediaType,
     );
   }
 
   @override
   void write(BinaryWriter writer, MediaMetadata obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -75,9 +35,7 @@ class MediaMetadataAdapter extends TypeAdapter<MediaMetadata> {
       ..writeByte(2)
       ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.storeDateTime)
-      ..writeByte(4)
-      ..write(obj.type);
+      ..write(obj.storeDateTime);
   }
 
   @override

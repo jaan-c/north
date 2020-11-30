@@ -6,15 +6,6 @@ import 'uuid.dart';
 
 part 'media_metadata.g.dart';
 
-@HiveType(typeId: 2)
-enum MediaType {
-  @HiveField(0)
-  image,
-
-  @HiveField(1)
-  video
-}
-
 @HiveType(typeId: 3)
 class MediaMetadata extends HiveObject {
   @HiveField(0)
@@ -29,15 +20,11 @@ class MediaMetadata extends HiveObject {
   @HiveField(3)
   final DateTime storeDateTime;
 
-  @HiveField(4)
-  final MediaType type;
-
   MediaMetadata(
       {@required this.id,
       @required String album,
       @required String name,
-      @required this.storeDateTime,
-      @required this.type})
+      @required this.storeDateTime})
       : assert(album.trim().isNotEmpty),
         assert(name.trim().isNotEmpty),
         album = album.trim(),
@@ -48,19 +35,14 @@ class MediaMetadata extends HiveObject {
       other is MediaMetadata && hashCode == other.hashCode;
 
   @override
-  int get hashCode => hashObjects([album, name, storeDateTime, type]);
+  int get hashCode => hash3(album, name, storeDateTime);
 
   MediaMetadata copy(
-      {Uuid id,
-      String album,
-      String name,
-      DateTime storeDateTime,
-      MediaType type}) {
+      {Uuid id, String album, String name, DateTime storeDateTime}) {
     return MediaMetadata(
         id: id ?? this.id,
         album: album ?? this.album,
         name: name ?? this.name,
-        storeDateTime: storeDateTime ?? this.storeDateTime,
-        type: type ?? this.type);
+        storeDateTime: storeDateTime ?? this.storeDateTime);
   }
 }

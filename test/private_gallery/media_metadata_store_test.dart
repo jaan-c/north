@@ -13,8 +13,7 @@ void main() {
         id: Uuid.generate(),
         album: 'Test Album',
         name: 'Test Media',
-        storeDateTime: DateTime(2020, 12, 25),
-        type: MediaType.image);
+        storeDateTime: DateTime(2020, 12, 25));
   });
 
   tearDown(() async {
@@ -44,33 +43,28 @@ void main() {
         id: Uuid.generate(),
         album: oldAlbum,
         name: 'Picture 1',
-        storeDateTime: DateTime.now(),
-        type: MediaType.image);
+        storeDateTime: DateTime.now());
     final oldMeta2 = MediaMetadata(
         id: Uuid.generate(),
         album: oldAlbum,
         name: 'Picture 2',
-        storeDateTime: DateTime.now(),
-        type: MediaType.video);
+        storeDateTime: DateTime.now());
     final oldMeta3 = MediaMetadata(
         id: Uuid.generate(),
         album: 'Static',
         name: 'Picture 3',
-        storeDateTime: DateTime.now(),
-        type: MediaType.image);
+        storeDateTime: DateTime.now());
 
     final newMeta1 = MediaMetadata(
         id: oldMeta1.id,
         album: newAlbum,
         name: oldMeta1.name,
-        storeDateTime: oldMeta1.storeDateTime,
-        type: oldMeta1.type);
+        storeDateTime: oldMeta1.storeDateTime);
     final newMeta2 = MediaMetadata(
         id: oldMeta2.id,
         album: newAlbum,
         name: oldMeta2.name,
-        storeDateTime: oldMeta2.storeDateTime,
-        type: oldMeta2.type);
+        storeDateTime: oldMeta2.storeDateTime);
 
     await store.put(oldMeta1);
     await store.put(oldMeta2);

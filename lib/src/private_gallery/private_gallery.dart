@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:mime/mime.dart';
 import 'package:north/src/private_gallery/thumbnail_generator.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:path_provider/path_provider.dart';
@@ -47,7 +46,6 @@ class Media {
   final Uuid id;
   final String name;
   final DateTime storeDateTime;
-  final MediaType type;
   final ThumbnailLoader thumbnailLoader;
   final MediaLoader mediaLoader;
 
@@ -55,7 +53,6 @@ class Media {
       {@required this.id,
       @required this.name,
       @required this.storeDateTime,
-      @required this.type,
       @required this.thumbnailLoader,
       @required this.mediaLoader});
 }
@@ -148,8 +145,7 @@ class PrivateGallery {
           id: id,
           album: album,
           name: pathlib.basename(media.path),
-          storeDateTime: DateTime.now(),
-          type: await _getMediaType(media));
+          storeDateTime: DateTime.now());
       await _metadataStore.put(meta);
 
       state.checkIsCancelled();
@@ -217,7 +213,6 @@ class PrivateGallery {
           id: meta.id,
           name: meta.name,
           storeDateTime: meta.storeDateTime,
-          type: meta.type,
           thumbnailLoader: thumbnailLoader,
           mediaLoader: mediaLoader);
 
@@ -310,33 +305,5 @@ class PrivateGallery {
     await _metadataStore.dispose();
     await _mediaStore.clearCache();
     await _thumbnailStore.clearCache();
-  }
-}
-
-Future<MediaType> _getMediaType(File media) async {
-  final header = await _readMediaHeader(media);
-  final mime = lookupMimeType(media.path, headerBytes: header);
-  if (mime == null) {
-    throw PrivateGalleryException(
-        'Cannot determine mime type of ${media.path}.');
-  }
-
-  if (mime.startsWith('image')) {
-    return MediaType.image;
-  } else if (mime.startsWith('video')) {
-    return MediaType.video;
-  } else {
-    throw PrivateGalleryException(
-        '${media.path} is neither an image or a video.');
-  }
-}
-
-Future<List<int>> _readMediaHeader(File media) async {
-  final ram = await media.open();
-  try {
-    final header = await ram.read(defaultMagicNumbersMaxLength);
-    return header;
-  } finally {
-    await ram.close();
   }
 }
