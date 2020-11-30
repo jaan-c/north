@@ -138,6 +138,10 @@ class PrivateGallery {
 
   Future<void> _putInStores(
       Uuid id, String album, File media, CancelState state) async {
+    if (await _metadataStore.has(id)) {
+      throw PrivateGalleryException('Media $id already exists.');
+    }
+
     try {
       state.checkIsCancelled();
 
