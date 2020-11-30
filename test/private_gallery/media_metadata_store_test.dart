@@ -7,8 +7,8 @@ void main() {
   MediaMetadataStore store;
   MediaMetadata metadata;
 
-  setUp(() {
-    store = MediaMetadataStore(shouldPersist: false);
+  setUp(() async {
+    store = await MediaMetadataStore.instantiate(shouldPersist: false);
     metadata = MediaMetadata(
         id: Uuid.generate(),
         album: 'Test Album',
