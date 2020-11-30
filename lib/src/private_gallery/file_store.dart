@@ -102,11 +102,25 @@ mixin FileStore {
     final cipherFile = fileDir.file(id.asString);
     final cacheFile = await cacheDir.file(id.asString);
 
-    await cipherFile.delete();
-    await cacheFile.delete();
+    await cipherFile.deleteOrNoop();
+    await cacheFile.deleteOrNoop();
   }
 
   Future<void> clearCache() async {
     await cacheDir.delete(recursive: true);
+  }
+}
+
+extension _DeleteOrNoop on File {
+  /// Delete this file. Noop if it already doesn't exist.
+  Future<void> deleteOrNoop({bool recursive = false}) async {
+    try {
+      await delete(recursive: recursive);
+    } on FileSystemException catch (e) {
+      // If not 'ENOENT: No such file or directory'.
+      if (e.osError.errorCode != 2) {
+        rethrow;
+      }
+    }
   }
 }
