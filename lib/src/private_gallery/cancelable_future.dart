@@ -65,8 +65,9 @@ class CancelableFuture<T> extends DelegatingFuture<T> {
     return CancelableFuture._internal(state, future);
   }
 
-  void rebindState(CancelState state) {
+  CancelableFuture<T> rebindState(CancelState state) {
     _state.state = state;
+    return this;
   }
 
   void cancel() {
