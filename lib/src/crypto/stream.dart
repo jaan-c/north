@@ -93,6 +93,7 @@ Future<void> _cryptoInIsolate(_CryptoArgs args) async {
   final channel = IsolateChannel.connectSend(args.sendPort);
   final inStream = channel.stream
       .takeWhileNotNull()
+      .rethrowErrorValue()
       .map((chunk) => Uint8List.fromList(chunk));
   Stream<Uint8List> outStream;
 
@@ -126,6 +127,16 @@ extension StreamSignal on Stream {
   /// Re-emit [this] up until a null is encountered.
   Stream takeWhileNotNull() async* {
     yield* takeWhile((value) => value != null);
+  }
+
+  Stream rethrowErrorValue() async* {
+    await for (final value in this) {
+      if (value is Exception || value is SodiumException) {
+        throw value;
+      }
+
+      yield value;
+    }
   }
 
   /// Emit encountered errors from [this] as the last value. Otherwise re-emit
