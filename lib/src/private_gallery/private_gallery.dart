@@ -128,16 +128,17 @@ class PrivateGallery {
 
   /// Store [media] inside [album].
   ///
-  /// Throws [PrivateGalleryException] if there is already a media with [id] or
-  /// [media] is neither an image or a video.
-  ///
-  /// Throws [CancelledException] if [CancelableFuture.cancel] is called.
+  /// Throws [ArgumentError] if album is empty. Throws [PrivateGalleryException]
+  /// if there is already a media with [id] or [media] is neither an image or a
+  /// video. Throws [CancelledException] if [CancelableFuture.cancel] is called.
   CancelableFuture<void> put(Uuid id, String album, File media) {
     return CancelableFuture((state) => _putInStores(id, album, media, state));
   }
 
   Future<void> _putInStores(
       Uuid id, String album, File media, CancelState state) async {
+    checkArgument(album.isNotEmpty, message: 'album is empty.');
+
     if (await _metadataStore.has(id)) {
       throw PrivateGalleryException('Media $id already exists.');
     }
