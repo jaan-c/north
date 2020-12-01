@@ -66,7 +66,7 @@ Stream<List<int>> _cryptoStream(
     }
 
     await cryptoResult;
-  } catch (e) {
+  } on SodiumException catch (e) {
     throw CryptoException(e.toString());
   } finally {
     receivePort.close();

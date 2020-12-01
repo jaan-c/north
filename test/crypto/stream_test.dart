@@ -49,15 +49,15 @@ void main() {
         throwsA(isInstanceOf<CryptoException>()));
   });
 
-  test('encryptStream and decryptStream handles error streams properly.',
+  test('encryptStream and decryptStream propagates errors from input stream.',
       () async {
     final errorStream = () => Stream<List<int>>.error(
         FileSystemException('Terrible things happened.'));
 
     await expectLater(encryptStream(key, errorStream()).collect(),
-        throwsA(isInstanceOf<CryptoException>()));
+        throwsA(isInstanceOf<FileSystemException>()));
     await expectLater(decryptStream(key, errorStream()).collect(),
-        throwsA(isInstanceOf<CryptoException>()));
+        throwsA(isInstanceOf<FileSystemException>()));
   });
 
   test('encryptStream cleans up properly on partial consumption.', () async {
