@@ -59,7 +59,7 @@ class CancelableFuture<T> extends DelegatingFuture<T> {
 
   CancelableFuture._internal(this._state, Future<T> future) : super(future);
 
-  factory CancelableFuture(CancelableComputation computation) {
+  factory CancelableFuture(CancelableComputation<T> computation) {
     final state = _CancelStateDelegate();
     final future = computation(state);
     return CancelableFuture._internal(state, future);
