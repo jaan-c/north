@@ -198,8 +198,8 @@ class PrivateGallery {
   ///
   /// This will create a cache of decrypted thumbnails for the returned medias.
   ///
-  /// Throws [ArgumentError] if [name] is empty or there is no album with
-  /// [name].
+  /// Throws [ArgumentError] if [name] is empty. Throws
+  /// [PrivateGalleryException] if album with [name] does not exist.
   Future<List<Media>> getMediasInAlbum(String name,
       {MediaOrder orderBy = MediaOrder.newest}) async {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
@@ -207,7 +207,9 @@ class PrivateGallery {
     final metas =
         await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
 
-    checkArgument(metas.isNotEmpty, message: 'Album "$name" does not exist.');
+    if (metas.isEmpty) {
+      throw PrivateGalleryException('Album $name does not exist.');
+    }
 
     final medias = <Media>[];
     for (final meta in metas) {
