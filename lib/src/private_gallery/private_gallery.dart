@@ -126,18 +126,19 @@ class PrivateGallery {
         _mediaStore = mediaStore,
         _thumbnailStore = thumbnailStore;
 
-  /// Store [media] inside [album].
+  /// Store [media] inside [albumName].
   ///
   /// Throws [ArgumentError] if album is empty. Throws [PrivateGalleryException]
   /// if there is already a media with [id] or [media] is neither an image or a
   /// video. Throws [CancelledException] if [CancelableFuture.cancel] is called.
-  CancelableFuture<void> put(Uuid id, String album, File media) {
-    return CancelableFuture((state) => _putInStores(id, album, media, state));
+  CancelableFuture<void> put(Uuid id, String albumName, File media) {
+    return CancelableFuture(
+        (state) => _putInStores(id, albumName, media, state));
   }
 
   Future<void> _putInStores(
-      Uuid id, String album, File media, CancelState state) async {
-    checkArgument(album.isNotEmpty, message: 'album is empty.');
+      Uuid id, String albumName, File media, CancelState state) async {
+    checkArgument(albumName.isNotEmpty, message: 'album is empty.');
 
     if (await _metadataStore.has(id)) {
       throw PrivateGalleryException('Media $id already exists.');
@@ -148,7 +149,7 @@ class PrivateGallery {
 
       final meta = MediaMetadata(
           id: id,
-          album: album,
+          album: albumName,
           name: pathlib.basename(media.path),
           storeDateTime: DateTime.now());
       await _metadataStore.put(meta);
