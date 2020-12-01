@@ -17,8 +17,7 @@ void main() {
       () async {
     final inner = CancelableFuture(infinity);
     final wrapper = CancelableFuture((state) async {
-      inner.rebindState(state);
-      return inner;
+      return inner.rebindState(state);
     });
     wrapper.cancel();
 
