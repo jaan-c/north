@@ -6,9 +6,9 @@ import 'package:north/src/private_gallery/thumbnail_generator.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:path_provider/path_provider.dart';
 import 'package:quiver/check.dart';
+import 'package:quiver/core.dart';
 
 import 'cancelable_future.dart';
-import 'loader.dart';
 import 'media_metadata.dart';
 import 'media_metadata_store.dart';
 import 'media_store.dart';
@@ -37,24 +37,31 @@ extension _MediaOrderAsComparator on MediaOrder {
 
 class Album {
   final String name;
-  final ThumbnailLoader thumbnailLoader;
+  final int mediaCount;
 
-  Album({@required this.name, @required this.thumbnailLoader});
+  Album(this.name, this.mediaCount);
+
+  @override
+  bool operator ==(dynamic other) =>
+      other is Album && hashCode == other.hashCode;
+
+  @override
+  int get hashCode => hash2(name, mediaCount);
 }
 
 class Media {
   final Uuid id;
   final String name;
   final DateTime storeDateTime;
-  final ThumbnailLoader thumbnailLoader;
-  final MediaLoader mediaLoader;
 
-  Media(
-      {@required this.id,
-      @required this.name,
-      @required this.storeDateTime,
-      @required this.thumbnailLoader,
-      @required this.mediaLoader});
+  Media(this.id, this.name, this.storeDateTime);
+
+  @override
+  bool operator ==(dynamic other) =>
+      other is Media && hashCode == other.hashCode;
+
+  @override
+  int get hashCode => hash3(id, name, storeDateTime);
 }
 
 class PrivateGalleryException implements Exception {
@@ -176,24 +183,13 @@ class PrivateGallery {
   Future<List<Album>> getAllAlbums() async {
     final albums = <Album>[];
     for (final albumName in await _metadataStore.getAlbumNames()) {
-      final thumbnailLoader = await _getThumbnailLoaderOfAlbum(albumName);
-      final album = Album(name: albumName, thumbnailLoader: thumbnailLoader);
+      final metas = await _metadataStore.getByAlbum(albumName);
+      final album = Album(albumName, metas.length);
 
       albums.add(album);
     }
 
     return albums;
-  }
-
-  Future<ThumbnailLoader> _getThumbnailLoaderOfAlbum(String name) async {
-    final newestMeta = await _getNewestMetaOfAlbum(name);
-    return ThumbnailLoader(newestMeta.id, _thumbnailStore);
-  }
-
-  Future<MediaMetadata> _getNewestMetaOfAlbum(String name) async {
-    final all = await _metadataStore.getByAlbum(name,
-        sortBy: MediaOrder.newest.asComparator);
-    return all.first;
   }
 
   /// Get [Media]s of album sorted by [orderBy].
@@ -202,7 +198,7 @@ class PrivateGallery {
   ///
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
-  Future<List<Media>> getMediasInAlbum(String name,
+  Future<List<Media>> getMediasOfAlbum(String name,
       {MediaOrder orderBy = MediaOrder.newest}) async {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
@@ -211,23 +207,33 @@ class PrivateGallery {
 
     if (metas.isEmpty) {
       throw PrivateGalleryException('Album $name does not exist.');
+    } else {
+      return metas.map((m) => Media(m.id, m.name, m.storeDateTime)).toList();
     }
+  }
 
-    final medias = <Media>[];
-    for (final meta in metas) {
-      final thumbnailLoader = ThumbnailLoader(meta.id, _thumbnailStore);
-      final mediaLoader = MediaLoader(meta.id, _mediaStore);
-      final media = Media(
-          id: meta.id,
-          name: meta.name,
-          storeDateTime: meta.storeDateTime,
-          thumbnailLoader: thumbnailLoader,
-          mediaLoader: mediaLoader);
+  /// Return the decrypted thumbnail of album with [name] as a cached [File].
+  Future<File> loadAlbumThumbnail(String name) async {
+    checkArgument(name.isNotEmpty, message: 'name is empty.');
 
-      medias.add(media);
-    }
+    final newestMeta = await _getNewestMetaOfAlbum(name);
+    return _thumbnailStore.get(newestMeta.id);
+  }
 
-    return medias;
+  Future<MediaMetadata> _getNewestMetaOfAlbum(String name) async {
+    final all = await _metadataStore.getByAlbum(name,
+        sortBy: MediaOrder.newest.asComparator);
+    return all.first;
+  }
+
+  /// Return the decrypted thumbnail of media with [id] as a cached [File].
+  Future<File> loadMediaThumbnail(Uuid id) async {
+    return _thumbnailStore.get(id);
+  }
+
+  /// Return the decrypted media with [id] as cached [File].
+  CancelableFuture<File> loadMedia(Uuid id) {
+    return _mediaStore.get(id);
   }
 
   /// Delete media with [id].

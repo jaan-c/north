@@ -66,7 +66,7 @@ void main() {
 
     await expectLater(future, throwsCancelledException);
     await expectLater(
-        gallery.getMediasInAlbum('Album'), throwsPrivateGalleryException);
+        gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
   });
 
   test('getAllAlbums returns an empty list when there are no albums.',
@@ -85,19 +85,6 @@ void main() {
 
     final albums = await gallery.getAllAlbums();
     expect(albums.map((a) => a.name).toList(), equals(['A', 'B', 'C']));
-
-    await expectLater(albums[0].thumbnailLoader.loadAsBytes(),
-        completion(equals(dummyThumbnailContent)));
-    await expectLater(albums[1].thumbnailLoader.loadAsBytes(),
-        completion(equals(dummyThumbnailContent)));
-    await expectLater(albums[2].thumbnailLoader.loadAsBytes(),
-        completion(equals(dummyThumbnailContent)));
+    expect(albums.map((a) => a.mediaCount).toList(), equals([1, 1, 1]));
   });
-}
-
-extension LoadAsBytes on ThumbnailLoader {
-  Future<List<int>> loadAsBytes() async {
-    final file = await load();
-    return file.readAsBytes();
-  }
 }
