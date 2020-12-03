@@ -315,6 +315,12 @@ class PrivateGallery {
     checkArgument(destinationAlbum.isNotEmpty,
         message: 'destinationAlbum is empty');
 
+    final allAlbums = await _metadataStore.getAlbumNames();
+    if (!await allAlbums.contains(destinationAlbum)) {
+      throw PrivateGalleryException(
+          'Moving media $id to non-existent destination album $destinationAlbum.');
+    }
+
     MediaMetadata oldMeta;
     try {
       oldMeta = await _metadataStore.get(id);
