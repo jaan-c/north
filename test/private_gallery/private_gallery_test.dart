@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 import 'package:north/private_gallery.dart';
@@ -272,5 +273,33 @@ void main() {
         gallery.getMediasOfAlbum(newAlbum), completion(hasLength(1)));
     await expectLater(
         gallery.getMediasOfAlbum('album'), completion(hasLength(1)));
+  });
+
+  test('renameMedia throws ArgumentError on empty name.', () async {
+    await expectLater(
+        gallery.renameMedia(Uuid.generate(), ''), throwsArgumentError);
+  });
+
+  test('renameMedia throws PrivateGalleryException on non-existent id.',
+      () async {
+    await expectLater(gallery.renameMedia(Uuid.generate(), 'NewName'),
+        throwsPrivateGalleryException);
+  });
+
+  test('renameMedia renames media with id to newName.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    final firstId = Uuid.generate();
+    final secondId = Uuid.generate();
+    await gallery.put(firstId, 'Album', media);
+    await gallery.put(secondId, 'Album', media);
+
+    await expectLater(gallery.renameMedia(firstId, 'NewName'), completes);
+
+    final medias = await gallery.getMediasOfAlbum('Album',
+        comparator: MediaOrder.nameAscending);
+    expect(medias[0].name, 'NewName');
+    expect(medias[1].name, pathlib.basename(media.path));
   });
 }
