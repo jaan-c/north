@@ -326,7 +326,8 @@ class PrivateGallery {
     try {
       oldMeta = await _metadataStore.get(id);
     } on MediaMetadataStoreException catch (_) {
-      throw ArgumentError('No media with id $id.');
+      throw PrivateGalleryException(
+          'Moving a non-existent media $id to album $destinationAlbum.');
     }
     final newMeta = oldMeta.copy(album: destinationAlbum);
 
