@@ -302,4 +302,53 @@ void main() {
     expect(medias[0].name, 'NewName');
     expect(medias[1].name, pathlib.basename(media.path));
   });
+
+  test('moveMediaToAlbum throws ArgumentError on empty destination album.',
+      () async {
+    await expectLater(
+        gallery.moveMediaToAlbum(Uuid.generate(), ''), throwsArgumentError);
+  });
+
+  test('moveMediaToAlbum throws PrivateGalleryException on non-existent id.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.put(Uuid.generate(), 'DestinationAlbum', media);
+
+    await expectLater(
+        gallery.moveMediaToAlbum(Uuid.generate(), 'DestinationAlbum'),
+        throwsPrivateGalleryException);
+  });
+
+  test(
+      'moveMediaToAlbum throws PrivateGalleryException on non-existent destination album.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    await expectLater(gallery.moveMediaToAlbum(id, 'NonExistent'),
+        throwsPrivateGalleryException);
+  });
+
+  test('moveMediaToAlbum moves media with id to destination album.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(Uuid.generate(), 'DestinationAlbum', media);
+    await gallery.put(id, 'Album', media);
+
+    await expectLater(
+        gallery.getMediasOfAlbum('DestinationAlbum'), completion(hasLength(1)));
+    await expectLater(
+        gallery.moveMediaToAlbum(id, 'DestinationAlbum'), completes);
+
+    final medias = await gallery.getMediasOfAlbum('DestinationAlbum');
+    expect(medias, hasLength(2));
+    expect(medias.map((m) => m.id).toList(), contains(id));
+  });
 }
