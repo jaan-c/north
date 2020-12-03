@@ -332,9 +332,9 @@ class PrivateGallery {
 
     if (oldMeta.album == destinationAlbum) {
       return;
+    } else {
+      await _metadataStore.update([newMeta]);
     }
-
-    await _metadataStore.update([newMeta]);
   }
 
   /// Dispose of this object and all caches.
