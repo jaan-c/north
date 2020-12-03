@@ -139,14 +139,13 @@ class PrivateGallery {
   /// Throws [ArgumentError] if album is empty. Throws [CancelledException] if
   /// [CancelableFuture.cancel] is called.
   CancelableFuture<void> put(Uuid id, String albumName, File media) {
-    _checkIsDisposed();
-
     return CancelableFuture(
         (state) => _putInStores(id, albumName, media, state));
   }
 
   Future<void> _putInStores(
       Uuid id, String albumName, File media, CancelState state) async {
+    _checkIsDisposed();
     checkArgument(albumName.isNotEmpty, message: 'album is empty.');
 
     if (await _metadataStore.has(id)) {
