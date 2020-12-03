@@ -70,6 +70,19 @@ void main() {
         gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
   });
 
+  test('put places media under app root.', () async {
+    final id = Uuid.generate();
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.put(id, 'Album', media);
+
+    final descendants = await tempAppRoot.list(recursive: true).toList();
+    final encryptedFile =
+        descendants.firstWhere((e) => pathlib.basename(e.path) == id.asString);
+    await expectLater(encryptedFile, isInstanceOf<File>());
+  });
+
   test('getAllAlbums returns an empty list when there are no albums.',
       () async {
     await expectLater(gallery.getAllAlbums(), completion(equals([])));
