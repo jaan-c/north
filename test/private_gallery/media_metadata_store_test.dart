@@ -63,8 +63,8 @@ void main() {
     final newMeta2 = MediaMetadata(
         id: oldMeta2.id,
         album: newAlbum,
-        name: oldMeta2.name,
-        storeDateTime: oldMeta2.storeDateTime);
+        name: 'Picture 200',
+        storeDateTime: DateTime.now());
 
     await store.put(oldMeta1);
     await store.put(oldMeta2);
