@@ -298,7 +298,7 @@ class PrivateGallery {
     try {
       oldMeta = await _metadataStore.get(id);
     } on MediaMetadataStoreException catch (_) {
-      throw ArgumentError('No media with id $id.');
+      throw PrivateGalleryException('Renaming a non-existent media $id.');
     }
     final newMeta = oldMeta.copy(name: newName);
 
