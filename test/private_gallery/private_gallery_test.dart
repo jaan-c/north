@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 import 'package:north/private_gallery.dart';
+import 'package:path/path.dart' as pathlib;
 
 import '../utils.dart';
 
@@ -121,5 +122,45 @@ void main() {
     final medias = await gallery.getMediasOfAlbum('A');
     expect(
         medias.map((m) => m.id).toList(), equals([thirdId, secondId, firstId]));
+  });
+
+  test('loadAlbumThumbnail throws ArgumentError on empty name.', () async {
+    await expectLater(gallery.loadAlbumThumbnail(''), throwsArgumentError);
+  });
+
+  test(
+      'loadAlbumThumbnail throws PrivateGalleryException on non-existent album.',
+      () async {
+    await expectLater(gallery.loadAlbumThumbnail('NonExistent'),
+        throwsPrivateGalleryException);
+  });
+
+  test('loadAlbumThumbnail returns a file in cache root.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.put(Uuid.generate(), 'Album', media);
+
+    final thumbnail = await gallery.loadAlbumThumbnail('Album');
+    await expectLater(
+        pathlib.isWithin(tempCacheRoot.path, thumbnail.path), isTrue);
+  });
+
+  test('loadMediaThumbnail throws PrivateGalleryException on non-existent id.',
+      () async {
+    await expectLater(gallery.loadMediaThumbnail(Uuid.generate()),
+        throwsPrivateGalleryException);
+  });
+
+  test('loadMediaThumbnail returns a file in cache root.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    final thumbnail = await gallery.loadMediaThumbnail(id);
+    await expectLater(
+        pathlib.isWithin(tempCacheRoot.path, thumbnail.path), isTrue);
   });
 }
