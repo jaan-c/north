@@ -262,7 +262,9 @@ class PrivateGallery {
   /// Rename album with [oldName] to [newName].
   ///
   /// Throws [ArgumentError] if [oldName] or [newName] is empty or if there is
-  /// no album named [oldName].
+  /// no album named [oldName]. Throws [PrivateGalleryException] if album named
+  /// [oldName] does not exist or if renaming to an already existing album named
+  /// [newName].
   Future<void> renameAlbum(String oldName, String newName) async {
     checkArgument(oldName.isNotEmpty, message: 'oldName is empty.');
     checkArgument(newName.isNotEmpty, message: 'newName is empty.');
