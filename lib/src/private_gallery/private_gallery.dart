@@ -267,7 +267,13 @@ class PrivateGallery {
     checkArgument(oldName.isNotEmpty, message: 'oldName is empty.');
     checkArgument(newName.isNotEmpty, message: 'newName is empty.');
 
-    if (oldName == newName) {
+    final allAlbums = await _metadataStore.getAlbumNames();
+    if (!allAlbums.contains(oldName)) {
+      throw PrivateGalleryException('Renaming a non-existent album $oldName.');
+    } else if (allAlbums.contains(newName)) {
+      throw PrivateGalleryException(
+          'Renaming album $oldName to an already existing album $newName.');
+    } else if (oldName == newName) {
       return;
     }
 
