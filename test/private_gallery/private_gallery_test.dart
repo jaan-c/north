@@ -205,4 +205,27 @@ void main() {
 
     await expectLater(result, throwsCancelledException);
   });
+
+  test('delete is noop on non-existent id.', () async {
+    await expectLater(gallery.delete(Uuid.generate()), completes);
+  });
+
+  test(
+      'delete removes media with id and album it is in if it is the only item.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    final firstId = Uuid.generate();
+    final secondId = Uuid.generate();
+    await gallery.put(firstId, 'Album', media);
+    await gallery.put(secondId, 'Album', media);
+
+    await expectLater(gallery.delete(firstId), completes);
+    await expectLater(
+        gallery.getMediasOfAlbum('Album'), completion(isNotEmpty));
+    await expectLater(gallery.delete(secondId), completes);
+    await expectLater(
+        gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
+  });
 }

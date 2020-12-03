@@ -248,8 +248,8 @@ class PrivateGallery {
 
   /// Delete media with [id].
   ///
-  /// If the album the media is contained in only has this media, it is also
-  /// deleted.
+  /// Noop if [id] does not exist. If the album the media is contained in only
+  /// has this media, it is also deleted.
   Future<void> delete(Uuid id) async {
     final metaResult = _metadataStore.delete(id);
     final thumbnailResult = _thumbnailStore.delete(id);
