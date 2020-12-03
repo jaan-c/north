@@ -227,6 +227,10 @@ class PrivateGallery {
   ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
   Future<File> loadMediaThumbnail(Uuid id) async {
+    if (!await _metadataStore.has(id)) {
+      throw PrivateGalleryException('Media $id does not exist.');
+    }
+
     return _thumbnailStore.get(id);
   }
 
