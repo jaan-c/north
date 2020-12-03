@@ -194,4 +194,15 @@ void main() {
     await expectLater(
         pathlib.isWithin(tempCacheRoot.path, cachedMedia.path), isTrue);
   });
+
+  test('loadMedia throws CanceledException on cancel.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    final result = gallery.put(id, 'Album', media);
+    result.cancel();
+
+    await expectLater(result, throwsCancelledException);
+  });
 }
