@@ -135,7 +135,7 @@ void main() {
         throwsPrivateGalleryException);
   });
 
-  test('loadAlbumThumbnail returns a file in cache root.', () async {
+  test('loadAlbumThumbnail returns a file under cache root.', () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
 
@@ -152,7 +152,7 @@ void main() {
         throwsPrivateGalleryException);
   });
 
-  test('loadMediaThumbnail returns a file in cache root.', () async {
+  test('loadMediaThumbnail returns a file under cache root.', () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
     final id = Uuid.generate();
@@ -162,5 +162,23 @@ void main() {
     final thumbnail = await gallery.loadMediaThumbnail(id);
     await expectLater(
         pathlib.isWithin(tempCacheRoot.path, thumbnail.path), isTrue);
+  });
+
+  test('loadMedia throws PrivateGalleryException on non-existent id.',
+      () async {
+    await expectLater(
+        gallery.loadMedia(Uuid.generate()), throwsPrivateGalleryException);
+  });
+
+  test('loadMedia returns a file under cache root.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    final cachedMedia = await gallery.loadMedia(id);
+    await expectLater(
+        pathlib.isWithin(tempCacheRoot.path, cachedMedia.path), isTrue);
   });
 }
