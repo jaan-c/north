@@ -309,8 +309,9 @@ class PrivateGallery {
 
   /// Move media with [id] to [destinationAlbum].
   ///
-  /// Throws [ArgumentError] if [destinationAlbum] is empty or there is no media
-  /// with [id].
+  /// Throws [ArgumentError] if [destinationAlbum] is empty. Throws
+  /// [PrivateGalleryException] if either [id] or [destinationAlbum] does not
+  /// exist.
   Future<void> moveMediaToAlbum(Uuid id, String destinationAlbum) async {
     checkArgument(destinationAlbum.isNotEmpty,
         message: 'destinationAlbum is empty');
