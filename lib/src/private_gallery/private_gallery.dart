@@ -272,7 +272,7 @@ class PrivateGallery {
     }
 
     final oldMetas = await _metadataStore.getByAlbum(oldName);
-    final newMetas = oldMetas.map((m) => m.copy(album: newName));
+    final newMetas = oldMetas.map((m) => m.copy(album: newName)).toList();
 
     checkArgument(oldMetas.isNotEmpty, message: 'No album named $oldName.');
 
