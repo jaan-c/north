@@ -302,9 +302,9 @@ class PrivateGallery {
 
     if (oldMeta.name == newMeta.name) {
       return;
+    } else {
+      await _metadataStore.update([newMeta]);
     }
-
-    await _metadataStore.update([newMeta]);
   }
 
   /// Move media with [id] to [destinationAlbum].
