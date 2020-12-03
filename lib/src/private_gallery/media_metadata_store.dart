@@ -58,15 +58,15 @@ class MediaMetadataStore {
     return _box.values.where((m) => m.album == name).toList();
   }
 
+  Future<void> delete(Uuid id) async {
+    await _box.delete(id.asString);
+  }
+
   Future<void> update(List<MediaMetadata> metadatas) async {
     final entries =
         Map.fromEntries(metadatas.map((m) => MapEntry(m.id.asString, m)));
 
     await _box.putAll(entries);
-  }
-
-  Future<void> delete(Uuid id) async {
-    await _box.delete(id.asString);
   }
 
   Future<void> dispose() async {
