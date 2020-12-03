@@ -134,9 +134,8 @@ class PrivateGallery {
 
   /// Store [media] inside [albumName].
   ///
-  /// Throws [ArgumentError] if album is empty. Throws [PrivateGalleryException]
-  /// if there is already a media with [id] or [media] is neither an image or a
-  /// video. Throws [CancelledException] if [CancelableFuture.cancel] is called.
+  /// Throws [ArgumentError] if album is empty. Throws [CancelledException] if
+  /// [CancelableFuture.cancel] is called.
   CancelableFuture<void> put(Uuid id, String albumName, File media) {
     return CancelableFuture(
         (state) => _putInStores(id, albumName, media, state));
