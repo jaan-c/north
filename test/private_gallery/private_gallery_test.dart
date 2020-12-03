@@ -87,4 +87,39 @@ void main() {
     expect(albums.map((a) => a.name).toList(), equals(['A', 'B', 'C']));
     expect(albums.map((a) => a.mediaCount).toList(), equals([1, 1, 1]));
   });
+
+  test('getMediasOfAlbum throws ArgumentError on empty name.', () async {
+    await expectLater(gallery.getMediasOfAlbum(''), throwsArgumentError);
+  });
+
+  test('getMediasOfAlbum throws PrivateGalleryException on non-existent album.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.put(Uuid.generate(), 'Album', media);
+
+    await expectLater(gallery.getMediasOfAlbum('Non Existent'),
+        throwsPrivateGalleryException);
+  });
+
+  test(
+      'getMediasOfAlbum only retrieves media inside passed album sorted by comparator.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    final firstId = Uuid.generate();
+    final secondId = Uuid.generate();
+    final thirdId = Uuid.generate();
+    await gallery.put(firstId, 'A', media);
+    await gallery.put(secondId, 'A', media);
+    await gallery.put(thirdId, 'A', media);
+    await gallery.put(Uuid.generate(), 'B', media);
+    await gallery.put(Uuid.generate(), 'B', media);
+
+    final medias = await gallery.getMediasOfAlbum('A');
+    expect(
+        medias.map((m) => m.id).toList(), equals([thirdId, secondId, firstId]));
+  });
 }
