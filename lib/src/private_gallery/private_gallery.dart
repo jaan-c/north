@@ -234,8 +234,16 @@ class PrivateGallery {
   }
 
   /// Return the decrypted media with [id] as cached [File].
+  ///
+  /// Throws [PrivateGalleryException] if [id] does not exist.
   CancelableFuture<File> loadMedia(Uuid id) {
-    return _mediaStore.get(id);
+    return CancelableFuture((state) async {
+      if (!await _metadataStore.has(id)) {
+        throw PrivateGalleryException('Media $id does not exist.');
+      }
+
+      return _mediaStore.get(id).rebindState(state);
+    });
   }
 
   /// Delete media with [id].
