@@ -215,14 +215,9 @@ class PrivateGallery {
   Future<File> loadAlbumThumbnail(String name) async {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
-    final newestMeta = await _getNewestMetaOfAlbum(name);
-    return _thumbnailStore.get(newestMeta.id);
-  }
-
-  Future<MediaMetadata> _getNewestMetaOfAlbum(String name) async {
-    final all = await _metadataStore.getByAlbum(name,
-        sortBy: MediaOrder.newest.asComparator);
-    return all.first;
+    final newestMedia =
+        (await getMediasOfAlbum(name, comparator: MediaOrder.newest)).first;
+    return _thumbnailStore.get(newestMedia.id);
   }
 
   /// Return the decrypted thumbnail of media with [id] as a cached [File].
