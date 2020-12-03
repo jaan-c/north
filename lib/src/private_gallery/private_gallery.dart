@@ -122,6 +122,8 @@ class PrivateGallery {
   final MediaStore _mediaStore;
   final ThumbnailStore _thumbnailStore;
 
+  var _isDisposed = false;
+
   PrivateGallery._internal(
       {@required ThumbnailGenerator thumbnailGenerator,
       @required MediaMetadataStore metadataStore,
@@ -137,6 +139,8 @@ class PrivateGallery {
   /// Throws [ArgumentError] if album is empty. Throws [CancelledException] if
   /// [CancelableFuture.cancel] is called.
   CancelableFuture<void> put(Uuid id, String albumName, File media) {
+    _checkIsDisposed();
+
     return CancelableFuture(
         (state) => _putInStores(id, albumName, media, state));
   }
@@ -179,6 +183,8 @@ class PrivateGallery {
   ///
   /// This will create a cache of decrypted thumbnails for the returned albums.
   Future<List<Album>> getAllAlbums() async {
+    _checkIsDisposed();
+
     final albums = <Album>[];
     for (final albumName in await _metadataStore.getAlbumNames()) {
       final metas = await _metadataStore.getByAlbum(albumName);
@@ -198,6 +204,7 @@ class PrivateGallery {
   /// [PrivateGalleryException] if album with [name] does not exist.
   Future<List<Media>> getMediasOfAlbum(String name,
       {Comparator<Media> comparator = MediaOrder.newest}) async {
+    _checkIsDisposed();
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
     final metas = await _metadataStore.getByAlbum(name);
@@ -215,6 +222,7 @@ class PrivateGallery {
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
   Future<File> loadAlbumThumbnail(String name) async {
+    _checkIsDisposed();
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
     final newestMedia =
@@ -226,6 +234,8 @@ class PrivateGallery {
   ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
   Future<File> loadMediaThumbnail(Uuid id) async {
+    _checkIsDisposed();
+
     if (!await _metadataStore.has(id)) {
       throw PrivateGalleryException('Media $id does not exist.');
     }
@@ -237,6 +247,8 @@ class PrivateGallery {
   ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
   CancelableFuture<File> loadMedia(Uuid id) {
+    _checkIsDisposed();
+
     return CancelableFuture((state) async {
       if (!await _metadataStore.has(id)) {
         throw PrivateGalleryException('Media $id does not exist.');
@@ -251,6 +263,8 @@ class PrivateGallery {
   /// Noop if [id] does not exist. If the album the media is contained in only
   /// has this media, it is also deleted.
   Future<void> delete(Uuid id) async {
+    _checkIsDisposed();
+
     final metaResult = _metadataStore.delete(id);
     final thumbnailResult = _thumbnailStore.delete(id);
     final mediaResult = _mediaStore.delete(id);
@@ -266,6 +280,7 @@ class PrivateGallery {
   /// [oldName] does not exist or if renaming to an already existing album named
   /// [newName].
   Future<void> renameAlbum(String oldName, String newName) async {
+    _checkIsDisposed();
     checkArgument(oldName.isNotEmpty, message: 'oldName is empty.');
     checkArgument(newName.isNotEmpty, message: 'newName is empty.');
 
@@ -290,6 +305,7 @@ class PrivateGallery {
   /// Throws [ArgumentError] if [newName] is empty or or there is no media with
   /// [id].
   Future<void> renameMedia(Uuid id, String newName) async {
+    _checkIsDisposed();
     checkArgument(newName.isNotEmpty, message: 'newName is empty');
 
     MediaMetadata oldMeta;
@@ -313,6 +329,7 @@ class PrivateGallery {
   /// [PrivateGalleryException] if either [id] or [destinationAlbum] does not
   /// exist.
   Future<void> moveMediaToAlbum(Uuid id, String destinationAlbum) async {
+    _checkIsDisposed();
     checkArgument(destinationAlbum.isNotEmpty,
         message: 'destinationAlbum is empty');
 
@@ -338,10 +355,20 @@ class PrivateGallery {
     }
   }
 
+  void _checkIsDisposed() {
+    if (_isDisposed) {
+      throw PrivateGalleryException('This instance is already disposed.');
+    }
+  }
+
   /// Dispose of this object and all caches.
   Future<void> dispose() async {
-    await _metadataStore.dispose();
-    await _mediaStore.clearCache();
-    await _thumbnailStore.clearCache();
+    if (!_isDisposed) {
+      await _metadataStore.dispose();
+      await _mediaStore.clearCache();
+      await _thumbnailStore.clearCache();
+
+      _isDisposed = true;
+    }
   }
 }
