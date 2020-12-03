@@ -351,4 +351,15 @@ void main() {
     expect(medias, hasLength(2));
     expect(medias.map((m) => m.id).toList(), contains(id));
   });
+
+  test('dispose prevents further method calls.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.dispose();
+
+    await expectLater(gallery.put(Uuid.generate(), 'Album', media),
+        throwsPrivateGalleryException);
+    await expectLater(gallery.getAllAlbums(), throwsPrivateGalleryException);
+  });
 }
