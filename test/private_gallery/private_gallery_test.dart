@@ -228,4 +228,49 @@ void main() {
     await expectLater(
         gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
   });
+
+  test(
+      'renameAlbum throws ArgumentError if either oldName and newName is empty.',
+      () async {
+    await expectLater(gallery.renameAlbum('', 'newName'), throwsArgumentError);
+    await expectLater(gallery.renameAlbum('oldName', ''), throwsArgumentError);
+  });
+
+  test(
+      'renameAlbum throws PrivateGalleryException if album with oldName does not exist.',
+      () async {
+    await expectLater(gallery.renameAlbum('NonExistent', 'NewName'),
+        throwsPrivateGalleryException);
+  });
+
+  test(
+      'renameAlbum throws PrivateGalleryException if album with newName already exists.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await gallery.put(Uuid.generate(), 'Album', media);
+    await gallery.put(Uuid.generate(), 'AlreadyExists', media);
+
+    await expectLater(gallery.renameAlbum('Album', 'AlreadyExists'),
+        throwsPrivateGalleryException);
+  });
+
+  test('renameAlbum renames album with oldName to newName.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final oldAlbum = 'Album';
+    final newAlbum = 'Album 2';
+
+    await gallery.put(Uuid.generate(), oldAlbum, media);
+    await gallery.put(Uuid.generate(), 'album', media);
+
+    await expectLater(gallery.renameAlbum(oldAlbum, newAlbum), completes);
+    await expectLater(
+        gallery.getMediasOfAlbum(oldAlbum), throwsPrivateGalleryException);
+    await expectLater(
+        gallery.getMediasOfAlbum(newAlbum), completion(hasLength(1)));
+    await expectLater(
+        gallery.getMediasOfAlbum('album'), completion(hasLength(1)));
+  });
 }
