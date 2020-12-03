@@ -212,6 +212,9 @@ class PrivateGallery {
   }
 
   /// Return the decrypted thumbnail of album with [name] as a cached [File].
+  ///
+  /// Throws [ArgumentError] if [name] is empty. Throws
+  /// [PrivateGalleryException] if album with [name] does not exist.
   Future<File> loadAlbumThumbnail(String name) async {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
@@ -221,6 +224,8 @@ class PrivateGallery {
   }
 
   /// Return the decrypted thumbnail of media with [id] as a cached [File].
+  ///
+  /// Throws [PrivateGalleryException] if [id] does not exist.
   Future<File> loadMediaThumbnail(Uuid id) async {
     return _thumbnailStore.get(id);
   }
