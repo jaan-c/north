@@ -54,11 +54,8 @@ class MediaMetadataStore {
     return _box.values.map((m) => m.album).toSet().toList()..sort();
   }
 
-  Future<List<MediaMetadata>> getByAlbum(String name,
-      {Comparator<MediaMetadata> sortBy}) async {
-    final metas = _box.values.where((m) => m.album == name).toList();
-
-    return sortBy != null ? (metas..sort(sortBy)) : metas;
+  Future<List<MediaMetadata>> getByAlbum(String name) async {
+    return _box.values.where((m) => m.album == name).toList();
   }
 
   Future<void> update(List<MediaMetadata> metadatas) async {

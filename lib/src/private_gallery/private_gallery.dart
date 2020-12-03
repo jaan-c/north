@@ -16,22 +16,21 @@ import 'thumbnail_store.dart';
 import 'uuid.dart';
 import 'file_system_utils.dart';
 
-enum MediaOrder { nameAscending, nameDescending, newest, oldest }
+class MediaOrder {
+  static int nameAscending(Media a, Media b) {
+    return a.name.compareTo(b.name);
+  }
 
-extension _MediaOrderAsComparator on MediaOrder {
-  Comparator<MediaMetadata> get asComparator {
-    switch (this) {
-      case MediaOrder.nameAscending:
-        return (a, b) => a.name.compareTo(b.name);
-      case MediaOrder.nameDescending:
-        return (a, b) => b.name.compareTo(a.name);
-      case MediaOrder.newest:
-        return (a, b) => b.storeDateTime.compareTo(a.storeDateTime);
-      case MediaOrder.oldest:
-        return (a, b) => a.storeDateTime.compareTo(b.storeDateTime);
-      default:
-        throw StateError('Unhandled $this');
-    }
+  static int nameDescending(Media a, Media b) {
+    return b.name.compareTo(a.name);
+  }
+
+  static int newest(Media a, Media b) {
+    return b.storeDateTime.compareTo(a.storeDateTime);
+  }
+
+  static int oldest(Media a, Media b) {
+    return a.storeDateTime.compareTo(b.storeDateTime);
   }
 }
 
@@ -192,23 +191,23 @@ class PrivateGallery {
     return albums;
   }
 
-  /// Get [Media]s of album sorted by [orderBy].
+  /// Get [Media]s of album ordered by [comparator].
   ///
   /// This will create a cache of decrypted thumbnails for the returned medias.
   ///
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
   Future<List<Media>> getMediasOfAlbum(String name,
-      {MediaOrder orderBy = MediaOrder.newest}) async {
+      {Comparator<Media> comparator = MediaOrder.newest}) async {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
-    final metas =
-        await _metadataStore.getByAlbum(name, sortBy: orderBy.asComparator);
+    final metas = await _metadataStore.getByAlbum(name);
 
     if (metas.isEmpty) {
       throw PrivateGalleryException('Album $name does not exist.');
     } else {
-      return metas.map((m) => Media(m.id, m.name, m.storeDateTime)).toList();
+      return metas.map((m) => Media(m.id, m.name, m.storeDateTime)).toList()
+        ..sort(comparator);
     }
   }
 
