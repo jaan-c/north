@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
 
 void main() {
-  setUpAll(initCrypto);
-
   test(
       'derivePasswordHash creates a hash verifiable with verifyPasswordWithHash with the same password.',
       () async {

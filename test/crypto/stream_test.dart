@@ -10,7 +10,6 @@ void main() {
   Uint8List key;
 
   setUpAll(() async {
-    initCrypto();
     key = await deriveKey('Password', generateSalt());
   });
 

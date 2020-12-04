@@ -28,6 +28,8 @@ class CryptoException implements Exception {
 /// on encryption error.
 Stream<List<int>> encryptStream(
     Uint8List key, Stream<List<int>> plainStream) async* {
+  Sodium.init();
+
   yield* _cryptoStream(key, plainStream, _CryptoMode.encrypt);
 }
 
@@ -37,6 +39,8 @@ Stream<List<int>> encryptStream(
 /// thrown on decryption error.
 Stream<List<int>> decryptStream(
     Uint8List key, Stream<List<int>> cipherStream) async* {
+  Sodium.init();
+
   yield* _cryptoStream(key, cipherStream, _CryptoMode.decrypt);
 }
 

@@ -8,6 +8,8 @@ final _memLimit = Sodium.cryptoPwhashMemlimitInteractive;
 
 /// Compute a hash for verifying [password] with [verifyPassword].
 Future<String> derivePasswordHash(String password) async {
+  Sodium.init();
+
   final runner = await IsolateRunner.spawn();
   return runner.run(_derivePasswordHash, password);
 }
@@ -19,6 +21,8 @@ Future<String> _derivePasswordHash(String password) async {
 
 /// Verify [password] if it matches the [hash] produced by [derivePasswordHash].
 Future<bool> verifyPassword(String password, String hash) async {
+  Sodium.init();
+
   final runner = await IsolateRunner.spawn();
   final args = _VerifyPasswordArgs(password, hash);
   return runner.run(_verifyPassword, args);
@@ -36,12 +40,16 @@ Future<bool> _verifyPassword(_VerifyPasswordArgs args) async {
 
 /// Generate a 128 bit random salt.
 List<int> generateSalt() {
+  Sodium.init();
+
   return PasswordHash.randomSalt();
 }
 
 /// Generate a key from [password] and [salt] for use in [encryptStream] and
 /// [decryptStream].
 Future<Uint8List> deriveKey(String password, List<int> salt) async {
+  Sodium.init();
+
   final runner = await IsolateRunner.spawn();
   final args = _DeriveKeyArgs(password, salt);
   return runner.run(_deriveKey, args);
