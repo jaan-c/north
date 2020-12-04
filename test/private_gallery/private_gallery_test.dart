@@ -70,6 +70,16 @@ void main() {
         gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
   });
 
+  test('put stores media inside album.', () async {
+    final id = Uuid.generate();
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+
+    await expectLater(gallery.put(id, 'Album', media), completes);
+    await expectLater(
+        gallery.getMediasOfAlbum('Album'), completion(hasLength(1)));
+  });
+
   test('put places media under app root.', () async {
     final id = Uuid.generate();
     final media = tempDir.file();
