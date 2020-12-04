@@ -21,7 +21,7 @@ class ThumbnailGrid extends StatelessWidget {
   final List<ThumbnailData> datas;
   final EdgeInsetsGeometry padding;
 
-  ThumbnailGrid(this.datas, {this.padding = const EdgeInsets.all(8)});
+  ThumbnailGrid(this.datas, {this.padding = const EdgeInsets.all(16)});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +31,8 @@ class ThumbnailGrid extends StatelessWidget {
         staggeredTileBuilder: (_) => StaggeredTile.fit(1),
         itemCount: datas.length,
         crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
         shrinkWrap: true,
       ),
       padding: padding,
