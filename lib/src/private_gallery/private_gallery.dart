@@ -16,6 +16,7 @@ import 'thumbnail_store.dart';
 import 'uuid.dart';
 import 'file_system_utils.dart';
 
+/// Predefined [Comparator]s for [Media].
 class MediaOrder {
   static int nameAscending(Media a, Media b) {
     return a.name.compareTo(b.name);
@@ -72,22 +73,26 @@ class PrivateGalleryException implements Exception {
 
 typedef ThumbnailGenerator = Future<List<int>> Function(File media);
 
-/// A private encrypted gallery.
-///
-/// Files are stored encrypted in a .north directory inside [externalRoot].
-/// Media and thumbnail on access will be decrypted and cached inside
-/// [cacheRoot] with respective directories media_cache and thumbnail_cache;
-/// which should be cleared at some point before the program closes.
-///
-/// By default [externalRoot] is [ExtStorage.getExternalStorageDirectory] and
-/// [cacheRoot] is [getExternalCacheDirectories]. If [shouldPersistMetadata] is
-/// false, metadata is only stored in memory.
+/// An encrypted storage for media files.
 class PrivateGallery {
   static const _mediaDirName = 'medias';
   static const _thumbnailDirName = 'thumbnails';
   static const _mediaCacheDirName = 'media_cache';
   static const _thumbnailCacheDirName = 'thumbnail_cache';
 
+  /// Create a new instance of [PrivateGallery].
+  ///
+  /// [key] is used for encryption and decryption,
+  /// [thumbnailGenerator] is called when generating thumbnails for newly stored
+  /// media. If [shouldPersistMetadata] is false, metadata is not written to
+  /// disk. [appRoot] is where encrypted media and thumbnails are stored.
+  /// [cacheRoot] is where temporarily decrypted media and thumbnails are stored
+  /// and must be cleaned up by calling [dispose].
+  ///
+  /// By default [appRoot] is [getExternalStorageDirectory] and [cacheRoot] is
+  /// the first output of [getExternalCacheDirectories] that is under
+  /// /storage/emulated, to make sure it's the non-removable storage of the
+  /// device and not an external memory card.
   static Future<PrivateGallery> instantiate(Uint8List key,
       {ThumbnailGenerator thumbnailGenerator = generateThumbnail,
       bool shouldPersistMetadata = true,
@@ -134,7 +139,9 @@ class PrivateGallery {
         _mediaStore = mediaStore,
         _thumbnailStore = thumbnailStore;
 
-  /// Store [media] inside [albumName].
+  /// Store [media] inside album named [albumName].
+  ///
+  /// If the album does not exist, it is created.
   ///
   /// Throws [ArgumentError] if album is empty. Throws [CancelledException] if
   /// [CancelableFuture.cancel] is called.
@@ -179,8 +186,6 @@ class PrivateGallery {
   }
 
   /// Get all [Album]s ordered alphabetically.
-  ///
-  /// This will create a cache of decrypted thumbnails for the returned albums.
   Future<List<Album>> getAllAlbums() async {
     _checkIsDisposed();
 
@@ -196,8 +201,6 @@ class PrivateGallery {
   }
 
   /// Get [Media]s of album ordered by [comparator].
-  ///
-  /// This will create a cache of decrypted thumbnails for the returned medias.
   ///
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
@@ -218,6 +221,9 @@ class PrivateGallery {
 
   /// Return the decrypted thumbnail of album with [name] as a cached [File].
   ///
+  /// There is no guarantee that the returned [File] will be kept, so every
+  /// access to the album thumbnail must call this method.
+  ///
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
   Future<File> loadAlbumThumbnail(String name) async {
@@ -231,6 +237,9 @@ class PrivateGallery {
 
   /// Return the decrypted thumbnail of media with [id] as a cached [File].
   ///
+  /// There is no guarantee that the returned [File] will be kept, so every
+  /// access to the media thumbnail must call this method.
+  ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
   Future<File> loadMediaThumbnail(Uuid id) async {
     _checkIsDisposed();
@@ -243,6 +252,9 @@ class PrivateGallery {
   }
 
   /// Return the decrypted media with [id] as cached [File].
+  ///
+  /// There is no guarantee that the returned [File] will be kept, so every
+  /// access to the media must call this method.
   ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
   CancelableFuture<File> loadMedia(Uuid id) {
@@ -259,8 +271,8 @@ class PrivateGallery {
 
   /// Delete media with [id].
   ///
-  /// Noop if [id] does not exist. If the album the media is contained in only
-  /// has this media, it is also deleted.
+  /// Noop if [id] does not exist. If the album where the media is in is the
+  /// only item, the album is also deleted.
   Future<void> delete(Uuid id) async {
     _checkIsDisposed();
 
@@ -360,7 +372,7 @@ class PrivateGallery {
     }
   }
 
-  /// Dispose of this object and all caches.
+  /// Dispose this object and all caches.
   Future<void> dispose() async {
     if (!_isDisposed) {
       await _metadataStore.dispose();
