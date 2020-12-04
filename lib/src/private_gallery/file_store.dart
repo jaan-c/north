@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:north/crypto.dart';
-import 'package:north/src/private_gallery/cancelable_future.dart';
+import 'package:north/private_gallery.dart';
 
 import 'file_system_utils.dart';
 import 'uuid.dart';

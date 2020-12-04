@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:north/src/private_gallery/thumbnail_generator.dart';
 import 'package:path/path.dart' as pathlib;
 import 'package:path_provider/path_provider.dart';
 import 'package:quiver/check.dart';
@@ -15,6 +14,7 @@ import 'media_store.dart';
 import 'thumbnail_store.dart';
 import 'uuid.dart';
 import 'file_system_utils.dart';
+import 'thumbnail_generator.dart';
 
 /// Predefined [Comparator]s for [Media].
 class MediaOrder {
