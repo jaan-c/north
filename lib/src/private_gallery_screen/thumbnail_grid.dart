@@ -73,7 +73,7 @@ class ThumbnailTileState extends State<ThumbnailTile> {
         aspectRatio: 1 / 1,
         child: child,
       ),
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+      borderRadius: BorderRadius.all(Radius.circular(24)),
     );
   }
 
