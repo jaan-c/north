@@ -104,15 +104,13 @@ class ThumbnailTileState extends State<ThumbnailTile> {
 
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            widget.data.name,
-            style: textTheme.subtitle2,
-            overflow: TextOverflow.ellipsis,
-          ),
+        Text(
+          widget.data.name,
+          style: textTheme.subtitle2,
+          overflow: TextOverflow.ellipsis,
         ),
         if (widget.data.count != null)
-          Text('(${widget.data.count})', style: textTheme.subtitle2),
+          Text(' (${widget.data.count})', style: textTheme.subtitle2),
       ],
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.baseline,
