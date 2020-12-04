@@ -112,6 +112,7 @@ class ThumbnailTileState extends State<ThumbnailTile> {
       ],
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
     );
   }
 }
