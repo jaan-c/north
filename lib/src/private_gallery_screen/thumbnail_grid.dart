@@ -19,19 +19,23 @@ class ThumbnailData {
 
 class ThumbnailGrid extends StatelessWidget {
   final List<ThumbnailData> datas;
+  final EdgeInsetsGeometry padding;
 
-  ThumbnailGrid(this.datas);
+  ThumbnailGrid(this.datas, {this.padding = const EdgeInsets.all(8)});
 
   @override
   Widget build(BuildContext context) {
-    return StaggeredGridView.countBuilder(
-      itemBuilder: (_, ix) => ThumbnailTile(datas[ix]),
-      staggeredTileBuilder: (_) => StaggeredTile.fit(1),
-      itemCount: datas.length,
-      crossAxisCount: 2,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      shrinkWrap: true,
+    return Padding(
+      child: StaggeredGridView.countBuilder(
+        itemBuilder: (_, ix) => ThumbnailTile(datas[ix]),
+        staggeredTileBuilder: (_) => StaggeredTile.fit(1),
+        itemCount: datas.length,
+        crossAxisCount: 2,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        shrinkWrap: true,
+      ),
+      padding: padding,
     );
   }
 }
