@@ -31,10 +31,12 @@ class _AlbumThumbnailGridState extends State<AlbumThumbnailGrid> {
         }
 
         if (snapshot.hasData) {
-          final datas = snapshot.data.map((a) => ThumbnailData(
-              name: a.name,
-              count: a.mediaCount,
-              loader: () => widget.gallery.loadAlbumThumbnail(a.name)));
+          final datas = snapshot.data
+              .map((a) => ThumbnailData(
+                  name: a.name,
+                  count: a.mediaCount,
+                  loader: () => widget.gallery.loadAlbumThumbnail(a.name)))
+              .toList();
 
           return ThumbnailGrid(datas);
         } else {
