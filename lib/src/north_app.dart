@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'private_gallery_screen.dart';
+import 'private_gallery_screen/private_gallery_screen.dart';
 
 class NorthApp extends StatefulWidget {
   @override

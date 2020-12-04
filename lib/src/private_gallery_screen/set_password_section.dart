@@ -6,7 +6,7 @@ import 'package:north/crypto.dart';
 
 import 'password_section.dart';
 
-typedef DoneCallback = FutureOr<void> Function();
+typedef DoneCallback = FutureOr<void> Function(String password);
 
 /// A section for accepting a password from user and setting password hash in
 /// [AppPreferences] unconditionally.
@@ -37,6 +37,6 @@ class _SetPasswordSectionState extends State<SetPasswordSection> {
     await prefs.setPasswordHash(hash);
     await prefs.setSalt(salt);
 
-    await widget.onDone?.call();
+    await widget.onDone?.call(password);
   }
 }

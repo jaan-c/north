@@ -2,20 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:north/private_gallery.dart';
-import 'package:north/src/private_gallery/loader.dart';
+
+typedef ThumbnailLoader = Future<File> Function();
 
 class ThumbnailData {
   final String name;
+  final int count;
   final ThumbnailLoader loader;
 
-  ThumbnailData({@required this.name, @required this.loader});
+  ThumbnailData({@required this.name, @required this.loader, this.count});
 
-  ThumbnailData.fromAlbum(Album album)
-      : this(name: album.name, loader: album.thumbnailLoader);
-
-  ThumbnailData.fromMedia(Media media)
-      : this(name: media.name, loader: media.thumbnailLoader);
+  Future<File> loadThumbnail() async {
+    return loader();
+  }
 }
 
 class ThumbnailGrid extends StatelessWidget {
@@ -26,7 +25,7 @@ class ThumbnailGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaggeredGridView.countBuilder(
-      itemBuilder: (_, ix) => _ThumbnailTile(datas[ix]),
+      itemBuilder: (_, ix) => ThumbnailTile(datas[ix]),
       staggeredTileBuilder: (_) => StaggeredTile.fit(1),
       itemCount: datas.length,
       crossAxisCount: 2,
@@ -37,22 +36,22 @@ class ThumbnailGrid extends StatelessWidget {
   }
 }
 
-class _ThumbnailTile extends StatefulWidget {
+class ThumbnailTile extends StatefulWidget {
   final ThumbnailData data;
 
-  _ThumbnailTile(this.data);
+  ThumbnailTile(this.data);
 
   @override
-  _ThumbnailTileState createState() => _ThumbnailTileState();
+  ThumbnailTileState createState() => ThumbnailTileState();
 }
 
-class _ThumbnailTileState extends State<_ThumbnailTile> {
+class ThumbnailTileState extends State<ThumbnailTile> {
   Future<File> futureThumbnail;
 
   @override
   void initState() {
-    futureThumbnail = widget.data.loader.load();
     super.initState();
+    futureThumbnail = widget.data.loadThumbnail();
   }
 
   @override
@@ -79,29 +78,40 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
       future: futureThumbnail,
       builder: (context, AsyncSnapshot<File> snapshot) {
         if (snapshot.hasError) {
-          final textTheme = Theme.of(context).textTheme;
-          return Center(
-            child: Text(
-              'No thumbnail',
-              style: textTheme.subtitle2,
-              textAlign: TextAlign.center,
-            ),
-          );
+          throw StateError('Failed to load thumbnail: ${snapshot.error}');
         }
 
-        if (snapshot.hasData) {
-          return FittedBox(child: Image.file(snapshot.data));
-        } else {
-          return Center(child: CircularProgressIndicator());
-        }
+        return FittedBox(
+            child: snapshot.hasData
+                ? Image.file(snapshot.data)
+                : _thumbnailImagePlaceholder());
       },
+    );
+  }
+
+  Widget _thumbnailImagePlaceholder() {
+    return SizedBox(
+      child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey)),
     );
   }
 
   Widget _thumbnailName(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Text(widget.data.name,
-        style: textTheme.subtitle2, overflow: TextOverflow.ellipsis);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            widget.data.name,
+            style: textTheme.subtitle2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (widget.data.count != null)
+          Text('(${widget.data.count})', style: textTheme.subtitle2),
+      ],
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+    );
   }
 }

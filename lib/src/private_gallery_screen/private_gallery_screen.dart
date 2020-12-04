@@ -1,11 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:north/crypto.dart';
 import 'package:north/private_gallery.dart';
 import 'package:north/app_preferences.dart';
-import 'package:north/src/crypto/password.dart';
-import 'package:north/src/widgets/private_gallery_section.dart';
 
+import 'album_thumbnail_grid.dart';
 import 'set_password_section.dart';
 import 'verify_password_section.dart';
 
@@ -20,7 +18,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   final prefs = AppPreferences.getInstance();
 
   Future<PrivateGalleryState> futureState;
-  Future<Uint8List> futureKey;
+  Future<PrivateGallery> futureGallery;
 
   @override
   void initState() {
@@ -58,7 +56,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
           case PrivateGalleryState.close:
             return _verifyPasswordSection();
           case PrivateGalleryState.open:
-            return _privateGallerySection();
+            return _albumThumbnailGrid();
           default:
             throw StateError('Unhandled state: ${snapshot.data}');
         }
@@ -67,30 +65,29 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   }
 
   Widget _setPasswordSection() {
-    return SetPasswordSection(
-      onDone: () => setState(() {
-        futureState = _determineState();
-      }),
-    );
+    return SetPasswordSection(onDone: _instantiateGallery);
   }
 
   Widget _verifyPasswordSection() {
-    return VerifyPasswordSection(onSubmitPassword: _computeKey);
+    return VerifyPasswordSection(onSubmitPassword: _instantiateGallery);
   }
 
-  Future<void> _computeKey(String password) async {
+  Future<void> _instantiateGallery(String password) async {
     final salt = await prefs.getSalt();
 
     setState(() {
-      futureKey = deriveKey(password, salt);
+      futureGallery = (() async {
+        final key = await deriveKey(password, salt);
+        return PrivateGallery.instantiate(key);
+      })();
       futureState = _determineState();
     });
   }
 
-  Widget _privateGallerySection() {
+  Widget _albumThumbnailGrid() {
     return FutureBuilder(
-      future: futureKey,
-      builder: (_, AsyncSnapshot<Uint8List> snapshot) {
+      future: futureGallery,
+      builder: (_, AsyncSnapshot<PrivateGallery> snapshot) {
         if (snapshot.hasError) {
           throw StateError('Failed to compute key: ${snapshot.error}');
         }
@@ -99,7 +96,11 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
           return LinearProgressIndicator();
         }
 
-        return PrivateGallerySection(PrivateGallery(snapshot.data));
+        if (snapshot.hasData) {
+          return AlbumThumbnailGrid(snapshot.data);
+        } else {
+          return LinearProgressIndicator();
+        }
       },
     );
   }
@@ -110,10 +111,8 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
       return PrivateGalleryState.unconfigured;
     }
 
-    if (futureKey == null) {
-      return PrivateGalleryState.close;
-    } else {
-      return PrivateGalleryState.open;
-    }
+    return futureGallery == null
+        ? PrivateGalleryState.close
+        : PrivateGalleryState.open;
   }
 }
