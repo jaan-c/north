@@ -76,13 +76,13 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   Widget _albumThumbnailGrid() {
     return FutureBuilder(
       future: futureGallery,
-      builder: (_, AsyncSnapshot<PrivateGallery> snapshot) {
+      builder: (context, AsyncSnapshot<PrivateGallery> snapshot) {
         if (snapshot.hasError) {
           throw StateError('Failed to compute key: ${snapshot.error}');
         }
 
         if (!snapshot.hasData) {
-          return LinearProgressIndicator();
+          return _unlockingGalleryProgressPage(context);
         }
 
         if (snapshot.hasData) {
@@ -93,6 +93,32 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
       },
     );
   }
+
+  Widget _unlockingGalleryProgressPage(BuildContext context) {
+          final textTheme = Theme.of(context).textTheme;
+
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(),
+                      SizedBox(height: 8),
+                      Text(
+                        'Unlocking Private Gallery',
+                        style: textTheme.subtitle2,
+                      ),
+                    ],
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                ),
+              ),
+            ),
+          );
+        }
 
   Future<PrivateGalleryState> _determineState() async {
     final passwordHash = await prefs.getPasswordHash();
