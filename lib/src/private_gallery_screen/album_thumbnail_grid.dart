@@ -40,7 +40,7 @@ class _AlbumThumbnailGridState extends State<AlbumThumbnailGrid> {
 
           return ThumbnailGrid(datas);
         } else {
-          return SizedBox();
+          return SizedBox.shrink();
         }
       },
     );
