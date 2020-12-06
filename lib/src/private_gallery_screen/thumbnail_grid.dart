@@ -20,19 +20,31 @@ class ThumbnailData {
 class ThumbnailGrid extends StatelessWidget {
   final List<ThumbnailData> datas;
   final EdgeInsetsGeometry padding;
+  final int crossAxisCount;
+  final double mainAxisSpacing;
+  final double crossAxisSpacing;
+  final double tileBorderRadius;
 
-  ThumbnailGrid(this.datas, {this.padding = const EdgeInsets.all(16)});
+  ThumbnailGrid(this.datas,
+      {this.padding = const EdgeInsets.all(0),
+      this.crossAxisCount = 2,
+      this.mainAxisSpacing = 0,
+      this.crossAxisSpacing = 0,
+      this.tileBorderRadius = 0});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       child: StaggeredGridView.countBuilder(
-        itemBuilder: (_, ix) => ThumbnailTile(datas[ix]),
+        itemBuilder: (_, ix) => _ThumbnailTile(
+          datas[ix],
+          borderRadius: tileBorderRadius,
+        ),
         staggeredTileBuilder: (_) => StaggeredTile.fit(1),
         itemCount: datas.length,
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: mainAxisSpacing,
+        crossAxisSpacing: crossAxisSpacing,
         shrinkWrap: true,
       ),
       padding: padding,
@@ -40,16 +52,17 @@ class ThumbnailGrid extends StatelessWidget {
   }
 }
 
-class ThumbnailTile extends StatefulWidget {
+class _ThumbnailTile extends StatefulWidget {
   final ThumbnailData data;
+  final double borderRadius;
 
-  ThumbnailTile(this.data);
+  _ThumbnailTile(this.data, {this.borderRadius = 0});
 
   @override
-  ThumbnailTileState createState() => ThumbnailTileState();
+  _ThumbnailTileState createState() => _ThumbnailTileState();
 }
 
-class ThumbnailTileState extends State<ThumbnailTile> {
+class _ThumbnailTileState extends State<_ThumbnailTile> {
   Future<File> futureThumbnail;
 
   @override
@@ -73,7 +86,7 @@ class ThumbnailTileState extends State<ThumbnailTile> {
         aspectRatio: 1 / 1,
         child: child,
       ),
-      borderRadius: BorderRadius.all(Radius.circular(24)),
+      borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
     );
   }
 
