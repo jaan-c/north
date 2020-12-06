@@ -45,6 +45,13 @@ class _PasswordPageState extends State<PasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(child: _body(context)),
+      floatingActionButton: _submitFab(),
+    );
+  }
+
+  Widget _body(BuildContext context) {
     return Center(
       child: Padding(
         child: Column(
@@ -54,12 +61,10 @@ class _PasswordPageState extends State<PasswordPage> {
             if (isCheckingPassword) ...[
               LinearProgressIndicator(),
               SizedBox(height: 8),
-              _checkingPasswordText(context),
+              _checkingPasswordText(context)
             ] else ...[
               _passwordField(context),
-              SizedBox(height: 8),
-              _submitButton(context),
-            ],
+            ]
           ],
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,18 +100,20 @@ class _PasswordPageState extends State<PasswordPage> {
     );
   }
 
-  Widget _submitButton(BuildContext context) {
-    return ElevatedButton(
-      child: Text('Submit'),
-      onPressed: isPasswordValid ? _submitPassword : null,
-      autofocus: false,
-      clipBehavior: Clip.antiAlias,
-    );
-  }
-
   Widget _checkingPasswordText(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Text('Checking Password', style: textTheme.subtitle2);
+    return Text('Checking password', style: textTheme.subtitle2);
+  }
+
+  Widget _submitFab() {
+    if (!isPasswordValid || isCheckingPassword) {
+      return null;
+    }
+
+    return FloatingActionButton(
+      child: Icon(Icons.check),
+      onPressed: _submitPassword,
+    );
   }
 
   Future<void> _submitPassword() async {
@@ -125,7 +132,20 @@ class _PasswordPageState extends State<PasswordPage> {
     final result = await widget.onCheckPassword(password);
     setState(() => isCheckingPassword = false);
 
+    if (!result) {
+      _showSnackbar(context, 'Invalid password');
+    }
+
     return result;
+  }
+
+  void _showSnackbar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 2),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   void _toggleObscurePassword() {
