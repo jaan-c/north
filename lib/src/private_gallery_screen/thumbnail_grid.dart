@@ -26,14 +26,16 @@ class ThumbnailGrid extends StatelessWidget {
   final int crossAxisCount;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
-  final double tileBorderRadius;
+  final double thumbnailBorderRadius;
+  final bool showThumbnailName;
 
   ThumbnailGrid(this.datas,
       {this.padding = const EdgeInsets.all(0),
       this.crossAxisCount = 2,
       this.mainAxisSpacing = 0,
       this.crossAxisSpacing = 0,
-      this.tileBorderRadius = 0});
+      this.thumbnailBorderRadius = 0,
+      this.showThumbnailName = true});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,8 @@ class ThumbnailGrid extends StatelessWidget {
       child: StaggeredGridView.countBuilder(
         itemBuilder: (_, ix) => _ThumbnailTile(
           datas[ix],
-          borderRadius: tileBorderRadius,
+          borderRadius: thumbnailBorderRadius,
+          showName: showThumbnailName,
         ),
         staggeredTileBuilder: (_) => StaggeredTile.fit(1),
         itemCount: datas.length,
@@ -58,8 +61,9 @@ class ThumbnailGrid extends StatelessWidget {
 class _ThumbnailTile extends StatefulWidget {
   final ThumbnailData data;
   final double borderRadius;
+  final bool showName;
 
-  _ThumbnailTile(this.data, {this.borderRadius = 0});
+  _ThumbnailTile(this.data, {this.borderRadius = 0, this.showName = true});
 
   @override
   _ThumbnailTileState createState() => _ThumbnailTileState();
@@ -79,8 +83,10 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
     return InkWell(
       child: Column(children: [
         _thumbnailImageContainer(child: _thumbnailImage()),
-        SizedBox(height: 4),
-        _thumbnailName(context)
+        if (widget.showName) ...[
+          SizedBox(height: 4),
+          _thumbnailName(context),
+        ]
       ]),
       onTap: widget.data.onTap,
     );
