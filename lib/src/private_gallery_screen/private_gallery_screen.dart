@@ -28,17 +28,6 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _appBar(),
-      body: _body(),
-    );
-  }
-
-  AppBar _appBar() {
-    return AppBar(title: Text('North'), centerTitle: true);
-  }
-
-  Widget _body() {
     return FutureBuilder(
       future: futureState,
       builder: (_, AsyncSnapshot<PrivateGalleryState> snapshot) {
@@ -52,9 +41,9 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
 
         switch (snapshot.data) {
           case PrivateGalleryState.unconfigured:
-            return _setPasswordSection();
+            return _setupAuthenticaitonPage();
           case PrivateGalleryState.close:
-            return _verifyPasswordSection();
+            return _authenticationPage();
           case PrivateGalleryState.open:
             return _albumThumbnailGrid();
           default:
@@ -64,12 +53,12 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
     );
   }
 
-  Widget _setPasswordSection() {
-    return SetPasswordSection(onDone: _instantiateGallery);
+  Widget _setupAuthenticaitonPage() {
+    return SetupAuthenticationPage(onDone: _instantiateGallery);
   }
 
-  Widget _verifyPasswordSection() {
-    return VerifyPasswordSection(onSubmitPassword: _instantiateGallery);
+  Widget _authenticationPage() {
+    return AuthenticationPage(onSubmitPassword: _instantiateGallery);
   }
 
   Future<void> _instantiateGallery(String password) async {
