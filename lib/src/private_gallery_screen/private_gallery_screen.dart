@@ -4,8 +4,8 @@ import 'package:north/private_gallery.dart';
 import 'package:north/app_preferences.dart';
 
 import 'album_thumbnail_grid.dart';
-import 'set_password_section.dart';
-import 'verify_password_section.dart';
+import 'setup_authentication_page.dart';
+import 'authentication_page.dart';
 
 enum PrivateGalleryState { unconfigured, close, open }
 

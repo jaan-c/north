@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
 import 'package:north/crypto.dart';
 
-import 'password_section.dart';
+import 'password_page.dart';
 
-class VerifyPasswordSection extends StatefulWidget {
+/// A page for authenticating access to private gallery.
+class AuthenticationPage extends StatefulWidget {
   final SubmitPasswordCallback onSubmitPassword;
 
-  VerifyPasswordSection({@required this.onSubmitPassword});
+  AuthenticationPage({@required this.onSubmitPassword});
 
   @override
-  _VerifyPasswordSectionState createState() => _VerifyPasswordSectionState();
+  _AuthenticationPageState createState() => _AuthenticationPageState();
 }
 
-class _VerifyPasswordSectionState extends State<VerifyPasswordSection> {
+class _AuthenticationPageState extends State<AuthenticationPage> {
   final prefs = AppPreferences.getInstance();
 
   @override
   Widget build(BuildContext context) {
-    return PasswordSection(
+    return PasswordPage(
       title: 'Enter Password',
       onSubmitPassword: widget.onSubmitPassword,
       onCheckPassword: _checkPassword,

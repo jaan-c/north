@@ -4,33 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
 import 'package:north/crypto.dart';
 
-import 'password_section.dart';
+import 'password_page.dart';
 
 typedef DoneCallback = FutureOr<void> Function(String password);
 
-/// A section for accepting a password from user and setting password hash in
-/// [AppPreferences] unconditionally.
-class SetPasswordSection extends StatefulWidget {
+/// A page for setting up password authentication.
+class SetupAuthenticationPage extends StatefulWidget {
   final DoneCallback onDone;
 
-  SetPasswordSection({this.onDone});
+  SetupAuthenticationPage({this.onDone});
 
   @override
-  _SetPasswordSectionState createState() => _SetPasswordSectionState();
+  _SetupAuthenticationPageState createState() =>
+      _SetupAuthenticationPageState();
 }
 
-class _SetPasswordSectionState extends State<SetPasswordSection> {
+class _SetupAuthenticationPageState extends State<SetupAuthenticationPage> {
   final prefs = AppPreferences.getInstance();
 
   @override
   Widget build(BuildContext context) {
-    return PasswordSection(
+    return PasswordPage(
       title: 'Set Password',
-      onSubmitPassword: _setPassword,
+      onSubmitPassword: _setPasswordHashInPrefs,
     );
   }
 
-  Future<void> _setPassword(String password) async {
+  Future<void> _setPasswordHashInPrefs(String password) async {
     final hash = await derivePasswordHash(password);
     final salt = generateSalt();
 

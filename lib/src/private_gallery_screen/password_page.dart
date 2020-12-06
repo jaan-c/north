@@ -5,22 +5,22 @@ import 'package:flutter/material.dart';
 typedef SubmitPasswordCallback = FutureOr<void> Function(String password);
 typedef CheckPasswordCallback = FutureOr<bool> Function(String password);
 
-/// A section for accepting a password from user.
-class PasswordSection extends StatefulWidget {
+/// A page for accepting a password from user.
+class PasswordPage extends StatefulWidget {
   final String title;
   final SubmitPasswordCallback onSubmitPassword;
   final CheckPasswordCallback onCheckPassword;
 
-  PasswordSection(
+  PasswordPage(
       {@required this.title,
       @required this.onSubmitPassword,
       this.onCheckPassword});
 
   @override
-  _PasswordSectionState createState() => _PasswordSectionState();
+  _PasswordPageState createState() => _PasswordPageState();
 }
 
-class _PasswordSectionState extends State<PasswordSection> {
+class _PasswordPageState extends State<PasswordPage> {
   final passwordController = TextEditingController();
   var obscurePassword = true;
   var isCheckingPassword = false;
@@ -34,7 +34,7 @@ class _PasswordSectionState extends State<PasswordSection> {
 
   @override
   void dispose() {
-    passwordController.removeListener(_setIsPasswordValidState);
+    passwordController.dispose();
     super.dispose();
   }
 
