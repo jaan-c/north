@@ -3,7 +3,7 @@ import 'package:north/crypto.dart';
 import 'package:north/private_gallery.dart';
 import 'package:north/app_preferences.dart';
 
-import 'gallery_page_navigator.dart';
+import 'gallery_pages_navigator.dart';
 import 'setup_authentication_page.dart';
 import 'authentication_page.dart';
 
@@ -51,7 +51,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
           case PrivateGalleryState.close:
             return _authenticationPage();
           case PrivateGalleryState.open:
-            return _albumThumbnailGrid();
+            return _galleryPageNavigator();
           default:
             throw StateError('Unhandled state: ${snapshot.data}');
         }
@@ -79,7 +79,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
     });
   }
 
-  Widget _albumThumbnailGrid() {
+  Widget _galleryPageNavigator() {
     return FutureBuilder(
       future: futureGallery,
       builder: (context, AsyncSnapshot<PrivateGallery> snapshot) {
@@ -92,7 +92,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
         }
 
         if (snapshot.hasData) {
-          return GalleryPageNavigator(snapshot.data);
+          return GalleryPagesNavigator(snapshot.data);
         } else {
           return LinearProgressIndicator();
         }

@@ -5,16 +5,16 @@ import 'album_listing_page.dart';
 import 'media_listing_page.dart';
 import 'media_viewer_page.dart';
 
-class GalleryPageNavigator extends StatefulWidget {
+class GalleryPagesNavigator extends StatefulWidget {
   final PrivateGallery gallery;
 
-  GalleryPageNavigator(this.gallery);
+  GalleryPagesNavigator(this.gallery);
 
   @override
   _GalleryNavigatorState createState() => _GalleryNavigatorState();
 }
 
-class _GalleryNavigatorState extends State<GalleryPageNavigator> {
+class _GalleryNavigatorState extends State<GalleryPagesNavigator> {
   String openedAlbum;
   Media openedMedia;
 
