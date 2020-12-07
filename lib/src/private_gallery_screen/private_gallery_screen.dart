@@ -27,6 +27,12 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   }
 
   @override
+  void dispose() {
+    futureGallery.then((g) => g.dispose());
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: futureState,
