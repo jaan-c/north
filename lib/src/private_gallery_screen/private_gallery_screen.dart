@@ -3,7 +3,7 @@ import 'package:north/crypto.dart';
 import 'package:north/private_gallery.dart';
 import 'package:north/app_preferences.dart';
 
-import 'album_thumbnail_grid.dart';
+import 'gallery_page_navigator.dart';
 import 'setup_authentication_page.dart';
 import 'authentication_page.dart';
 
@@ -86,7 +86,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
         }
 
         if (snapshot.hasData) {
-          return AlbumThumbnailGrid(snapshot.data);
+          return GalleryPageNavigator(snapshot.data);
         } else {
           return LinearProgressIndicator();
         }
