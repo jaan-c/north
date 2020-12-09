@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
+import 'media_listing_page.dart';
 import 'thumbnail_grid.dart';
 
 typedef AlbumTapCallback = void Function(String albumName);
 
 class AlbumListingPage extends StatefulWidget {
   final PrivateGallery gallery;
-  final AlbumTapCallback onAlbumTap;
 
-  AlbumListingPage(this.gallery, {this.onAlbumTap});
+  AlbumListingPage(this.gallery);
 
   @override
   _AlbumListingPageState createState() => _AlbumListingPageState();
@@ -28,7 +28,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: _body(),
+      body: _body(context),
     );
   }
 
@@ -36,7 +36,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     return AppBar(title: Text('North'), centerTitle: true);
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     return FutureBuilder(
       future: futureAlbums,
       builder: (context, AsyncSnapshot<List<Album>> snapshot) {
@@ -51,7 +51,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
                     name: a.name,
                     count: a.mediaCount,
                     loader: () => widget.gallery.loadAlbumThumbnail(a.name),
-                    onTap: () => widget.onAlbumTap?.call(a.name)),
+                    onTap: () => _openAlbum(context, a.name)),
               )
               .toList();
 
@@ -67,6 +67,15 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           return SizedBox.shrink();
         }
       },
+    );
+  }
+
+  void _openAlbum(BuildContext context, String name) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MediaListingPage(widget.gallery, name),
+      ),
     );
   }
 }

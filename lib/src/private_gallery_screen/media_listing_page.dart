@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
+import 'media_viewer_page.dart';
 import 'thumbnail_grid.dart';
-
-typedef MediaTapCallback = void Function(Media media);
 
 class MediaListingPage extends StatefulWidget {
   final PrivateGallery gallery;
   final String albumName;
-  final MediaTapCallback onMediaTap;
 
-  MediaListingPage(this.gallery, this.albumName, {this.onMediaTap});
+  MediaListingPage(this.gallery, this.albumName);
 
   @override
   _MediaListingPageState createState() => _MediaListingPageState();
@@ -28,23 +26,20 @@ class _MediaListingPageState extends State<MediaListingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(context),
-      body: _body(),
+      appBar: _appBar(),
+      body: _body(context),
     );
   }
 
-  Widget _appBar(BuildContext context) {
+  Widget _appBar() {
     return AppBar(
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text(widget.albumName),
       centerTitle: true,
+      automaticallyImplyLeading: true,
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     return FutureBuilder(
       future: futureMedias,
       builder: (context, AsyncSnapshot<List<Media>> snapshot) {
@@ -57,7 +52,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
               .map((m) => ThumbnailData(
                   name: m.name,
                   loader: () => widget.gallery.loadMediaThumbnail(m.id),
-                  onTap: () => widget.onMediaTap?.call(m)))
+                  onTap: () => _openMedia(context, m)))
               .toList();
 
           return ThumbnailGrid(
@@ -73,6 +68,15 @@ class _MediaListingPageState extends State<MediaListingPage> {
           return SizedBox.shrink();
         }
       },
+    );
+  }
+
+  void _openMedia(BuildContext context, Media media) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MediaViewerPage(widget.gallery, media),
+      ),
     );
   }
 }

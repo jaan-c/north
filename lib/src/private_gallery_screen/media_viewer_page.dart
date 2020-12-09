@@ -76,22 +76,16 @@ class _MediaViewerPageState extends State<MediaViewerPage> {
 
   Widget _loadingPage(BuildContext context) {
     return Scaffold(
-      appBar: _loadingPageAppBar(context),
+      appBar: _loadingPageAppBar(),
       body: _loadingPageBody(context),
     );
   }
 
-  AppBar _loadingPageAppBar(BuildContext context) {
+  AppBar _loadingPageAppBar() {
     return AppBar(
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          futureMediaFile.cancel();
-          Navigator.pop(context);
-        },
-      ),
       title: Text(widget.media.name),
       centerTitle: true,
+      automaticallyImplyLeading: true,
     );
   }
 

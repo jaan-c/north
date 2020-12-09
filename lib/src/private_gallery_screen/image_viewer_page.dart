@@ -17,18 +17,16 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(context),
+      appBar: _appBar(),
       body: _body(),
     );
   }
 
-  AppBar _appBar(BuildContext context) {
+  AppBar _appBar() {
     return AppBar(
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () => Navigator.pop(context),
-      ),
       title: Text(widget.media.name),
+      centerTitle: true,
+      automaticallyImplyLeading: true,
     );
   }
 
