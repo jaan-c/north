@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 typedef ThumbnailLoader = Future<File> Function();
-typedef ThumbnailTapCallback = void Function();
 
 class ThumbnailData {
   final String name;
   final int count;
   final ThumbnailLoader loader;
-  final ThumbnailTapCallback onTap;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   ThumbnailData(
-      {@required this.name, @required this.loader, this.count, this.onTap});
+      {@required this.name,
+      @required this.loader,
+      this.count,
+      this.onTap,
+      this.onLongPress});
 
   Future<File> loadThumbnail() async {
     return loader();
@@ -89,6 +93,7 @@ class _ThumbnailTileState extends State<_ThumbnailTile> {
         ]
       ]),
       onTap: widget.data.onTap,
+      onLongPress: widget.data.onLongPress,
     );
   }
 
