@@ -3,6 +3,7 @@ import 'package:north/private_gallery.dart';
 
 import 'media_viewer_page.dart';
 import 'thumbnail_grid.dart';
+import 'thumbnail_tile.dart';
 
 class MediaListingPage extends StatefulWidget {
   final PrivateGallery gallery;
@@ -48,26 +49,26 @@ class _MediaListingPageState extends State<MediaListingPage> {
         }
 
         if (snapshot.hasData) {
-          final datas = snapshot.data
-              .map((m) => ThumbnailData(
-                  name: m.name,
-                  loader: () => widget.gallery.loadMediaThumbnail(m.id),
-                  onTap: () => _openMedia(context, m)))
-              .toList();
-
           return ThumbnailGrid(
-            datas,
+            children: [
+              for (final media in snapshot.data) _thumbnailTile(media)
+            ],
             padding: EdgeInsets.zero,
             crossAxisCount: 3,
             mainAxisSpacing: 0,
             crossAxisSpacing: 0,
-            thumbnailBorderRadius: 0,
-            showThumbnailName: false,
           );
         } else {
           return SizedBox.shrink();
         }
       },
+    );
+  }
+
+  Widget _thumbnailTile(Media media) {
+    return ThumbnailTile(
+      loader: () => widget.gallery.loadMedia(media.id),
+      onTap: () => _openMedia(context, media),
     );
   }
 
