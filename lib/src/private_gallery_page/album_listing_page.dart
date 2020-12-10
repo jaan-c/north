@@ -30,7 +30,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(),
-      body: _body(context),
+      body: _body(),
     );
   }
 
@@ -49,7 +49,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     }
   }
 
-  Widget _body(BuildContext context) {
+  Widget _body() {
     return FutureBuilder(
       future: futureAlbums,
       builder: (context, AsyncSnapshot<List<Album>> snapshot) {
