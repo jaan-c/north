@@ -60,7 +60,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         if (snapshot.hasData) {
           return ThumbnailGrid(
             children: [
-              for (final album in snapshot.data) _thumbnailTile(album)
+              for (final album in snapshot.data) _thumbnailTile(context, album)
             ],
             padding: EdgeInsets.all(16),
             crossAxisCount: 2,
@@ -74,7 +74,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  Widget _thumbnailTile(Album album) {
+  Widget _thumbnailTile(BuildContext context, Album album) {
     ThumbnailTileMode mode;
     if (selectedAlbums.isEmpty) {
       mode = ThumbnailTileMode.normal;
