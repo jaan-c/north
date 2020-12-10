@@ -3,6 +3,7 @@ import 'package:north/private_gallery.dart';
 
 import 'media_listing_page.dart';
 import 'thumbnail_grid.dart';
+import 'thumbnail_tile.dart';
 
 typedef AlbumTapCallback = void Function(String albumName);
 
@@ -17,6 +18,7 @@ class AlbumListingPage extends StatefulWidget {
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<List<Album>> futureAlbums;
+  List<Album> selectedAlbums = [];
 
   @override
   void initState() {
@@ -33,7 +35,18 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _appBar() {
-    return AppBar(title: Text('North'), centerTitle: true);
+    if (selectedAlbums.isEmpty) {
+      return AppBar(title: Text('North'), centerTitle: true);
+    } else {
+      return AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.close_rounded),
+          onPressed: _clearAlbumSelection,
+        ),
+        title: Text('Selected ${selectedAlbums.length}'),
+        centerTitle: true,
+      );
+    }
   }
 
   Widget _body(BuildContext context) {
@@ -45,29 +58,64 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         }
 
         if (snapshot.hasData) {
-          final datas = snapshot.data
-              .map(
-                (a) => ThumbnailData(
-                    name: a.name,
-                    count: a.mediaCount,
-                    loader: () => widget.gallery.loadAlbumThumbnail(a.name),
-                    onTap: () => _openAlbum(context, a.name)),
-              )
-              .toList();
-
           return ThumbnailGrid(
-            datas,
+            children: [
+              for (final album in snapshot.data) _thumbnailTile(album)
+            ],
             padding: EdgeInsets.all(16),
             crossAxisCount: 2,
             mainAxisSpacing: 16,
             crossAxisSpacing: 16,
-            thumbnailBorderRadius: 24,
           );
         } else {
           return SizedBox.shrink();
         }
       },
     );
+  }
+
+  Widget _thumbnailTile(Album album) {
+    ThumbnailTileMode mode;
+    if (selectedAlbums.isEmpty) {
+      mode = ThumbnailTileMode.normal;
+    } else {
+      mode = selectedAlbums.contains(album)
+          ? ThumbnailTileMode.selected
+          : ThumbnailTileMode.unselected;
+    }
+
+    return ThumbnailTile(
+      name: album.name,
+      count: album.mediaCount,
+      loader: () => widget.gallery.loadAlbumThumbnail(album.name),
+      mode: mode,
+      borderRadius: BorderRadius.circular(24),
+      onTap: mode == ThumbnailTileMode.normal
+          ? () => _openAlbum(context, album.name)
+          : () => _toggleAlbumSelection(album),
+      onLongPress: mode == ThumbnailTileMode.normal
+          ? () => _toggleAlbumSelection(album)
+          : null,
+    );
+  }
+
+  void _clearAlbumSelection() {
+    setState(() {
+      selectedAlbums = [];
+    });
+  }
+
+  void _toggleAlbumSelection(Album album) {
+    final newSelectedAlbums = selectedAlbums.toList();
+    if (newSelectedAlbums.contains(album)) {
+      newSelectedAlbums.remove(album);
+    } else {
+      newSelectedAlbums.add(album);
+    }
+
+    setState(() {
+      selectedAlbums = newSelectedAlbums;
+    });
   }
 
   void _openAlbum(BuildContext context, String name) {
