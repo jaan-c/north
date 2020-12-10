@@ -7,17 +7,17 @@ import 'album_listing_page.dart';
 import 'setup_authentication_page.dart';
 import 'authentication_page.dart';
 
-enum PrivateGalleryState { unconfigured, close, open }
+enum _PrivateGalleryState { unconfigured, close, open }
 
-class PrivateGalleryScreen extends StatefulWidget {
+class PrivateGalleryPage extends StatefulWidget {
   @override
-  _PrivateGalleryScreenState createState() => _PrivateGalleryScreenState();
+  _PrivateGalleryPageState createState() => _PrivateGalleryPageState();
 }
 
-class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
+class _PrivateGalleryPageState extends State<PrivateGalleryPage> {
   final prefs = AppPreferences.getInstance();
 
-  Future<PrivateGalleryState> futureState;
+  Future<_PrivateGalleryState> futureState;
   Future<PrivateGallery> futureGallery;
 
   @override
@@ -36,7 +36,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: futureState,
-      builder: (_, AsyncSnapshot<PrivateGalleryState> snapshot) {
+      builder: (_, AsyncSnapshot<_PrivateGalleryState> snapshot) {
         if (snapshot.hasError) {
           throw StateError('Failed to determine state: ${snapshot.error}');
         }
@@ -46,11 +46,11 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
         }
 
         switch (snapshot.data) {
-          case PrivateGalleryState.unconfigured:
+          case _PrivateGalleryState.unconfigured:
             return _setupAuthenticationPage();
-          case PrivateGalleryState.close:
+          case _PrivateGalleryState.close:
             return _authenticationPage();
-          case PrivateGalleryState.open:
+          case _PrivateGalleryState.open:
             return _albumListingPage();
           default:
             throw StateError('Unhandled state: ${snapshot.data}');
@@ -122,14 +122,14 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
     );
   }
 
-  Future<PrivateGalleryState> _determineState() async {
+  Future<_PrivateGalleryState> _determineState() async {
     final passwordHash = await prefs.getPasswordHash();
     if (passwordHash.isEmpty) {
-      return PrivateGalleryState.unconfigured;
+      return _PrivateGalleryState.unconfigured;
     }
 
     return futureGallery == null
-        ? PrivateGalleryState.close
-        : PrivateGalleryState.open;
+        ? _PrivateGalleryState.close
+        : _PrivateGalleryState.open;
   }
 }

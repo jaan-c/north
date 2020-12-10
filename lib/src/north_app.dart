@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'private_gallery_screen/private_gallery_screen.dart';
+import 'package:north/src/private_gallery_page/private_gallery_page.dart';
 
 class NorthApp extends StatefulWidget {
   @override
@@ -10,6 +9,6 @@ class NorthApp extends StatefulWidget {
 class _NorthAppState extends State<NorthApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: PrivateGalleryScreen());
+    return MaterialApp(home: PrivateGalleryPage());
   }
 }
