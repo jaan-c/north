@@ -47,7 +47,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
 
         switch (snapshot.data) {
           case PrivateGalleryState.unconfigured:
-            return _setupAuthenticaitonPage();
+            return _setupAuthenticationPage();
           case PrivateGalleryState.close:
             return _authenticationPage();
           case PrivateGalleryState.open:
@@ -59,7 +59,7 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
     );
   }
 
-  Widget _setupAuthenticaitonPage() {
+  Widget _setupAuthenticationPage() {
     return SetupAuthenticationPage(onDone: _instantiateGallery);
   }
 
@@ -97,30 +97,30 @@ class _PrivateGalleryScreenState extends State<PrivateGalleryScreen> {
   }
 
   Widget _unlockingGalleryProgressPage(BuildContext context) {
-          final textTheme = Theme.of(context).textTheme;
+    final textTheme = Theme.of(context).textTheme;
 
-          return Scaffold(
-            body: SafeArea(
-              child: Center(
-                child: Padding(
-                  child: Column(
-                    children: [
-                      LinearProgressIndicator(),
-                      SizedBox(height: 8),
-                      Text(
-                        'Unlocking Private Gallery',
-                        style: textTheme.subtitle2,
-                      ),
-                    ],
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            child: Column(
+              children: [
+                LinearProgressIndicator(),
+                SizedBox(height: 8),
+                Text(
+                  'Unlocking Private Gallery',
+                  style: textTheme.subtitle2,
                 ),
-              ),
+              ],
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
             ),
-          );
-        }
+            padding: EdgeInsets.symmetric(horizontal: 16),
+          ),
+        ),
+      ),
+    );
+  }
 
   Future<PrivateGalleryState> _determineState() async {
     final passwordHash = await prefs.getPasswordHash();
