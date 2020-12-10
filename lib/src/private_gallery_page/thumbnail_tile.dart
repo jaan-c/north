@@ -65,13 +65,11 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
 
     return Stack(
       children: [
-        Expanded(
-          child: Padding(
-            child: child,
-            padding: widget.mode == ThumbnailTileMode.unselected
-                ? EdgeInsets.zero
-                : EdgeInsets.all(16),
-          ),
+        Padding(
+          child: child,
+          padding: widget.mode == ThumbnailTileMode.unselected
+              ? EdgeInsets.zero
+              : EdgeInsets.all(16),
         ),
         Padding(
           child: Icon(widget.mode == ThumbnailTileMode.unselected
