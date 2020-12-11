@@ -50,7 +50,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       actions: [
         if (selectedAlbums.length == 1)
           IconButton(
-            icon: Icon(Icons.edit),
+            icon: Icon(Icons.edit_rounded),
             onPressed: () => showDialog(
               context: context,
               builder: _renameDialog,
