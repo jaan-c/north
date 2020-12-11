@@ -29,25 +29,70 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       body: _body(),
     );
   }
 
-  Widget _appBar() {
+  Widget _appBar(BuildContext context) {
     if (selectedAlbums.isEmpty) {
       return AppBar(title: Text('North'), centerTitle: true);
     } else {
+      final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
+
       return AppBar(
         leading: IconButton(
           icon: Icon(Icons.close_rounded),
           onPressed: _clearAlbumSelection,
         ),
-        title: Text(
-            'Selected ${selectedAlbums.length} album${selectedAlbums.length != 1 ? 's' : ''}'),
+        title: Text('Selected ${selectedAlbums.length} $pluralizedAlbum'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_rounded),
+            onPressed: () => _showDeleteConfirmationDialog(
+              context,
+              onDelete: _deleteSelectedAlbums,
+            ),
+          ),
+        ],
       );
     }
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context,
+      {@required VoidCallback onDelete}) {
+    showDialog(
+      context: context,
+      builder: _deleteDialog,
+      barrierDismissible: false,
+    );
+  }
+
+  Widget _deleteDialog(BuildContext context) {
+    final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
+
+    return AlertDialog(
+      title: Text('Delete $pluralizedAlbum?'),
+      content: Text(
+          'This will permanently delete ${selectedAlbums.length} selected $pluralizedAlbum.'),
+      actions: [
+        TextButton(
+          child: Text('CANCEL'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: Text('DELETE'),
+          onPressed: () {
+            _deleteSelectedAlbums();
+            Navigator.pop(context);
+          },
+        ),
+      ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+    );
   }
 
   Widget _body() {
@@ -101,9 +146,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   void _clearAlbumSelection() {
-    setState(() {
-      selectedAlbums = [];
-    });
+    setState(() => selectedAlbums = []);
   }
 
   void _toggleAlbumSelection(Album album) {
@@ -114,8 +157,23 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       newSelectedAlbums.add(album);
     }
 
+    setState(() => selectedAlbums = newSelectedAlbums);
+  }
+
+  Future _deleteSelectedAlbums() async {
+    final mediasForDeletion = <Media>[];
+    for (final album in selectedAlbums) {
+      final medias = await widget.gallery.getMediasOfAlbum(album.name);
+      mediasForDeletion.addAll(medias);
+    }
+
+    for (final media in mediasForDeletion) {
+      await widget.gallery.delete(media.id);
+    }
+
+    _clearAlbumSelection();
     setState(() {
-      selectedAlbums = newSelectedAlbums;
+      futureAlbums = widget.gallery.getAllAlbums();
     });
   }
 
