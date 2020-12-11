@@ -74,7 +74,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
     return _RenameAlbumDialog(
       initialName: selectedAlbum.name,
-      onRename: _renameSelectedAlbum,
+      onRename: (newName) => _renameSelectedAlbum(context, newName),
     );
   }
 
@@ -173,14 +173,26 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     setState(() => selectedAlbums = newSelectedAlbums);
   }
 
-  Future<void> _renameSelectedAlbum(String newName) async {
+  Future<void> _renameSelectedAlbum(
+      BuildContext context, String newName) async {
     final selectedAlbum = selectedAlbums.single;
     try {
       await widget.gallery.renameAlbum(selectedAlbum.name, newName);
-    } on PrivateGalleryException catch (_) {}
+    } on PrivateGalleryException catch (_) {
+      _showFailedToRenameSnackBar(context, newName);
+    }
 
     _clearAlbumSelection();
     _loadAlbums();
+  }
+
+  void _showFailedToRenameSnackBar(BuildContext context, String newName) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Can't rename to an already existing album $newName"),
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 
   Future<void> _deleteSelectedAlbums() async {
