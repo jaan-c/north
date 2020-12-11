@@ -23,7 +23,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   @override
   void initState() {
     super.initState();
-    _reloadAlbums();
+    _loadAlbums();
   }
 
   @override
@@ -37,35 +37,44 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Widget _appBar(BuildContext context) {
     if (selectedAlbums.isEmpty) {
       return AppBar(title: Text('North'), centerTitle: true);
-    } else {
-      final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
+    }
 
-      return AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.close_rounded),
-          onPressed: _clearAlbumSelection,
-        ),
-        title: Text('Selected ${selectedAlbums.length} $pluralizedAlbum'),
-        centerTitle: true,
-        actions: [
+    final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
+
+    return AppBar(
+      leading: IconButton(
+        icon: Icon(Icons.close_rounded),
+        onPressed: _clearAlbumSelection,
+      ),
+      title: Text('Selected ${selectedAlbums.length} $pluralizedAlbum'),
+      actions: [
+        if (selectedAlbums.length == 1)
           IconButton(
-            icon: Icon(Icons.delete_rounded),
-            onPressed: () => _showDeleteConfirmationDialog(
-              context,
-              onDelete: _deleteSelectedAlbums,
+            icon: Icon(Icons.edit),
+            onPressed: () => showDialog(
+              context: context,
+              builder: _renameDialog,
+              barrierDismissible: false,
             ),
           ),
-        ],
-      );
-    }
+        IconButton(
+          icon: Icon(Icons.delete_rounded),
+          onPressed: () => showDialog(
+            context: context,
+            builder: _deleteDialog,
+            barrierDismissible: false,
+          ),
+        ),
+      ],
+    );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context,
-      {@required VoidCallback onDelete}) {
-    showDialog(
-      context: context,
-      builder: _deleteDialog,
-      barrierDismissible: false,
+  Widget _renameDialog(BuildContext context) {
+    final selectedAlbum = selectedAlbums.single;
+
+    return _RenameAlbumDialog(
+      initialName: selectedAlbum.name,
+      onRename: _renameSelectedAlbum,
     );
   }
 
@@ -89,9 +98,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           },
         ),
       ],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     );
   }
 
@@ -145,7 +152,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  void _reloadAlbums() {
+  void _loadAlbums() {
     setState(() {
       futureAlbums = widget.gallery.getAllAlbums();
     });
@@ -166,7 +173,17 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     setState(() => selectedAlbums = newSelectedAlbums);
   }
 
-  Future _deleteSelectedAlbums() async {
+  Future<void> _renameSelectedAlbum(String newName) async {
+    final selectedAlbum = selectedAlbums.single;
+    try {
+      await widget.gallery.renameAlbum(selectedAlbum.name, newName);
+    } on PrivateGalleryException catch (_) {}
+
+    _clearAlbumSelection();
+    _loadAlbums();
+  }
+
+  Future<void> _deleteSelectedAlbums() async {
     final mediasForDeletion = <Media>[];
     for (final album in selectedAlbums) {
       final medias = await widget.gallery.getMediasOfAlbum(album.name);
@@ -178,7 +195,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     }
 
     _clearAlbumSelection();
-    _reloadAlbums();
+    _loadAlbums();
   }
 
   void _openAlbum(BuildContext context, String name) {
@@ -187,6 +204,76 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       MaterialPageRoute(
         builder: (_) => MediaListingPage(widget.gallery, name),
       ),
+    );
+  }
+}
+
+typedef _RenameAlbumCallback = void Function(String newName);
+
+class _RenameAlbumDialog extends StatefulWidget {
+  final String initialName;
+  final _RenameAlbumCallback onRename;
+
+  _RenameAlbumDialog({@required this.initialName, @required this.onRename});
+
+  @override
+  __RenameAlbumDialogState createState() => __RenameAlbumDialogState();
+}
+
+class __RenameAlbumDialogState extends State<_RenameAlbumDialog> {
+  TextEditingController nameController;
+  var isNameValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: widget.initialName);
+    nameController.addListener(_setIsNameValid);
+  }
+
+  void _setIsNameValid() {
+    setState(() => isNameValid = nameController.text.trim().isNotEmpty);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Rename album'),
+      content: _nameField(context),
+      actions: [
+        TextButton(
+          child: Text('CANCEL'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: Text('RENAME'),
+          onPressed: isNameValid
+              ? () {
+                  widget.onRename(nameController.text);
+                  Navigator.pop(context);
+                }
+              : null,
+        ),
+      ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    );
+  }
+
+  Widget _nameField(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return TextField(
+      controller: nameController,
+      style: textTheme.subtitle1,
+      decoration: InputDecoration(border: OutlineInputBorder()),
+      autofocus: true,
+      autocorrect: true,
     );
   }
 }
