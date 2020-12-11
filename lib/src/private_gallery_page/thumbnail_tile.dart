@@ -9,6 +9,7 @@ class ThumbnailTile extends StatefulWidget {
   final String name;
   final int count;
   final ThumbnailTileMode mode;
+  final EdgeInsetsGeometry margin;
   final BorderRadius borderRadius;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
@@ -18,6 +19,7 @@ class ThumbnailTile extends StatefulWidget {
       this.name = '',
       this.count = 0,
       this.mode = ThumbnailTileMode.normal,
+      this.margin = EdgeInsets.zero,
       this.borderRadius = BorderRadius.zero,
       this.onTap,
       this.onLongPress});
@@ -40,22 +42,26 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      child: Column(
-        children: [
-          _thumbnailEmbellishment(
-            context: context,
-            child: _thumbnailContainer(
-              child: _thumbnailImage(),
+      child: Padding(
+        child: Column(
+          children: [
+            _thumbnailEmbellishment(
+              context: context,
+              child: _thumbnailContainer(
+                child: _thumbnailImage(),
+              ),
             ),
-          ),
-          if (widget.name.isNotEmpty) SizedBox(height: 8),
-          _thumbnailName(context),
-        ],
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+            if (widget.name.isNotEmpty) SizedBox(height: 8),
+            _thumbnailName(context),
+          ],
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        padding: widget.margin,
       ),
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
+      borderRadius: widget.borderRadius,
     );
   }
 

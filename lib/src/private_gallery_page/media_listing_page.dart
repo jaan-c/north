@@ -53,10 +53,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
             children: [
               for (final media in snapshot.data) _thumbnailTile(media)
             ],
-            padding: EdgeInsets.zero,
             crossAxisCount: 3,
-            mainAxisSpacing: 0,
-            crossAxisSpacing: 0,
           );
         } else {
           return SizedBox.shrink();
