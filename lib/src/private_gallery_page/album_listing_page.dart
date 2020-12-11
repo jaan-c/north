@@ -43,7 +43,8 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           icon: Icon(Icons.close_rounded),
           onPressed: _clearAlbumSelection,
         ),
-        title: Text('Selected ${selectedAlbums.length}'),
+        title: Text(
+            'Selected ${selectedAlbums.length} album${selectedAlbums.length != 1 ? 's' : ''}'),
         centerTitle: true,
       );
     }
