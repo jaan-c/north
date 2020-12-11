@@ -39,8 +39,7 @@ class _PasswordPageState extends State<PasswordPage> {
   }
 
   void _setIsPasswordValidState() {
-    final password = passwordController.text;
-    setState(() => isPasswordValid = password.isNotEmpty);
+    setState(() => isPasswordValid = passwordController.text.isNotEmpty);
   }
 
   @override
