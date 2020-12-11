@@ -23,7 +23,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   @override
   void initState() {
     super.initState();
-    futureAlbums = widget.gallery.getAllAlbums();
+    _reloadAlbums();
   }
 
   @override
@@ -145,6 +145,12 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
+  void _reloadAlbums() {
+    setState(() {
+      futureAlbums = widget.gallery.getAllAlbums();
+    });
+  }
+
   void _clearAlbumSelection() {
     setState(() => selectedAlbums = []);
   }
@@ -172,9 +178,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     }
 
     _clearAlbumSelection();
-    setState(() {
-      futureAlbums = widget.gallery.getAllAlbums();
-    });
+    _reloadAlbums();
   }
 
   void _openAlbum(BuildContext context, String name) {
