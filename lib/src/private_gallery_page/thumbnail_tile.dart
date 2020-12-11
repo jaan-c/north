@@ -43,6 +43,7 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
       child: Column(
         children: [
           _thumbnailEmbellishment(
+            context: context,
             child: _thumbnailContainer(
               child: _thumbnailImage(),
             ),
@@ -58,10 +59,13 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
     );
   }
 
-  Widget _thumbnailEmbellishment({@required Widget child}) {
+  Widget _thumbnailEmbellishment(
+      {@required BuildContext context, @required Widget child}) {
     if (widget.mode == ThumbnailTileMode.normal) {
       return child;
     }
+
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Stack(
       children: [
@@ -72,9 +76,15 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
               : EdgeInsets.all(16),
         ),
         Padding(
-          child: Icon(widget.mode == ThumbnailTileMode.unselected
-              ? Icons.radio_button_off_rounded
-              : Icons.check_circle_rounded),
+          child: widget.mode == ThumbnailTileMode.unselected
+              ? Icon(
+                  Icons.radio_button_off_rounded,
+                  color: colorScheme.onSurface,
+                )
+              : Icon(
+                  Icons.check_circle_rounded,
+                  color: colorScheme.primary,
+                ),
           padding: EdgeInsets.all(8),
         ),
       ],
