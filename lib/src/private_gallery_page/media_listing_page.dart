@@ -23,7 +23,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
   @override
   void initState() {
     super.initState();
-    futureMedias = widget.gallery.getMediasOfAlbum(widget.albumName);
+    _loadMedias();
     mediaSelection = Selection(singularName: 'media', setState: setState);
   }
 
@@ -50,6 +50,38 @@ class _MediaListingPageState extends State<MediaListingPage> {
         onPressed: mediaSelection.clear,
       ),
       title: Text('${mediaSelection.count} selected ${mediaSelection.name}'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.delete_rounded),
+          onPressed: () => showDialog(
+            context: context,
+            builder: _deleteSelectionDialog,
+            barrierDismissible: false,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _deleteSelectionDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text('Delete ${mediaSelection.name}?'),
+      content: Text(
+          'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.'),
+      actions: [
+        TextButton(
+          child: Text('CANCEL'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: Text('DELETE'),
+          onPressed: () {
+            _deleteSelectedMedia();
+            Navigator.pop(context);
+          },
+        ),
+      ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     );
   }
 
@@ -95,6 +127,21 @@ class _MediaListingPageState extends State<MediaListingPage> {
           ? () => mediaSelection.toggle(media)
           : null,
     );
+  }
+
+  void _loadMedias() {
+    setState(() {
+      futureMedias = widget.gallery.getMediasOfAlbum(widget.albumName);
+    });
+  }
+
+  Future<void> _deleteSelectedMedia() async {
+    for (final media in mediaSelection.toList()) {
+      await widget.gallery.delete(media.id);
+    }
+
+    mediaSelection.clear();
+    _loadMedias();
   }
 
   void _openMedia(BuildContext context, Media media) {
