@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
 import 'media_listing_page.dart';
+import 'selection.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
@@ -18,12 +19,14 @@ class AlbumListingPage extends StatefulWidget {
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<List<Album>> futureAlbums;
-  List<Album> selectedAlbums = [];
+  Selection<Album> albumSelection;
 
   @override
   void initState() {
     super.initState();
     _loadAlbums();
+    albumSelection = Selection(
+        singularName: 'album', pluralName: 'albums', setState: setState);
   }
 
   @override
@@ -35,20 +38,18 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _appBar(BuildContext context) {
-    if (selectedAlbums.isEmpty) {
+    if (albumSelection.isEmpty) {
       return AppBar(title: Text('North'), centerTitle: true);
     }
-
-    final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
 
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.close_rounded),
-        onPressed: _clearAlbumSelection,
+        onPressed: albumSelection.clear,
       ),
-      title: Text('Selected ${selectedAlbums.length} $pluralizedAlbum'),
+      title: Text('Selected ${albumSelection.count} ${albumSelection.name}'),
       actions: [
-        if (selectedAlbums.length == 1)
+        if (albumSelection.isSingle)
           IconButton(
             icon: Icon(Icons.edit_rounded),
             onPressed: () => showDialog(
@@ -70,21 +71,17 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _renameDialog(BuildContext context) {
-    final selectedAlbum = selectedAlbums.single;
-
     return _RenameAlbumDialog(
-      initialName: selectedAlbum.name,
+      initialName: albumSelection.single.name,
       onRename: (newName) => _renameSelectedAlbum(context, newName),
     );
   }
 
   Widget _deleteDialog(BuildContext context) {
-    final pluralizedAlbum = 'album${selectedAlbums.length != 1 ? 's' : ''}';
-
     return AlertDialog(
-      title: Text('Delete $pluralizedAlbum?'),
+      title: Text('Delete ${albumSelection.name}?'),
       content: Text(
-          'This will permanently delete ${selectedAlbums.length} selected $pluralizedAlbum.'),
+          'This will permanently delete ${albumSelection.count} selected ${albumSelection.name}.'),
       actions: [
         TextButton(
           child: Text('CANCEL'),
@@ -126,10 +123,10 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   Widget _thumbnailTile(BuildContext context, Album album) {
     ThumbnailTileMode mode;
-    if (selectedAlbums.isEmpty) {
+    if (albumSelection.isEmpty) {
       mode = ThumbnailTileMode.normal;
     } else {
-      mode = selectedAlbums.contains(album)
+      mode = albumSelection.contains(album)
           ? ThumbnailTileMode.selected
           : ThumbnailTileMode.unselected;
     }
@@ -143,9 +140,9 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       borderRadius: BorderRadius.circular(24),
       onTap: mode == ThumbnailTileMode.normal
           ? () => _openAlbum(context, album.name)
-          : () => _toggleAlbumSelection(album),
+          : () => albumSelection.toggle(album),
       onLongPress: mode == ThumbnailTileMode.normal
-          ? () => _toggleAlbumSelection(album)
+          ? () => albumSelection.toggle(album)
           : null,
     );
   }
@@ -156,31 +153,16 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     });
   }
 
-  void _clearAlbumSelection() {
-    setState(() => selectedAlbums = []);
-  }
-
-  void _toggleAlbumSelection(Album album) {
-    final newSelectedAlbums = selectedAlbums.toList();
-    if (newSelectedAlbums.contains(album)) {
-      newSelectedAlbums.remove(album);
-    } else {
-      newSelectedAlbums.add(album);
-    }
-
-    setState(() => selectedAlbums = newSelectedAlbums);
-  }
-
   Future<void> _renameSelectedAlbum(
       BuildContext context, String newName) async {
-    final selectedAlbum = selectedAlbums.single;
+    final selectedAlbum = albumSelection.single;
     try {
       await widget.gallery.renameAlbum(selectedAlbum.name, newName);
     } on PrivateGalleryException catch (_) {
       _showFailedToRenameSnackBar(context, newName);
     }
 
-    _clearAlbumSelection();
+    albumSelection.clear();
     _loadAlbums();
   }
 
@@ -195,7 +177,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   Future<void> _deleteSelectedAlbums() async {
     final mediasForDeletion = <Media>[];
-    for (final album in selectedAlbums) {
+    for (final album in albumSelection.toList()) {
       final medias = await widget.gallery.getMediasOfAlbum(album.name);
       mediasForDeletion.addAll(medias);
     }
@@ -204,7 +186,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       await widget.gallery.delete(media.id);
     }
 
-    _clearAlbumSelection();
+    albumSelection.clear();
     _loadAlbums();
   }
 
