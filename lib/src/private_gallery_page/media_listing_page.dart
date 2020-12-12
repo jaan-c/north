@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
 import 'media_viewer_page.dart';
+import 'selection.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
@@ -17,11 +18,13 @@ class MediaListingPage extends StatefulWidget {
 
 class _MediaListingPageState extends State<MediaListingPage> {
   Future<List<Media>> futureMedias;
+  Selection<Media> mediaSelection;
 
   @override
   void initState() {
     super.initState();
     futureMedias = widget.gallery.getMediasOfAlbum(widget.albumName);
+    mediaSelection = Selection(singularName: 'media', setState: setState);
   }
 
   @override
@@ -33,10 +36,20 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _appBar() {
+    if (mediaSelection.isEmpty) {
+      return AppBar(
+        title: Text(widget.albumName),
+        centerTitle: true,
+        automaticallyImplyLeading: true,
+      );
+    }
+
     return AppBar(
-      title: Text(widget.albumName),
-      centerTitle: true,
-      automaticallyImplyLeading: true,
+      leading: IconButton(
+        icon: Icon(Icons.close_rounded),
+        onPressed: mediaSelection.clear,
+      ),
+      title: Text('${mediaSelection.count} selected ${mediaSelection.name}'),
     );
   }
 
@@ -63,9 +76,24 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _thumbnailTile(Media media) {
+    ThumbnailTileMode mode;
+    if (mediaSelection.isEmpty) {
+      mode = ThumbnailTileMode.normal;
+    } else {
+      mode = mediaSelection.contains(media)
+          ? ThumbnailTileMode.selected
+          : ThumbnailTileMode.unselected;
+    }
+
     return ThumbnailTile(
       loader: () => widget.gallery.loadMedia(media.id),
-      onTap: () => _openMedia(context, media),
+      mode: mode,
+      onTap: mode == ThumbnailTileMode.normal
+          ? () => _openMedia(context, media)
+          : () => mediaSelection.toggle(media),
+      onLongPress: mode == ThumbnailTileMode.normal
+          ? () => mediaSelection.toggle(media)
+          : null,
     );
   }
 
