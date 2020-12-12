@@ -108,11 +108,17 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         }
 
         if (snapshot.hasData) {
-          return ThumbnailGrid(
-            children: [
-              for (final album in snapshot.data) _thumbnailTile(context, album)
-            ],
-            crossAxisCount: 2,
+          return Padding(
+            child: ThumbnailGrid(
+              children: [
+                for (final album in snapshot.data)
+                  _thumbnailTile(context, album)
+              ],
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
+            padding: EdgeInsets.all(16),
           );
         } else {
           return SizedBox.shrink();
@@ -136,7 +142,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       count: album.mediaCount,
       loader: () => widget.gallery.loadAlbumThumbnail(album.name),
       mode: mode,
-      margin: EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(24),
       onTap: mode == ThumbnailTileMode.normal
           ? () => _openAlbum(context, album.name)
