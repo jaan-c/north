@@ -43,9 +43,7 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
       children: [
         _thumbnailEmbellishment(
           context: context,
-          child: _thumbnailContainer(
-            child: _thumbnailImage(),
-          ),
+          child: _thumbnailImage(),
         ),
         if (widget.name.isNotEmpty) SizedBox(height: 8),
         _thumbnailName(context),
@@ -87,16 +85,6 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
     );
   }
 
-  Widget _thumbnailContainer({@required Widget child}) {
-    return ClipRRect(
-      child: AspectRatio(
-        child: child,
-        aspectRatio: 1 / 1,
-      ),
-      borderRadius: widget.borderRadius,
-    );
-  }
-
   Widget _thumbnailImage() {
     return FutureBuilder(
       future: futureThumbnail,
@@ -105,11 +93,25 @@ class _ThumbnailTileState extends State<ThumbnailTile> {
           throw StateError('Failed to load thumbnail: ${snapshot.error}');
         }
 
-        return FittedBox(
-          child: snapshot.hasData
-              ? Image.file(snapshot.data)
-              : Container(color: Colors.grey),
-          fit: BoxFit.cover,
+        return AspectRatio(
+          child: Ink(
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              image: snapshot.hasData
+                  ? DecorationImage(
+                      image: FileImage(snapshot.data),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+              borderRadius: widget.borderRadius,
+            ),
+            child: InkWell(
+              onTap: widget.onTap,
+              onLongPress: widget.onLongPress,
+              borderRadius: widget.borderRadius,
+            ),
+          ),
+          aspectRatio: 1 / 1,
         );
       },
     );
