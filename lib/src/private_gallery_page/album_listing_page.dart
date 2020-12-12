@@ -47,7 +47,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         icon: Icon(Icons.close_rounded),
         onPressed: albumSelection.clear,
       ),
-      title: Text('Selected ${albumSelection.count} ${albumSelection.name}'),
+      title: Text('${albumSelection.count} selected ${albumSelection.name}'),
       actions: [
         if (albumSelection.isSingle)
           IconButton(
