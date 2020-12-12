@@ -62,7 +62,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
             context: context,
-            builder: _deleteDialog,
+            builder: _deleteSelectionDialog,
             barrierDismissible: false,
           ),
         ),
@@ -77,7 +77,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  Widget _deleteDialog(BuildContext context) {
+  Widget _deleteSelectionDialog(BuildContext context) {
     return AlertDialog(
       title: Text('Delete ${albumSelection.name}?'),
       content: Text(
