@@ -81,7 +81,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     return AlertDialog(
       title: Text('Delete ${albumSelection.name}?'),
       content: Text(
-          'This will permanently delete ${albumSelection.count} selected ${albumSelection.name}.'),
+          'This will permanently delete ${albumSelection.count} ${albumSelection.name}.'),
       actions: [
         TextButton(
           child: Text('CANCEL'),
