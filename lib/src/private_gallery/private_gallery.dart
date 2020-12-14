@@ -126,6 +126,7 @@ class PrivateGallery {
   final MediaMetadataStore _metadataStore;
   final MediaStore _mediaStore;
   final ThumbnailStore _thumbnailStore;
+  final List<VoidCallback> _listeners = [];
 
   var _isDisposed = false;
 
@@ -138,6 +139,22 @@ class PrivateGallery {
         _metadataStore = metadataStore,
         _mediaStore = mediaStore,
         _thumbnailStore = thumbnailStore;
+
+  bool hasListener(VoidCallback listener) {
+    return _listeners.contains(listener);
+  }
+
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  void _callListeners() {
+    _listeners.forEach((l) => l());
+  }
 
   /// Store [media] inside album named [albumName].
   ///
@@ -177,6 +194,8 @@ class PrivateGallery {
           .rebindState(state);
 
       await _mediaStore.put(id, media).rebindState(state);
+
+      _callListeners();
     } catch (e) {
       await _metadataStore.delete(id);
       await _thumbnailStore.delete(id);
@@ -282,6 +301,8 @@ class PrivateGallery {
 
     await Future.wait([metaResult, thumbnailResult, mediaResult],
         eagerError: true);
+
+    _callListeners();
   }
 
   /// Rename album with [oldName] to [newName].
@@ -309,6 +330,8 @@ class PrivateGallery {
     final newMetas = oldMetas.map((m) => m.copy(album: newName)).toList();
 
     await _metadataStore.update(newMetas);
+
+    _callListeners();
   }
 
   /// Rename media with [id] to [newName].
@@ -331,6 +354,7 @@ class PrivateGallery {
       return;
     } else {
       await _metadataStore.update([newMeta]);
+      _callListeners();
     }
   }
 
@@ -363,6 +387,7 @@ class PrivateGallery {
       return;
     } else {
       await _metadataStore.update([newMeta]);
+      _callListeners();
     }
   }
 
@@ -378,6 +403,7 @@ class PrivateGallery {
       await _metadataStore.dispose();
       await _mediaStore.clearCache();
       await _thumbnailStore.clearCache();
+      _listeners.clear();
 
       _isDisposed = true;
     }

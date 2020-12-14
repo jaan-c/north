@@ -39,6 +39,16 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
+  test('hasListener, addListener, removeListener', () async {
+    final listener = () {};
+
+    gallery.addListener(listener);
+    expect(gallery.hasListener(listener), isTrue);
+
+    gallery.removeListener(listener);
+    expect(gallery.hasListener(listener), isFalse);
+  });
+
   test('put throws ArgumentError on empty album name.', () async {
     final id = Uuid.generate();
     final media = tempDir.file();
@@ -91,6 +101,19 @@ void main() {
     final encryptedFile =
         descendants.firstWhere((e) => pathlib.basename(e.path) == id.asString);
     await expectLater(encryptedFile, isInstanceOf<File>());
+  });
+
+  test('put calls listeners on completion.', () async {
+    final id = Uuid.generate();
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+
+    gallery.addListener(listener);
+
+    await expectLater(gallery.put(id, 'Album', media), completes);
+    expect(isListenerCalled, isTrue);
   });
 
   test('getAllAlbums returns an empty list when there are no albums.',
@@ -239,6 +262,20 @@ void main() {
         gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
   });
 
+  test('delete calls listeners on completion.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+
+    await gallery.put(id, 'Album', media);
+    gallery.addListener(listener);
+
+    await expectLater(gallery.delete(id), completes);
+    expect(isListenerCalled, isTrue);
+  });
+
   test(
       'renameAlbum throws ArgumentError if either oldName and newName is empty.',
       () async {
@@ -284,6 +321,19 @@ void main() {
         gallery.getMediasOfAlbum('album'), completion(hasLength(1)));
   });
 
+  test('renameAlbum calls listeners on completion.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+
+    await gallery.put(Uuid.generate(), 'Album', media);
+    await gallery.addListener(listener);
+
+    await expectLater(gallery.renameAlbum('Album', 'New Album'), completes);
+    expect(isListenerCalled, isTrue);
+  });
+
   test('renameMedia throws ArgumentError on empty name.', () async {
     await expectLater(
         gallery.renameMedia(Uuid.generate(), ''), throwsArgumentError);
@@ -310,6 +360,20 @@ void main() {
         comparator: MediaOrder.nameAscending);
     expect(medias[0].name, 'NewName');
     expect(medias[1].name, pathlib.basename(media.path));
+  });
+
+  test('renameMedia calls listeners on completion.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+    gallery.addListener(listener);
+
+    await expectLater(gallery.renameMedia(id, 'new media.png'), completes);
+    expect(isListenerCalled, isTrue);
   });
 
   test('moveMediaToAlbum throws ArgumentError on empty destination album.',
@@ -361,14 +425,33 @@ void main() {
     expect(medias.map((m) => m.id).toList(), contains(id));
   });
 
-  test('dispose prevents further method calls.', () async {
+  test('moveMediaToAlbum calls listeners on completion', () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+    final id = Uuid.generate();
 
+    await gallery.put(id, 'Album', media);
+    await gallery.put(Uuid.generate(), 'Album 1', media);
+    gallery.addListener(listener);
+
+    await expectLater(gallery.moveMediaToAlbum(id, 'Album 1'), completes);
+    expect(isListenerCalled, isTrue);
+  });
+
+  test('dispose prevents further method calls and removes all listeners.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final listener = () {};
+
+    gallery.addListener(listener);
     await gallery.dispose();
 
     await expectLater(gallery.put(Uuid.generate(), 'Album', media),
         throwsPrivateGalleryException);
     await expectLater(gallery.getAllAlbums(), throwsPrivateGalleryException);
+    expect(gallery.hasListener(listener), isFalse);
   });
 }
