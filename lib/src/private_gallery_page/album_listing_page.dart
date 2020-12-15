@@ -24,9 +24,16 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   @override
   void initState() {
     super.initState();
+    widget.gallery.addListener(_loadAlbums);
     _loadAlbums();
     albumSelection = Selection(
         singularName: 'album', pluralName: 'albums', setState: setState);
+  }
+
+  @override
+  void dispose() {
+    widget.gallery.removeListener(_loadAlbums);
+    super.dispose();
   }
 
   @override
@@ -183,7 +190,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<void> _deleteSelectedAlbums() async {
     final mediasForDeletion = <Media>[];
     for (final album in albumSelection.toList()) {
-      final medias = await widget.gallery.getMediasOfAlbum(album.name);
+      final medias = await widget.gallery.getAlbumMedias(album.name);
       mediasForDeletion.addAll(medias);
     }
 

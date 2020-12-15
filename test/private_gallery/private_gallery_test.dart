@@ -77,7 +77,7 @@ void main() {
 
     await expectLater(future, throwsCancelledException);
     await expectLater(
-        gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
+        gallery.getAlbumMedias('Album'), throwsPrivateGalleryException);
   });
 
   test('put stores media inside album.', () async {
@@ -87,7 +87,7 @@ void main() {
 
     await expectLater(gallery.put(id, 'Album', media), completes);
     await expectLater(
-        gallery.getMediasOfAlbum('Album'), completion(hasLength(1)));
+        gallery.getAlbumMedias('Album'), completion(hasLength(1)));
   });
 
   test('put places media under app root.', () async {
@@ -135,23 +135,23 @@ void main() {
     expect(albums.map((a) => a.mediaCount).toList(), equals([1, 1, 1]));
   });
 
-  test('getMediasOfAlbum throws ArgumentError on empty name.', () async {
-    await expectLater(gallery.getMediasOfAlbum(''), throwsArgumentError);
+  test('getAlbumMedias throws ArgumentError on empty name.', () async {
+    await expectLater(gallery.getAlbumMedias(''), throwsArgumentError);
   });
 
-  test('getMediasOfAlbum throws PrivateGalleryException on non-existent album.',
+  test('getAlbumMedias throws PrivateGalleryException on non-existent album.',
       () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
 
     await gallery.put(Uuid.generate(), 'Album', media);
 
-    await expectLater(gallery.getMediasOfAlbum('Non Existent'),
-        throwsPrivateGalleryException);
+    await expectLater(
+        gallery.getAlbumMedias('Non Existent'), throwsPrivateGalleryException);
   });
 
   test(
-      'getMediasOfAlbum only retrieves media inside passed album sorted by comparator.',
+      'getAlbumMedias only retrieves media inside passed album sorted by comparator.',
       () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
@@ -165,7 +165,7 @@ void main() {
     await gallery.put(Uuid.generate(), 'B', media);
     await gallery.put(Uuid.generate(), 'B', media);
 
-    final medias = await gallery.getMediasOfAlbum('A');
+    final medias = await gallery.getAlbumMedias('A');
     expect(
         medias.map((m) => m.id).toList(), equals([thirdId, secondId, firstId]));
   });
@@ -255,11 +255,10 @@ void main() {
     await gallery.put(secondId, 'Album', media);
 
     await expectLater(gallery.delete(firstId), completes);
-    await expectLater(
-        gallery.getMediasOfAlbum('Album'), completion(isNotEmpty));
+    await expectLater(gallery.getAlbumMedias('Album'), completion(isNotEmpty));
     await expectLater(gallery.delete(secondId), completes);
     await expectLater(
-        gallery.getMediasOfAlbum('Album'), throwsPrivateGalleryException);
+        gallery.getAlbumMedias('Album'), throwsPrivateGalleryException);
   });
 
   test('delete calls listeners on completion.', () async {
@@ -314,11 +313,11 @@ void main() {
 
     await expectLater(gallery.renameAlbum(oldAlbum, newAlbum), completes);
     await expectLater(
-        gallery.getMediasOfAlbum(oldAlbum), throwsPrivateGalleryException);
+        gallery.getAlbumMedias(oldAlbum), throwsPrivateGalleryException);
     await expectLater(
-        gallery.getMediasOfAlbum(newAlbum), completion(hasLength(1)));
+        gallery.getAlbumMedias(newAlbum), completion(hasLength(1)));
     await expectLater(
-        gallery.getMediasOfAlbum('album'), completion(hasLength(1)));
+        gallery.getAlbumMedias('album'), completion(hasLength(1)));
   });
 
   test('renameAlbum calls listeners on completion.', () async {
@@ -356,7 +355,7 @@ void main() {
 
     await expectLater(gallery.renameMedia(firstId, 'NewName'), completes);
 
-    final medias = await gallery.getMediasOfAlbum('Album',
+    final medias = await gallery.getAlbumMedias('Album',
         comparator: MediaOrder.nameAscending);
     expect(medias[0].name, 'NewName');
     expect(medias[1].name, pathlib.basename(media.path));
@@ -416,11 +415,11 @@ void main() {
     await gallery.put(id, 'Album', media);
 
     await expectLater(
-        gallery.getMediasOfAlbum('DestinationAlbum'), completion(hasLength(1)));
+        gallery.getAlbumMedias('DestinationAlbum'), completion(hasLength(1)));
     await expectLater(
         gallery.moveMediaToAlbum(id, 'DestinationAlbum'), completes);
 
-    final medias = await gallery.getMediasOfAlbum('DestinationAlbum');
+    final medias = await gallery.getAlbumMedias('DestinationAlbum');
     expect(medias, hasLength(2));
     expect(medias.map((m) => m.id).toList(), contains(id));
   });

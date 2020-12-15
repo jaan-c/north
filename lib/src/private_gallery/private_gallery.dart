@@ -223,7 +223,7 @@ class PrivateGallery {
   ///
   /// Throws [ArgumentError] if [name] is empty. Throws
   /// [PrivateGalleryException] if album with [name] does not exist.
-  Future<List<Media>> getMediasOfAlbum(String name,
+  Future<List<Media>> getAlbumMedias(String name,
       {Comparator<Media> comparator = MediaOrder.newest}) async {
     _checkIsDisposed();
     checkArgument(name.isNotEmpty, message: 'name is empty.');
@@ -250,7 +250,7 @@ class PrivateGallery {
     checkArgument(name.isNotEmpty, message: 'name is empty.');
 
     final newestMedia =
-        (await getMediasOfAlbum(name, comparator: MediaOrder.newest)).first;
+        (await getAlbumMedias(name, comparator: MediaOrder.newest)).first;
     return _thumbnailStore.get(newestMedia.id);
   }
 

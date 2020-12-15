@@ -131,7 +131,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
   void _loadMedias() {
     setState(() {
-      futureMedias = widget.gallery.getMediasOfAlbum(widget.albumName);
+      futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
     });
   }
 
