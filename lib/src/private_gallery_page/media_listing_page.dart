@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
 import 'media_viewer_page.dart';
+import 'prompt_dialog.dart';
 import 'selection.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -64,24 +65,12 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _deleteSelectionDialog(BuildContext context) {
-    return AlertDialog(
-      title: Text('Delete ${mediaSelection.name}?'),
-      content: Text(
-          'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.'),
-      actions: [
-        TextButton(
-          child: Text('CANCEL'),
-          onPressed: () => Navigator.pop(context),
-        ),
-        TextButton(
-          child: Text('DELETE'),
-          onPressed: () {
-            _deleteSelectedMedia();
-            Navigator.pop(context);
-          },
-        ),
-      ],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    return PromptDialog(
+      title: 'Delete ${mediaSelection.name}?',
+      content:
+          'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.',
+      positiveButtonText: 'DELETE',
+      onPositivePressed: _deleteSelectedMedia,
     );
   }
 

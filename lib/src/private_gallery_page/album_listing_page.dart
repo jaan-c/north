@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
 import 'media_listing_page.dart';
+import 'prompt_dialog.dart';
 import 'selection.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -85,24 +86,12 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _deleteSelectionDialog(BuildContext context) {
-    return AlertDialog(
-      title: Text('Delete ${albumSelection.name}?'),
-      content: Text(
-          'This will permanently delete ${albumSelection.count} ${albumSelection.name}.'),
-      actions: [
-        TextButton(
-          child: Text('CANCEL'),
-          onPressed: () => Navigator.pop(context),
-        ),
-        TextButton(
-          child: Text('DELETE'),
-          onPressed: () {
-            _deleteSelectedAlbums();
-            Navigator.pop(context);
-          },
-        ),
-      ],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    return PromptDialog(
+      title: 'Delete ${albumSelection.name}?',
+      content:
+          'This will permanently delete ${albumSelection.count} ${albumSelection.name}',
+      positiveButtonText: 'DELETE',
+      onPositivePressed: _deleteSelectedAlbums,
     );
   }
 
