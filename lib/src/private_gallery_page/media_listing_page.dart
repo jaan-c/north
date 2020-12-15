@@ -4,6 +4,7 @@ import 'package:north/private_gallery.dart';
 import 'media_viewer_page.dart';
 import 'prompt_dialog.dart';
 import 'selection.dart';
+import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
@@ -31,12 +32,12 @@ class _MediaListingPageState extends State<MediaListingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       body: _body(context),
     );
   }
 
-  Widget _appBar() {
+  Widget _appBar(BuildContext context) {
     if (mediaSelection.isEmpty) {
       return AppBar(
         title: Text(widget.albumName),
@@ -52,6 +53,15 @@ class _MediaListingPageState extends State<MediaListingPage> {
       ),
       title: Text('${mediaSelection.count} selected ${mediaSelection.name}'),
       actions: [
+        if (mediaSelection.isSingle)
+          IconButton(
+            icon: Icon(Icons.edit_rounded),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => _renameDialog(),
+              barrierDismissible: false,
+            ),
+          ),
         IconButton(
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
@@ -61,6 +71,16 @@ class _MediaListingPageState extends State<MediaListingPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _renameDialog() {
+    return TextFieldDialog(
+      title: 'Rename media',
+      initialText: mediaSelection.single.name,
+      positiveTextButton: 'RENAME',
+      onCheckText: (name) => name.trim().isNotEmpty,
+      onSubmitText: (newName) => _renameSelectedMedia(newName),
     );
   }
 
@@ -122,6 +142,14 @@ class _MediaListingPageState extends State<MediaListingPage> {
     setState(() {
       futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
     });
+  }
+
+  void _renameSelectedMedia(String newName) async {
+    final selectedMedia = mediaSelection.single;
+    await widget.gallery.renameMedia(selectedMedia.id, newName);
+
+    mediaSelection.clear();
+    _loadMedias();
   }
 
   Future<void> _deleteSelectedMedia() async {
