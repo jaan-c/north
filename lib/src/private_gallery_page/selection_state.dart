@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
-class Selection<T> {
+class SelectionState<T> {
   final String singularName;
   final String pluralName;
   final void Function(VoidCallback) setState;
@@ -17,7 +17,7 @@ class Selection<T> {
 
   T get single => _selection.single;
 
-  Selection(
+  SelectionState(
       {@required this.singularName, String pluralName, @required this.setState})
       : pluralName = pluralName ?? singularName;
 

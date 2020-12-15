@@ -3,7 +3,7 @@ import 'package:north/private_gallery.dart';
 
 import 'media_viewer_page.dart';
 import 'prompt_dialog.dart';
-import 'selection.dart';
+import 'selection_state.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -20,13 +20,13 @@ class MediaListingPage extends StatefulWidget {
 
 class _MediaListingPageState extends State<MediaListingPage> {
   Future<List<Media>> futureMedias;
-  Selection<Media> mediaSelection;
+  SelectionState<Media> mediaSelection;
 
   @override
   void initState() {
     super.initState();
     _loadMedias();
-    mediaSelection = Selection(singularName: 'media', setState: setState);
+    mediaSelection = SelectionState(singularName: 'media', setState: setState);
   }
 
   @override
