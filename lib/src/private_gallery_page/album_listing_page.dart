@@ -81,7 +81,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   Widget _renameDialog(BuildContext context) {
     return TextFieldDialog(
-      title: 'Rename album?',
+      title: 'Rename album',
       initialText: albumSelection.single.name,
       positiveTextButton: 'RENAME',
       onCheckText: (name) => name.trim().isNotEmpty,
