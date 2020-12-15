@@ -56,7 +56,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
             context: context,
-            builder: _deleteSelectionDialog,
+            builder: (_) => _deleteSelectionDialog(),
             barrierDismissible: false,
           ),
         ),
@@ -64,7 +64,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  Widget _deleteSelectionDialog(BuildContext context) {
+  Widget _deleteSelectionDialog() {
     return PromptDialog(
       title: 'Delete ${mediaSelection.name}?',
       content:
