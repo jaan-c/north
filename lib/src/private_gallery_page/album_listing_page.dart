@@ -4,6 +4,7 @@ import 'package:north/private_gallery.dart';
 import 'media_listing_page.dart';
 import 'prompt_dialog.dart';
 import 'selection.dart';
+import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
@@ -79,9 +80,12 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _renameDialog(BuildContext context) {
-    return _RenameAlbumDialog(
-      initialName: albumSelection.single.name,
-      onRename: (newName) => _renameSelectedAlbum(context, newName),
+    return TextFieldDialog(
+      title: 'Rename album?',
+      initialText: albumSelection.single.name,
+      positiveTextButton: 'RENAME',
+      onCheckText: (name) => name.trim().isNotEmpty,
+      onSubmitText: (newName) => _renameSelectedAlbum(context, newName),
     );
   }
 
@@ -197,76 +201,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       MaterialPageRoute(
         builder: (_) => MediaListingPage(widget.gallery, name),
       ),
-    );
-  }
-}
-
-typedef _RenameAlbumCallback = void Function(String newName);
-
-class _RenameAlbumDialog extends StatefulWidget {
-  final String initialName;
-  final _RenameAlbumCallback onRename;
-
-  _RenameAlbumDialog({@required this.initialName, @required this.onRename});
-
-  @override
-  __RenameAlbumDialogState createState() => __RenameAlbumDialogState();
-}
-
-class __RenameAlbumDialogState extends State<_RenameAlbumDialog> {
-  TextEditingController nameController;
-  var isNameValid = false;
-
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: widget.initialName);
-    nameController.addListener(_setIsNameValid);
-  }
-
-  void _setIsNameValid() {
-    setState(() => isNameValid = nameController.text.trim().isNotEmpty);
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Rename album'),
-      content: _nameField(context),
-      actions: [
-        TextButton(
-          child: Text('CANCEL'),
-          onPressed: () => Navigator.pop(context),
-        ),
-        TextButton(
-          child: Text('RENAME'),
-          onPressed: isNameValid
-              ? () {
-                  widget.onRename(nameController.text);
-                  Navigator.pop(context);
-                }
-              : null,
-        ),
-      ],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    );
-  }
-
-  Widget _nameField(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return TextField(
-      controller: nameController,
-      style: textTheme.subtitle1,
-      decoration: InputDecoration(border: OutlineInputBorder()),
-      autofocus: true,
-      autocorrect: true,
     );
   }
 }
