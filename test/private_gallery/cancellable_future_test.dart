@@ -1,22 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:north/src/private_gallery/cancelable_future.dart';
+import 'package:north/src/private_gallery/cancellable_future.dart';
 
 void main() {
   final throwsCancelledException = throwsA(isInstanceOf<CancelledException>());
 
   test(
-      '''CancelableFuture.cancel triggers CancelState.checkIsCancelled to throw 
+      '''CancellableFuture.cancel triggers CancelState.checkIsCancelled to throw 
       CancelledException.''', () async {
-    final cancelableFuture = CancelableFuture(infinity);
-    cancelableFuture.cancel();
-    await expectLater(cancelableFuture, throwsCancelledException);
+    final cancellableFuture = CancellableFuture(infinity);
+    cancellableFuture.cancel();
+    await expectLater(cancellableFuture, throwsCancelledException);
   });
 
   test(
-      'CancelableFuture can wrap another CancelableFuture by overriding its state.',
+      'CancellableFuture can wrap another CancellableFuture by overriding its state.',
       () async {
-    final inner = CancelableFuture(infinity);
-    final wrapper = CancelableFuture((state) async {
+    final inner = CancellableFuture(infinity);
+    final wrapper = CancellableFuture((state) async {
       return inner.rebindState(state);
     });
     wrapper.cancel();

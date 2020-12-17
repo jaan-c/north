@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:quiver/check.dart';
 import 'package:quiver/core.dart';
 
-import 'cancelable_future.dart';
+import 'cancellable_future.dart';
 import 'media_metadata.dart';
 import 'media_metadata_store.dart';
 import 'media_store.dart';
@@ -161,9 +161,9 @@ class PrivateGallery {
   /// If the album does not exist, it is created.
   ///
   /// Throws [ArgumentError] if album is empty. Throws [CancelledException] if
-  /// [CancelableFuture.cancel] is called.
-  CancelableFuture<void> put(Uuid id, String albumName, File media) {
-    return CancelableFuture(
+  /// [CancellableFuture.cancel] is called.
+  CancellableFuture<void> put(Uuid id, String albumName, File media) {
+    return CancellableFuture(
         (state) => _putInStores(id, albumName, media, state));
   }
 
@@ -211,8 +211,8 @@ class PrivateGallery {
   /// Throws [ArgumentError] if [album] is empty. Throws
   /// [PrivateGallerException] if media with [id] does not exist or if
   /// media with [duplicateId] already exists.
-  CancelableFuture<void> copyMedia(Uuid id, String album, Uuid duplicateId) {
-    return CancelableFuture(
+  CancellableFuture<void> copyMedia(Uuid id, String album, Uuid duplicateId) {
+    return CancellableFuture(
         (state) => _copyStoreEntries(id, album, duplicateId, state));
   }
 
@@ -318,10 +318,10 @@ class PrivateGallery {
   /// access to the media must call this method.
   ///
   /// Throws [PrivateGalleryException] if [id] does not exist.
-  CancelableFuture<File> loadMedia(Uuid id) {
+  CancellableFuture<File> loadMedia(Uuid id) {
     _checkIsDisposed();
 
-    return CancelableFuture((state) async {
+    return CancellableFuture((state) async {
       if (!await _metadataStore.has(id)) {
         throw PrivateGalleryException('Media $id does not exist.');
       }

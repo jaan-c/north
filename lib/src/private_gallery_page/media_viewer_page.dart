@@ -18,7 +18,7 @@ class MediaViewerPage extends StatefulWidget {
 }
 
 class _MediaViewerPageState extends State<MediaViewerPage> {
-  CancelableFuture<File> futureMediaFile;
+  CancellableFuture<File> futureMediaFile;
   Future<_MediaType> futureMediaType;
 
   @override

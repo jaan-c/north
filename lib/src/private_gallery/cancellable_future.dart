@@ -5,7 +5,7 @@ class CancelledException implements Exception {
   String toString() => '${(CancelledException)}';
 }
 
-/// An object passed to [CancelableFuture] computation to signal cancellation.
+/// An object passed to [CancellableFuture] computation to signal cancellation.
 abstract class CancelState {
   /// Throws [CancelledException] if [cancel] is called.
   void checkIsCancelled();
@@ -56,27 +56,27 @@ class _CancelStateDelegate implements CancelState {
   }
 }
 
-typedef CancelableComputation<T> = Future<T> Function(CancelState state);
+typedef CancellableComputation<T> = Future<T> Function(CancelState state);
 
 /// A [Future] that can be signalled to cancel.
 ///
 /// Takes a [computation] that must frequently call
 /// [CancelState.checkIsCancelled] whenever possible.
-class CancelableFuture<T> extends DelegatingFuture<T> {
+class CancellableFuture<T> extends DelegatingFuture<T> {
   final _CancelStateDelegate _state;
 
-  CancelableFuture._internal(this._state, Future<T> future) : super(future);
+  CancellableFuture._internal(this._state, Future<T> future) : super(future);
 
-  factory CancelableFuture(CancelableComputation<T> computation) {
+  factory CancellableFuture(CancellableComputation<T> computation) {
     final state = _CancelStateDelegate();
     final future = computation(state);
-    return CancelableFuture._internal(state, future);
+    return CancellableFuture._internal(state, future);
   }
 
-  /// Override the state consulted by this with a wrapping [CancelableFuture]'s
-  /// state. This way cancelation from the outer [CancelableFuture] propagates
+  /// Override the state consulted by this with a wrapping [CancellableFuture]'s
+  /// state. This way cancelation from the outer [CancellableFuture] propagates
   /// to this.
-  CancelableFuture<T> rebindState(CancelState state) {
+  CancellableFuture<T> rebindState(CancelState state) {
     _state.state = state;
     return this;
   }

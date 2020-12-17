@@ -29,13 +29,13 @@ mixin FileStore {
     return fileDir.file(id.asString).exists();
   }
 
-  CancelableFuture<void> put(Uuid id, File file) {
+  CancellableFuture<void> put(Uuid id, File file) {
     final chunkStream = file.openRead();
     return putStream(id, chunkStream);
   }
 
-  CancelableFuture<void> putStream(Uuid id, Stream<List<int>> chunkStream) {
-    return CancelableFuture(
+  CancellableFuture<void> putStream(Uuid id, Stream<List<int>> chunkStream) {
+    return CancellableFuture(
         (state) => _encryptAndStore(id, chunkStream, state));
   }
 
@@ -63,8 +63,8 @@ mixin FileStore {
     }
   }
 
-  CancelableFuture<void> duplicate(Uuid id, Uuid duplicateId) {
-    return CancelableFuture((state) => _duplicateFile(id, duplicateId, state));
+  CancellableFuture<void> duplicate(Uuid id, Uuid duplicateId) {
+    return CancellableFuture((state) => _duplicateFile(id, duplicateId, state));
   }
 
   Future<void> _duplicateFile(
@@ -93,8 +93,8 @@ mixin FileStore {
     }
   }
 
-  CancelableFuture<File> get(Uuid id) {
-    return CancelableFuture((state) => _decryptAndCache(id, state));
+  CancellableFuture<File> get(Uuid id) {
+    return CancellableFuture((state) => _decryptAndCache(id, state));
   }
 
   Future<File> _decryptAndCache(Uuid id, CancelState state) async {

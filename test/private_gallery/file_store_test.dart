@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:north/crypto.dart';
-import 'package:north/src/private_gallery/cancelable_future.dart';
+import 'package:north/src/private_gallery/cancellable_future.dart';
 import 'package:north/src/private_gallery/file_store.dart';
 import 'package:north/src/private_gallery/uuid.dart';
 
