@@ -116,6 +116,82 @@ void main() {
     expect(isListenerCalled, isTrue);
   });
 
+  test('copyMedia throws ArgumentError if album is empty.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    await expectLater(
+        gallery.copyMedia(id, '', Uuid.generate()), throwsArgumentError);
+  });
+
+  test(
+      'copyMedia throws PrivateGalleryException if media with id does not exist or duplicateId already exists.',
+      () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+    final existingId = Uuid.generate();
+    final nonExistingId = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+    await gallery.put(existingId, 'Album', media);
+
+    await expectLater(gallery.copyMedia(id, 'Album Copy', existingId),
+        throwsPrivateGalleryException);
+    await expectLater(
+        gallery.copyMedia(nonExistingId, 'Album Copy', Uuid.generate()),
+        throwsPrivateGalleryException);
+  });
+
+  test('copyMedia throws CanceledException on cancel.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    final future = gallery.copyMedia(id, 'Album Copy', Uuid.generate());
+    future.cancel();
+    await expectLater(future, throwsCancelledException);
+    await expectLater(
+        gallery.getAlbumMedias('Album Copy'), throwsPrivateGalleryException);
+  });
+
+  test('copyMedia copies id to duplicateId inside album.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+    final duplicateId = Uuid.generate();
+
+    await gallery.put(id, 'Album', media);
+
+    await expectLater(
+        gallery.copyMedia(id, 'Album Copy', duplicateId), completes);
+    final original = (await gallery.getAlbumMedias('Album')).single;
+    final copy = (await gallery.getAlbumMedias('Album Copy')).single;
+    expect([original.name, original.storeDateTime],
+        equals([copy.name, copy.storeDateTime]));
+  });
+
+  test('copyMedia calls listeners on completion.', () async {
+    final media = tempDir.file();
+    await media.writeAsBytes(randomBytes(1024));
+    final id = Uuid.generate();
+    final duplicateId = Uuid.generate();
+    var isListenerCalled = false;
+    final listener = () => isListenerCalled = true;
+
+    await gallery.put(id, 'Album', media);
+    gallery.addListener(listener);
+
+    await expectLater(
+        gallery.copyMedia(id, 'Album Copy', duplicateId), completes);
+    await expectLater(isListenerCalled, isTrue);
+  });
+
   test('getAllAlbums returns an empty list when there are no albums.',
       () async {
     await expectLater(gallery.getAllAlbums(), completion(equals([])));

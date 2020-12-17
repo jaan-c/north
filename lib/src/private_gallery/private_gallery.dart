@@ -204,6 +204,48 @@ class PrivateGallery {
     }
   }
 
+  /// Copy [id] content to [duplicateId] placed inside [album].
+  ///
+  /// If [album] does not exist, it is created.
+  ///
+  /// Throws [ArgumentError] if [album] is empty. Throws
+  /// [PrivateGallerException] if media with [id] does not exist or if
+  /// media with [duplicateId] already exists.
+  CancelableFuture<void> copyMedia(Uuid id, String album, Uuid duplicateId) {
+    return CancelableFuture(
+        (state) => _copyStoreEntries(id, album, duplicateId, state));
+  }
+
+  Future<void> _copyStoreEntries(
+      Uuid id, String album, Uuid duplicateId, CancelState state) async {
+    checkArgument(album.isNotEmpty, message: 'album is empty');
+
+    if (!await _metadataStore.has(id)) {
+      throw PrivateGalleryException('Media $id does not exist.');
+    } else if (await _metadataStore.has(duplicateId)) {
+      throw PrivateGalleryException('Media $duplicateId already exists.');
+    }
+
+    try {
+      state.checkIsCancelled();
+
+      final meta = await _metadataStore.get(id);
+      final duplicateMeta = meta.copy(id: duplicateId, album: album);
+      await _metadataStore.put(duplicateMeta);
+
+      await _thumbnailStore.duplicate(id, duplicateId).rebindState(state);
+
+      await _mediaStore.duplicate(id, duplicateId).rebindState(state);
+
+      _callListeners();
+    } catch (e) {
+      await _metadataStore.delete(duplicateId);
+      await _thumbnailStore.delete(duplicateId);
+      await _mediaStore.delete(duplicateId);
+      rethrow;
+    }
+  }
+
   /// Get all [Album]s ordered alphabetically.
   Future<List<Album>> getAllAlbums() async {
     _checkIsDisposed();
