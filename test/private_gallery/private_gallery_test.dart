@@ -116,7 +116,8 @@ void main() {
     expect(isListenerCalled, isTrue);
   });
 
-  test('copyMedia throws ArgumentError if album is empty.', () async {
+  test('copyMedia throws ArgumentError if destinationAlbum is empty.',
+      () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
     final id = Uuid.generate();
@@ -160,7 +161,7 @@ void main() {
         gallery.getAlbumMedias('Album Copy'), throwsPrivateGalleryException);
   });
 
-  test('copyMedia copies id to duplicateId inside album.', () async {
+  test('copyMedia copies id to duplicateId inside destinationAlbum.', () async {
     final media = tempDir.file();
     await media.writeAsBytes(randomBytes(1024));
     final id = Uuid.generate();
