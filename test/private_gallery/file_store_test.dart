@@ -66,6 +66,38 @@ void main() {
         throwsFileStoreException);
   });
 
+  test(
+      'duplicate throws FileStoreException on non-existent id or existing duplicateId.',
+      () async {
+    final file = tempDir.file();
+    await file.writeAsBytes(randomBytes(2048));
+    final id = Uuid.generate();
+    final existingId = Uuid.generate();
+    final nonExistingId = Uuid.generate();
+
+    await store.put(id, file);
+    await store.put(existingId, file);
+
+    await expectLater(store.duplicate(nonExistingId, Uuid.generate()),
+        throwsFileStoreException);
+    await expectLater(
+        store.duplicate(id, existingId), throwsFileStoreException);
+  });
+
+  test('duplicate copies id file content to duplicateId file.', () async {
+    final file = tempDir.file();
+    final content = randomBytes(2048);
+    await file.writeAsBytes(content);
+    final id = Uuid.generate();
+    final duplicateId = Uuid.generate();
+
+    await store.put(id, file);
+    await store.duplicate(id, duplicateId);
+
+    final duplicateContent = await (await store.get(duplicateId)).readAsBytes();
+    expect(content, duplicateContent);
+  });
+
   test('get throws FileStoreException on non-existent id.', () async {
     final id = Uuid.generate();
 

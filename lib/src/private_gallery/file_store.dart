@@ -63,6 +63,36 @@ mixin FileStore {
     }
   }
 
+  CancelableFuture<void> duplicate(Uuid id, Uuid duplicateId) {
+    return CancelableFuture((state) => _duplicateFile(id, duplicateId, state));
+  }
+
+  Future<void> _duplicateFile(
+      Uuid id, Uuid duplicateId, CancelState state) async {
+    if (!await has(id)) {
+      throw FileStoreException('File $id does not exist.');
+    } else if (await has(duplicateId)) {
+      throw FileStoreException('File $duplicateId already exists.');
+    }
+
+    final chunkStream = fileDir.file(id.asString).openRead();
+    final duplicateFile = fileDir.file(duplicateId.asString);
+    final duplicateSink = duplicateFile.openWrite();
+
+    try {
+      await for (final chunk in chunkStream) {
+        state.checkIsCancelled();
+        duplicateSink.add(chunk);
+      }
+      await duplicateSink.flush();
+    } catch (e) {
+      await duplicateFile.delete();
+      rethrow;
+    } finally {
+      await duplicateSink.close();
+    }
+  }
+
   CancelableFuture<File> get(Uuid id) {
     return CancelableFuture((state) => _decryptAndCache(id, state));
   }
