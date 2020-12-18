@@ -104,9 +104,8 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
         if (snapshot.hasData) {
           return ThumbnailGrid(
-            children: [
-              for (final media in snapshot.data) _thumbnailTile(media)
-            ],
+            builder: (_, ix) => _thumbnailTile(snapshot.data[ix]),
+            itemCount: snapshot.data.length,
             crossAxisCount: 3,
           );
         } else {

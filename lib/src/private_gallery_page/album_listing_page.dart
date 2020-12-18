@@ -110,10 +110,9 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         if (snapshot.hasData) {
           return Padding(
             child: ThumbnailGrid(
-              children: [
-                for (final album in snapshot.data)
-                  _thumbnailTile(context, album)
-              ],
+              builder: (context, ix) =>
+                  _thumbnailTile(context, snapshot.data[ix]),
+              itemCount: snapshot.data.length,
               crossAxisCount: 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,

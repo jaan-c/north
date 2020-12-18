@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ThumbnailGrid extends StatelessWidget {
-  final List<Widget> children;
+  final IndexedWidgetBuilder builder;
+  final int itemCount;
   final int crossAxisCount;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
 
   ThumbnailGrid(
-      {this.children = const [],
+      {@required this.builder,
+      @required this.itemCount,
       this.crossAxisCount = 2,
       this.mainAxisSpacing = 0,
       this.crossAxisSpacing = 0});
@@ -16,9 +18,9 @@ class ThumbnailGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaggeredGridView.countBuilder(
-      itemBuilder: (_, ix) => children[ix],
+      itemBuilder: builder,
       staggeredTileBuilder: (_) => StaggeredTile.fit(1),
-      itemCount: children.length,
+      itemCount: itemCount,
       crossAxisCount: crossAxisCount,
       mainAxisSpacing: mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing,
