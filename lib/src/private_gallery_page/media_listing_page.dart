@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
+import 'album_selector_dialog.dart';
 import 'media_viewer_page.dart';
+import 'operation_queue_controller.dart';
+import 'operation_queue_dialog.dart';
 import 'prompt_dialog.dart';
 import 'selection_controller.dart';
 import 'text_field_dialog.dart';
@@ -72,6 +75,10 @@ class _MediaListingPageState extends State<MediaListingPage> {
             ),
           ),
         IconButton(
+          icon: Icon(Icons.copy_rounded),
+          onPressed: () => _onCopy(context),
+        ),
+        IconButton(
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
             context: context,
@@ -90,6 +97,28 @@ class _MediaListingPageState extends State<MediaListingPage> {
       positiveTextButton: 'RENAME',
       onCheckText: (name) => name.trim().isNotEmpty,
       onSubmitText: (newName) => _renameSelectedMedia(newName),
+    );
+  }
+
+  void _onCopy(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlbumSelectorDialog(
+        gallery: widget.gallery,
+        onSelect: (destinationAlbum) => showDialog(
+          context: context,
+          builder: (_) => OperationQueueDialog(
+            title:
+                'Copying ${mediaSelection.count} ${mediaSelection.name} to $destinationAlbum',
+            queueController: CopyQueueController(
+              gallery: widget.gallery,
+              medias: mediaSelection.toList(),
+              destinationAlbum: destinationAlbum,
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
     );
   }
 
