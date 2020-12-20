@@ -3,7 +3,7 @@ import 'package:north/private_gallery.dart';
 
 import 'media_listing_page.dart';
 import 'prompt_dialog.dart';
-import 'selection_state.dart';
+import 'selection_controller.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -21,20 +21,24 @@ class AlbumListingPage extends StatefulWidget {
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<List<Album>> futureAlbums;
-  SelectionState<Album> albumSelection;
+  SelectionController<Album> albumSelection;
 
   @override
   void initState() {
     super.initState();
+
     widget.gallery.addListener(_loadAlbums);
+    albumSelection =
+        SelectionController(singularName: 'album', pluralName: 'albums');
+    albumSelection.addListener(() => setState(() {}));
+
     _loadAlbums();
-    albumSelection = SelectionState(
-        singularName: 'album', pluralName: 'albums', setState: setState);
   }
 
   @override
   void dispose() {
     widget.gallery.removeListener(_loadAlbums);
+    albumSelection.dispose();
     super.dispose();
   }
 

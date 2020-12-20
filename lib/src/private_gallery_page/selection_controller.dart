@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-class SelectionState<T> {
+class SelectionController<T> with ChangeNotifier {
   final String singularName;
   final String pluralName;
-  final void Function(VoidCallback) setState;
 
   List<T> _selection = <T>[];
 
@@ -17,8 +16,7 @@ class SelectionState<T> {
 
   T get single => _selection.single;
 
-  SelectionState(
-      {@required this.singularName, String pluralName, @required this.setState})
+  SelectionController({@required this.singularName, String pluralName})
       : pluralName = pluralName ?? singularName;
 
   bool contains(T item) {
@@ -33,11 +31,13 @@ class SelectionState<T> {
       newSelection.add(item);
     }
 
-    setState(() => _selection = newSelection);
+    _selection = newSelection;
+    notifyListeners();
   }
 
   void clear() {
-    setState(() => _selection = []);
+    _selection = [];
+    notifyListeners();
   }
 
   List<T> toList() {
