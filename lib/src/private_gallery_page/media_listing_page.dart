@@ -164,7 +164,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     }
 
     return ThumbnailTile(
-      loader: () => widget.gallery.loadMedia(media.id),
+      loader: () => widget.gallery.loadMediaThumbnail(media.id),
       mode: mode,
       onTap: mode == ThumbnailTileMode.normal
           ? () => _openMedia(context, media)
