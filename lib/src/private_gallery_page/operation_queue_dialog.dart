@@ -29,7 +29,7 @@ class _OperationQueueDialogState extends State<OperationQueueDialog> {
   @override
   Widget build(BuildContext context) {
     if (widget.queueController.isDone) {
-      Navigator.pop(context);
+      Future.delayed(Duration.zero, () => Navigator.pop(context));
     }
 
     return AlertDialog(
