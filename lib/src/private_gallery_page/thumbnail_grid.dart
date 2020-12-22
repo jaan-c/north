@@ -21,6 +21,7 @@ class ThumbnailGrid extends StatelessWidget {
       itemBuilder: builder,
       staggeredTileBuilder: (_) => StaggeredTile.fit(1),
       itemCount: itemCount,
+      addAutomaticKeepAlives: false,
       crossAxisCount: crossAxisCount,
       mainAxisSpacing: mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing,
