@@ -37,9 +37,9 @@ class _OperationQueueDialogState extends State<OperationQueueDialog> {
       content: LinearProgressIndicator(value: widget.queueController.progress),
       actions: [
         TextButton(
-          child: Text('CANCEL'),
+          child: Text('STOP'),
           onPressed: () {
-            widget.queueController.cancel();
+            widget.queueController.stop();
             Navigator.pop(context);
           },
         ),

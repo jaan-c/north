@@ -6,7 +6,7 @@ abstract class OperationQueueController implements ChangeNotifier {
   double get progress;
   bool get isDone;
   void start();
-  void cancel();
+  void stop();
 }
 
 class CopyQueueController
@@ -50,7 +50,7 @@ class CopyQueueController
   }
 
   @override
-  void cancel() {
+  void stop() {
     if (_copyOperation != null) {
       _copyOperation.cancel();
     } else {
@@ -107,7 +107,7 @@ class MoveQueueController
   }
 
   @override
-  void cancel() {
+  void stop() {
     if (_moveOperation != null) {
       _moveOperation.cancel();
     } else {
