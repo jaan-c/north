@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
+import 'async_queue.dart';
 import 'media_listing_page.dart';
 import 'prompt_dialog.dart';
 import 'selection_controller.dart';
@@ -21,6 +24,7 @@ class AlbumListingPage extends StatefulWidget {
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<List<Album>> futureAlbums;
+  AsyncQueue<File> thumbnailLoaderQueue;
   SelectionController<Album> albumSelection;
 
   @override
@@ -28,6 +32,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     super.initState();
 
     widget.gallery.addListener(_loadAlbums);
+    thumbnailLoaderQueue = AsyncQueue();
     albumSelection =
         SelectionController(singularName: 'album', pluralName: 'albums');
     albumSelection.addListener(() => setState(() {}));
@@ -38,6 +43,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   @override
   void dispose() {
     widget.gallery.removeListener(_loadAlbums);
+    thumbnailLoaderQueue.dispose();
     albumSelection.dispose();
     super.dispose();
   }
@@ -143,7 +149,8 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     return ThumbnailTile(
       name: album.name,
       count: album.mediaCount,
-      loader: () => widget.gallery.loadAlbumThumbnail(album.name),
+      loader: () => thumbnailLoaderQueue
+          .add(() => widget.gallery.loadAlbumThumbnail(album.name)),
       mode: mode,
       borderRadius: BorderRadius.circular(24),
       onTap: mode == ThumbnailTileMode.normal

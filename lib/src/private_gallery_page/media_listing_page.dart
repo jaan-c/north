@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
 import 'album_selector_dialog.dart';
+import 'async_queue.dart';
 import 'media_viewer_page.dart';
 import 'operation_queue_controller.dart';
 import 'operation_queue_dialog.dart';
@@ -23,21 +26,24 @@ class MediaListingPage extends StatefulWidget {
 
 class _MediaListingPageState extends State<MediaListingPage> {
   Future<List<Media>> futureMedias;
+  AsyncQueue<File> thumbnailLoaderQueue;
   SelectionController<Media> mediaSelection;
 
   @override
   void initState() {
     super.initState();
 
+    futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
+    thumbnailLoaderQueue = AsyncQueue();
     mediaSelection = SelectionController(singularName: 'media');
     mediaSelection.addListener(() => setState(() {}));
-
-    _loadMedias();
   }
 
   @override
   void dispose() {
+    thumbnailLoaderQueue.dispose();
     mediaSelection.dispose();
+
     super.dispose();
   }
 
@@ -61,7 +67,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.close_rounded),
-        onPressed: mediaSelection.clear,
+        onPressed: _resetState,
       ),
       title: Text('${mediaSelection.count} selected ${mediaSelection.name}'),
       actions: [
@@ -164,7 +170,8 @@ class _MediaListingPageState extends State<MediaListingPage> {
     }
 
     return ThumbnailTile(
-      loader: () => widget.gallery.loadMediaThumbnail(media.id),
+      loader: () => thumbnailLoaderQueue
+          .add(() => widget.gallery.loadMediaThumbnail(media.id)),
       mode: mode,
       onTap: mode == ThumbnailTileMode.normal
           ? () => _openMedia(context, media)
@@ -175,18 +182,11 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  void _loadMedias() {
-    setState(() {
-      futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
-    });
-  }
-
   void _renameSelectedMedia(String newName) async {
     final selectedMedia = mediaSelection.single;
     await widget.gallery.renameMedia(selectedMedia.id, newName);
 
-    mediaSelection.clear();
-    _loadMedias();
+    _resetState();
   }
 
   Future<void> _deleteSelectedMedia() async {
@@ -194,8 +194,15 @@ class _MediaListingPageState extends State<MediaListingPage> {
       await widget.gallery.delete(media.id);
     }
 
-    mediaSelection.clear();
-    _loadMedias();
+    _resetState();
+  }
+
+  void _resetState() {
+    setState(() {
+      futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
+      thumbnailLoaderQueue.clear();
+      mediaSelection.clear();
+    });
   }
 
   void _openMedia(BuildContext context, Media media) {
