@@ -14,6 +14,8 @@ import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
+enum _ExtraAppBarActions { rename, copy, move }
+
 class MediaListingPage extends StatefulWidget {
   final PrivateGallery gallery;
   final String albumName;
@@ -73,19 +75,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
       ),
       title: Text('${mediaSelection.count} selected ${mediaSelection.name}'),
       actions: [
-        if (mediaSelection.isSingle)
-          IconButton(
-            icon: Icon(Icons.edit_rounded),
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => _renameDialog(),
-              barrierDismissible: false,
-            ),
-          ),
-        IconButton(
-          icon: Icon(Icons.copy_rounded),
-          onPressed: () => _onCopy(context),
-        ),
         IconButton(
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
@@ -94,7 +83,41 @@ class _MediaListingPageState extends State<MediaListingPage> {
             barrierDismissible: false,
           ),
         ),
+        _extraActionsMenuButton(context),
       ],
+    );
+  }
+
+  Widget _extraActionsMenuButton(BuildContext context) {
+    return PopupMenuButton<_ExtraAppBarActions>(
+      itemBuilder: (context) => [
+        if (mediaSelection.isSingle)
+          PopupMenuItem(
+            child: Text('Rename'),
+            value: _ExtraAppBarActions.rename,
+          ),
+        PopupMenuItem(child: Text('Copy'), value: _ExtraAppBarActions.copy),
+        PopupMenuItem(child: Text('Move'), value: _ExtraAppBarActions.move),
+      ],
+      onSelected: (action) {
+        switch (action) {
+          case _ExtraAppBarActions.rename:
+            showDialog(
+              context: context,
+              builder: (_) => _renameDialog(),
+              barrierDismissible: false,
+            );
+            break;
+          case _ExtraAppBarActions.copy:
+            _onCopy(context);
+            break;
+          case _ExtraAppBarActions.move:
+            _onMove(context);
+            break;
+          default:
+            throw StateError('Unhandled extra action $action');
+        }
+      },
     );
   }
 
@@ -124,6 +147,29 @@ class _MediaListingPageState extends State<MediaListingPage> {
               destinationAlbum: destinationAlbum,
             ),
           ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _onMove(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlbumSelectorDialog(
+        gallery: widget.gallery,
+        onSelect: (destinationAlbum) => showDialog(
+          context: context,
+          builder: (_) => OperationQueueDialog(
+            title:
+                'Moving ${mediaSelection.count} ${mediaSelection.name} to $destinationAlbum',
+            queueController: MoveQueueController(
+              gallery: widget.gallery,
+              medias: mediaSelection.toList(),
+              destinationAlbum: destinationAlbum,
+            ),
+          ),
+          barrierDismissible: false,
         ),
       ),
       barrierDismissible: false,
