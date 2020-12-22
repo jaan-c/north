@@ -31,18 +31,17 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   void initState() {
     super.initState();
 
-    widget.gallery.addListener(_loadAlbums);
+    futureAlbums = widget.gallery.getAllAlbums();
+    widget.gallery.addListener(_resetState);
     thumbnailLoaderQueue = AsyncQueue();
     albumSelection =
         SelectionController(singularName: 'album', pluralName: 'albums');
     albumSelection.addListener(() => setState(() {}));
-
-    _loadAlbums();
   }
 
   @override
   void dispose() {
-    widget.gallery.removeListener(_loadAlbums);
+    widget.gallery.removeListener(_resetState);
     thumbnailLoaderQueue.dispose();
     albumSelection.dispose();
     super.dispose();
@@ -64,7 +63,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     return AppBar(
       leading: IconButton(
         icon: Icon(Icons.close_rounded),
-        onPressed: albumSelection.clear,
+        onPressed: _resetState,
       ),
       title: Text('${albumSelection.count} selected ${albumSelection.name}'),
       actions: [
@@ -162,9 +161,11 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  void _loadAlbums() {
+  void _resetState() {
     setState(() {
       futureAlbums = widget.gallery.getAllAlbums();
+      thumbnailLoaderQueue.clear();
+      albumSelection.clear();
     });
   }
 
@@ -177,8 +178,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       _showFailedToRenameSnackBar(context, newName);
     }
 
-    albumSelection.clear();
-    _loadAlbums();
+    _resetState();
   }
 
   void _showFailedToRenameSnackBar(BuildContext context, String newName) {
@@ -201,8 +201,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       await widget.gallery.delete(media.id);
     }
 
-    albumSelection.clear();
-    _loadAlbums();
+    _resetState();
   }
 
   void _openAlbum(BuildContext context, String name) {
