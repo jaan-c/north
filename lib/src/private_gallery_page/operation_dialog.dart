@@ -147,6 +147,8 @@ class _OperationDialogState extends State<_OperationDialog> {
           await operationQueue.add(() => widget.gallery
               .moveMediaToAlbum(media.value.id, destinationAlbum));
           break;
+        default:
+          throw StateError('Unhandled operation ${widget.operation}.');
       }
 
       setState(() => progress = (media.index + 1) / widget.medias.length);
@@ -166,6 +168,8 @@ class _OperationDialogState extends State<_OperationDialog> {
       case _Operation.move:
         operationName = 'Moving';
         break;
+      default:
+        throw StateError('Unhandled operation ${widget.operation}.');
     }
 
     return AlertDialog(
