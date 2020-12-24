@@ -3,11 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 
-import 'album_selector_dialog.dart';
 import 'async_queue.dart';
 import 'media_viewer_page.dart';
-import 'operation_queue_controller.dart';
-import 'operation_queue_dialog.dart';
+import 'operation_dialog.dart';
 import 'prompt_dialog.dart';
 import 'selection_controller.dart';
 import 'text_field_dialog.dart';
@@ -134,20 +132,9 @@ class _MediaListingPageState extends State<MediaListingPage> {
   void _onCopy(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlbumSelectorDialog(
+      builder: (context) => CopyDialog(
         gallery: widget.gallery,
-        onSelect: (destinationAlbum) => showDialog(
-          context: context,
-          builder: (_) => OperationQueueDialog(
-            title:
-                'Copying ${mediaSelection.count} ${mediaSelection.name} to $destinationAlbum',
-            queueController: CopyQueueController(
-              gallery: widget.gallery,
-              medias: mediaSelection.toList(),
-              destinationAlbum: destinationAlbum,
-            ),
-          ),
-        ),
+        medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
     );
@@ -156,21 +143,9 @@ class _MediaListingPageState extends State<MediaListingPage> {
   void _onMove(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlbumSelectorDialog(
+      builder: (context) => MoveDialog(
         gallery: widget.gallery,
-        onSelect: (destinationAlbum) => showDialog(
-          context: context,
-          builder: (_) => OperationQueueDialog(
-            title:
-                'Moving ${mediaSelection.count} ${mediaSelection.name} to $destinationAlbum',
-            queueController: MoveQueueController(
-              gallery: widget.gallery,
-              medias: mediaSelection.toList(),
-              destinationAlbum: destinationAlbum,
-            ),
-          ),
-          barrierDismissible: false,
-        ),
+        medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
     );
