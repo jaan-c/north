@@ -1,47 +1,45 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Wrapper over [SharedPreferences] only exposing preferences that will
 /// actually be used by the app.
-class AppPreferences {
+///
+/// Only one instance should exist at runtime, otherwise behavior is undefined.
+class AppPreferences with ChangeNotifier {
   static const _passwordHashKey = 'passwordHash';
   static const _saltKey = 'salt';
 
-  static AppPreferences _instance;
-
-  static AppPreferences getInstance() {
-    _instance ??= AppPreferences._internal();
-
-    return _instance;
+  static Future<AppPreferences> instantiate() async {
+    final prefs = await SharedPreferences.getInstance();
+    return AppPreferences._internal(prefs);
   }
 
-  final _futurePrefs = SharedPreferences.getInstance();
+  final SharedPreferences _prefs;
 
-  AppPreferences._internal();
+  AppPreferences._internal(this._prefs);
 
   Future<String> getPasswordHash() async {
-    final prefs = await _futurePrefs;
-    return prefs.getString(_passwordHashKey) ?? '';
+    return _prefs.getString(_passwordHashKey) ?? '';
   }
 
   Future<void> setPasswordHash(String newHash) async {
-    final prefs = await _futurePrefs;
-    return prefs.setString(_passwordHashKey, newHash);
+    await _prefs.setString(_passwordHashKey, newHash);
+    notifyListeners();
   }
 
   Future<List<int>> getSalt() async {
-    final prefs = await _futurePrefs;
-    final saltString = prefs.getStringList(_saltKey);
+    final saltString = _prefs.getStringList(_saltKey);
     return saltString.map((s) => int.parse(s)).toList();
   }
 
   Future<void> setSalt(List<int> newSalt) async {
-    final prefs = await _futurePrefs;
     final newSaltString = newSalt.map((i) => i.toString()).toList();
-    return prefs.setStringList(_saltKey, newSaltString);
+    await _prefs.setStringList(_saltKey, newSaltString);
+    notifyListeners();
   }
 
   Future<void> clear() async {
-    final prefs = await _futurePrefs;
-    await prefs.clear();
+    await _prefs.clear();
+    notifyListeners();
   }
 }
