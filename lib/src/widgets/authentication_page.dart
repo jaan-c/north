@@ -108,7 +108,7 @@ class _AuthenticationPageModel with ChangeNotifier {
     }
 
     final prefs = context.read<AppPreferences>();
-    if ((await prefs.getPasswordHash()).isEmpty) {
+    if ((await prefs.passwordHash).isEmpty) {
       _state = _AuthenticationPageModelState.unconfigured;
     } else {
       _state = _AuthenticationPageModelState.close;
@@ -123,7 +123,7 @@ class _AuthenticationPageModel with ChangeNotifier {
     final prefs = context.read<AppPreferences>();
 
     final hash = await derivePasswordHash(password);
-    final salt = await prefs.getSalt();
+    final salt = await prefs.salt;
     await prefs.setPasswordHash(hash);
     await prefs.setSalt(salt);
 
@@ -135,9 +135,9 @@ class _AuthenticationPageModel with ChangeNotifier {
   Future<void> authenticate(BuildContext context, String password) async {
     final prefs = context.read<AppPreferences>();
 
-    final hash = await prefs.getPasswordHash();
+    final hash = await prefs.passwordHash;
     if (await verifyPassword(password, hash)) {
-      final salt = await prefs.getSalt();
+      final salt = await prefs.salt;
       _state = _AuthenticationPageModelState.open;
       _key = await deriveKey(password, salt);
 

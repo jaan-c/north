@@ -16,25 +16,21 @@ class AppPreferences with ChangeNotifier {
 
   final SharedPreferences _prefs;
 
-  AppPreferences._internal(this._prefs);
+  String get passwordHash => _prefs.getString(_passwordHashKey) ?? '';
 
-  Future<String> getPasswordHash() async {
-    return _prefs.getString(_passwordHashKey) ?? '';
-  }
+  List<int> get salt =>
+      _prefs.getStringList(_saltKey)?.map((s) => int.parse(s))?.toList() ?? [];
+
+  AppPreferences._internal(this._prefs);
 
   Future<void> setPasswordHash(String newHash) async {
     await _prefs.setString(_passwordHashKey, newHash);
     notifyListeners();
   }
 
-  Future<List<int>> getSalt() async {
-    final saltString = _prefs.getStringList(_saltKey);
-    return saltString.map((s) => int.parse(s)).toList();
-  }
-
   Future<void> setSalt(List<int> newSalt) async {
-    final newSaltString = newSalt.map((i) => i.toString()).toList();
-    await _prefs.setStringList(_saltKey, newSaltString);
+    await _prefs.setStringList(
+        _saltKey, newSalt.map((i) => i.toString()).toList());
     notifyListeners();
   }
 
