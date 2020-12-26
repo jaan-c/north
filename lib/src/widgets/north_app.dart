@@ -2,9 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
-import 'package:north/src/authentication_page/authentication_page.dart';
-import 'package:north/src/private_gallery_page/private_gallery_page.dart';
 import 'package:provider/provider.dart';
+
+import 'authentication_page.dart';
+import 'private_gallery_page.dart';
 
 class NorthApp extends StatefulWidget {
   @override
