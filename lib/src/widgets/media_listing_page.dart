@@ -34,7 +34,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
     super.initState();
 
     futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
-    widget.gallery.addListener(_resetState);
     thumbnailLoaderQueue = AsyncQueue();
     mediaSelection = SelectionController(singularName: 'media');
     mediaSelection.addListener(() => setState(() {}));
@@ -42,7 +41,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
   @override
   void dispose() {
-    widget.gallery.removeListener(_resetState);
     thumbnailLoaderQueue.dispose();
     mediaSelection.dispose();
 

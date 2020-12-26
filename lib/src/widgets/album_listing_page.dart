@@ -32,7 +32,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     super.initState();
 
     futureAlbums = widget.gallery.getAllAlbums();
-    widget.gallery.addListener(_resetState);
     thumbnailLoaderQueue = AsyncQueue();
     albumSelection =
         SelectionController(singularName: 'album', pluralName: 'albums');
@@ -41,7 +40,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   @override
   void dispose() {
-    widget.gallery.removeListener(_resetState);
     thumbnailLoaderQueue.dispose();
     albumSelection.dispose();
     super.dispose();

@@ -140,22 +140,6 @@ class PrivateGallery {
         _mediaStore = mediaStore,
         _thumbnailStore = thumbnailStore;
 
-  bool hasListener(VoidCallback listener) {
-    return _listeners.contains(listener);
-  }
-
-  void addListener(VoidCallback listener) {
-    _listeners.add(listener);
-  }
-
-  void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-  }
-
-  void _callListeners() {
-    _listeners.forEach((l) => l());
-  }
-
   /// Store [media] inside album named [albumName].
   ///
   /// If the album does not exist, it is created.
@@ -194,8 +178,6 @@ class PrivateGallery {
           .rebindState(state);
 
       await _mediaStore.put(id, media).rebindState(state);
-
-      _callListeners();
     } catch (e) {
       await _metadataStore.delete(id);
       await _thumbnailStore.delete(id);
@@ -237,8 +219,6 @@ class PrivateGallery {
       await _thumbnailStore.duplicate(id, duplicateId).rebindState(state);
 
       await _mediaStore.duplicate(id, duplicateId).rebindState(state);
-
-      _callListeners();
     } catch (e) {
       await _metadataStore.delete(duplicateId);
       await _thumbnailStore.delete(duplicateId);
@@ -344,8 +324,6 @@ class PrivateGallery {
 
     await Future.wait([metaResult, thumbnailResult, mediaResult],
         eagerError: true);
-
-    _callListeners();
   }
 
   /// Rename album with [oldName] to [newName].
@@ -373,8 +351,6 @@ class PrivateGallery {
     final newMetas = oldMetas.map((m) => m.copy(album: newName)).toList();
 
     await _metadataStore.update(newMetas);
-
-    _callListeners();
   }
 
   /// Rename media with [id] to [newName].
@@ -397,7 +373,6 @@ class PrivateGallery {
       return;
     } else {
       await _metadataStore.update([newMeta]);
-      _callListeners();
     }
   }
 
@@ -430,7 +405,6 @@ class PrivateGallery {
       return;
     } else {
       await _metadataStore.update([newMeta]);
-      _callListeners();
     }
   }
 
