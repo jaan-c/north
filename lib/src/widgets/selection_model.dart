@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-class SelectionController<T> with ChangeNotifier {
+class SelectionModel<T> with ChangeNotifier {
   final String singularName;
   final String pluralName;
 
@@ -16,7 +16,7 @@ class SelectionController<T> with ChangeNotifier {
 
   T get single => _selection.single;
 
-  SelectionController({@required this.singularName, String pluralName})
+  SelectionModel({@required this.singularName, String pluralName})
       : pluralName = pluralName ?? singularName;
 
   bool contains(T item) {

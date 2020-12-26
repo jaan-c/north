@@ -1,26 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
 import 'package:north/private_gallery.dart';
 
 import 'image_viewer_page.dart';
 import 'video_viewer_page.dart';
 
 class MediaViewerPage extends StatefulWidget {
-  final PrivateGallery gallery;
-  final Media media;
-
-  MediaViewerPage(this.gallery, this.media);
-
   @override
   _MediaViewerPageState createState() => _MediaViewerPageState();
 }
 
 class _MediaViewerPageState extends State<MediaViewerPage> {
-  CancellableFuture<File> futureMediaFile;
-  Future<_MediaType> futureMediaType;
-
   @override
   void initState() {
     super.initState();
@@ -104,25 +95,4 @@ class _MediaViewerPageState extends State<MediaViewerPage> {
       ),
     );
   }
-}
-
-enum _MediaType { image, video }
-
-Future<_MediaType> _getMediaType(File file) async {
-  final header = await _readHeader(file);
-  final mime = lookupMimeType(file.path, headerBytes: header);
-
-  if (mime.startsWith('image')) {
-    return _MediaType.image;
-  } else if (mime.startsWith('video')) {
-    return _MediaType.video;
-  } else {
-    throw StateError('Not a media file ${file.path}: $mime.');
-  }
-}
-
-Future<List<int>> _readHeader(File file) async {
-  return (await file.openRead(0, defaultMagicNumbersMaxLength).toList())
-      .expand((chunk) => chunk)
-      .toList();
 }

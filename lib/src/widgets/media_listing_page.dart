@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
+import 'package:provider/provider.dart';
 
 import 'async_queue.dart';
-import 'media_viewer_page.dart';
+import 'gallery_model.dart';
 import 'operation_dialog.dart';
 import 'prompt_dialog.dart';
-import 'selection_controller.dart';
+import 'selection_model.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -15,27 +16,20 @@ import 'thumbnail_tile.dart';
 enum _ExtraAppBarActions { rename, copy, move }
 
 class MediaListingPage extends StatefulWidget {
-  final PrivateGallery gallery;
-  final String albumName;
-
-  MediaListingPage(this.gallery, this.albumName);
-
   @override
   _MediaListingPageState createState() => _MediaListingPageState();
 }
 
 class _MediaListingPageState extends State<MediaListingPage> {
-  Future<List<Media>> futureMedias;
   AsyncQueue<File> thumbnailLoaderQueue;
-  SelectionController<Media> mediaSelection;
+  SelectionModel<Media> mediaSelection;
 
   @override
   void initState() {
     super.initState();
 
-    futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
     thumbnailLoaderQueue = AsyncQueue();
-    mediaSelection = SelectionController(singularName: 'media');
+    mediaSelection = SelectionModel(singularName: 'media');
     mediaSelection.addListener(() => setState(() {}));
   }
 
@@ -56,9 +50,11 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _appBar(BuildContext context) {
+    final gallery = context.watch<GalleryModel>();
+
     if (mediaSelection.isEmpty) {
       return AppBar(
-        title: Text(widget.albumName),
+        title: Text(gallery.openedAlbum),
         centerTitle: true,
         automaticallyImplyLeading: true,
       );
@@ -100,7 +96,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
           case _ExtraAppBarActions.rename:
             showDialog(
               context: context,
-              builder: (_) => _renameDialog(),
+              builder: (context) => _renameDialog(context),
               barrierDismissible: false,
             );
             break;
@@ -117,13 +113,13 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  Widget _renameDialog() {
+  Widget _renameDialog(BuildContext context) {
     return TextFieldDialog(
       title: 'Rename media',
       initialText: mediaSelection.single.name,
       positiveTextButton: 'RENAME',
       onCheckText: (name) => name.trim().isNotEmpty,
-      onSubmitText: (newName) => _renameSelectedMedia(newName),
+      onSubmitText: (newName) => _renameSelectedMedia(context, newName),
     );
   }
 
@@ -131,7 +127,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
     showDialog(
       context: context,
       builder: (context) => CopyDialog(
-        gallery: widget.gallery,
         medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
@@ -142,7 +137,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
     showDialog(
       context: context,
       builder: (context) => MoveDialog(
-        gallery: widget.gallery,
         medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
@@ -160,27 +154,17 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _body(BuildContext context) {
-    return FutureBuilder(
-      future: futureMedias,
-      builder: (context, AsyncSnapshot<List<Media>> snapshot) {
-        if (snapshot.hasError) {
-          throw StateError('Failed to load albums: ${snapshot.error}');
-        }
+    final medias = context.select<GalleryModel, List<Media>>(
+        (gallery) => gallery.openedAlbumMedias);
 
-        if (snapshot.hasData) {
-          return ThumbnailGrid(
-            builder: (_, ix) => _thumbnailTile(snapshot.data[ix]),
-            itemCount: snapshot.data.length,
-            crossAxisCount: 3,
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
+    return ThumbnailGrid(
+      builder: (_, ix) => _thumbnailTile(context, medias[ix]),
+      itemCount: medias.length,
+      crossAxisCount: 3,
     );
   }
 
-  Widget _thumbnailTile(Media media) {
+  Widget _thumbnailTile(BuildContext context, Media media) {
     ThumbnailTileMode mode;
     if (mediaSelection.isEmpty) {
       mode = ThumbnailTileMode.normal;
@@ -192,7 +176,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
     return ThumbnailTile(
       loader: () => thumbnailLoaderQueue
-          .add(() => widget.gallery.loadMediaThumbnail(media.id)),
+          .add(() => context.read<GalleryModel>().loadMediaThumbnail(media.id)),
       mode: mode,
       onTap: mode == ThumbnailTileMode.normal
           ? () => _openMedia(context, media)
@@ -203,16 +187,20 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  void _renameSelectedMedia(String newName) async {
+  void _renameSelectedMedia(BuildContext context, String newName) async {
+    final gallery = context.read<GalleryModel>();
+
     final selectedMedia = mediaSelection.single;
-    await widget.gallery.renameMedia(selectedMedia.id, newName);
+    await gallery.renameMedia(selectedMedia.id, newName);
 
     _resetState();
   }
 
   Future<void> _deleteSelectedMedia() async {
+    final gallery = context.read<GalleryModel>();
+
     for (final media in mediaSelection.toList()) {
-      await widget.gallery.delete(media.id);
+      await gallery.deleteMedia(media.id);
     }
 
     _resetState();
@@ -220,18 +208,13 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
   void _resetState() {
     setState(() {
-      futureMedias = widget.gallery.getAlbumMedias(widget.albumName);
       thumbnailLoaderQueue.clear();
       mediaSelection.clear();
     });
   }
 
   void _openMedia(BuildContext context, Media media) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MediaViewerPage(widget.gallery, media),
-      ),
-    );
+    final gallery = context.read<GalleryModel>();
+    gallery.openMedia(media.id);
   }
 }

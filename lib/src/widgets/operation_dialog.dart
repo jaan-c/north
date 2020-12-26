@@ -3,48 +3,42 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 import 'package:quiver/iterables.dart';
+import 'package:provider/provider.dart';
 
 import 'async_queue.dart';
+import 'gallery_model.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
 class CopyDialog extends StatelessWidget {
-  final PrivateGallery gallery;
   final List<Media> medias;
 
-  CopyDialog({@required this.gallery, @required this.medias});
+  CopyDialog({@required this.medias});
 
   @override
   Widget build(BuildContext context) {
-    return _OperationDialog(
-        gallery: gallery, medias: medias, operation: _Operation.copy);
+    return _OperationDialog(medias: medias, operation: _Operation.copy);
   }
 }
 
 class MoveDialog extends StatelessWidget {
-  final PrivateGallery gallery;
   final List<Media> medias;
 
-  MoveDialog({@required this.gallery, @required this.medias});
+  MoveDialog({@required this.medias});
 
   @override
   Widget build(BuildContext context) {
-    return _OperationDialog(
-        gallery: gallery, medias: medias, operation: _Operation.move);
+    return _OperationDialog(medias: medias, operation: _Operation.move);
   }
 }
 
 enum _Operation { copy, move }
 
 class _OperationDialog extends StatefulWidget {
-  final PrivateGallery gallery;
   final List<Media> medias;
   final _Operation operation;
 
-  _OperationDialog(
-      {@required this.gallery,
-      @required this.medias,
-      @required this.operation});
+  _OperationDialog({@required this.medias, @required this.operation});
 
   @override
   _OperationDialogState createState() => _OperationDialogState();
@@ -52,7 +46,6 @@ class _OperationDialog extends StatefulWidget {
 
 class _OperationDialogState extends State<_OperationDialog> {
   AsyncQueue<File> thumbnailLoaderQueue;
-  Future<List<Album>> futureAlbums;
   AsyncQueue<void> operationQueue;
 
   var destinationAlbum = '';
@@ -62,7 +55,6 @@ class _OperationDialogState extends State<_OperationDialog> {
   void initState() {
     super.initState();
 
-    futureAlbums = widget.gallery.getAllAlbums();
     thumbnailLoaderQueue = AsyncQueue();
     operationQueue = AsyncQueue();
   }
@@ -86,7 +78,7 @@ class _OperationDialogState extends State<_OperationDialog> {
   Widget _albumPickerDialog(BuildContext context) {
     return AlertDialog(
       title: Text('Select album'),
-      content: _thumbnailGrid(),
+      content: _thumbnailGrid(context),
       actions: [
         TextButton(
           child: Text('CANCEL'),
@@ -96,55 +88,47 @@ class _OperationDialogState extends State<_OperationDialog> {
     );
   }
 
-  Widget _thumbnailGrid() {
-    return FutureBuilder(
-      future: futureAlbums,
-      builder: (_, AsyncSnapshot<List<Album>> snapshot) {
-        if (snapshot.hasError) {
-          throw StateError('Failed to load albums: ${snapshot.hasError}');
-        }
+  Widget _thumbnailGrid(BuildContext context) {
+    final albums = context
+        .select<GalleryModel, List<Album>>((gallery) => gallery.allAlbums);
 
-        if (snapshot.hasData) {
-          return ThumbnailGrid(
-            builder: (_, ix) => _thumbnailTile(snapshot.data[ix]),
-            itemCount: snapshot.data.length,
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
+    return ThumbnailGrid(
+      builder: (_, ix) => _thumbnailTile(context, albums[ix]),
+      itemCount: albums.length,
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
     );
   }
 
-  Widget _thumbnailTile(Album album) {
+  Widget _thumbnailTile(BuildContext context, Album album) {
     return ThumbnailTile(
       name: album.name,
       count: album.mediaCount,
-      loader: () => thumbnailLoaderQueue
-          .add(() => widget.gallery.loadAlbumThumbnail(album.name)),
+      loader: () => thumbnailLoaderQueue.add(
+          () => context.read<GalleryModel>().loadAlbumThumbnail(album.name)),
       mode: ThumbnailTileMode.normal,
       borderRadius: BorderRadius.circular(24),
-      onTap: () => _pickDestinationAlbum(album.name),
+      onTap: () => _pickDestinationAlbum(context, album.name),
     );
   }
 
-  void _pickDestinationAlbum(String albumName) {
+  void _pickDestinationAlbum(BuildContext context, String albumName) {
     setState(() => destinationAlbum = albumName);
-    _runOperation();
+    _runOperation(context);
   }
 
-  Future<void> _runOperation() async {
+  Future<void> _runOperation(BuildContext context) async {
     for (final media in enumerate(widget.medias)) {
       switch (widget.operation) {
         case _Operation.copy:
-          await operationQueue.add(() => widget.gallery
-              .copyMedia(media.value.id, destinationAlbum, Uuid.generate()));
+          await operationQueue.add(() => context
+              .read<GalleryModel>()
+              .copyMedia(media.value.id, destinationAlbum));
           break;
         case _Operation.move:
-          await operationQueue.add(() => widget.gallery
+          await operationQueue.add(() => context
+              .read<GalleryModel>()
               .moveMediaToAlbum(media.value.id, destinationAlbum));
           break;
         default:

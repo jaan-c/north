@@ -1,10 +1,12 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'album_listing_page.dart';
 import 'authentication_page.dart';
-import 'private_gallery_page.dart';
-import 'providers.dart';
+import 'gallery_model.dart';
+import 'media_listing_page.dart';
+import 'media_view_page.dart';
+import 'models_provider.dart';
 
 class NorthApp extends StatefulWidget {
   @override
@@ -12,32 +14,28 @@ class NorthApp extends StatefulWidget {
 }
 
 class _NorthAppState extends State<NorthApp> {
-  var galleryKey = Uint8List.fromList([]);
-
   @override
   Widget build(BuildContext context) {
-    return Providers(
-      builder: (_, __) {
-        return _app(context);
-      },
+    return ModelsProvider(
+      builder: (_, __) => _app(context),
     );
   }
 
   Widget _app(BuildContext context) {
+    final gallery = context.watch<GalleryModel>();
+
     return MaterialApp(
       home: Navigator(
         pages: [
-          if (galleryKey.isEmpty)
-            MaterialPage(
-              child: AuthenticationPage(
-                onAuthenticated: (newKey) =>
-                    setState(() => galleryKey = newKey),
-              ),
-            )
-          else
-            MaterialPage(
-              child: PrivateGalleryPage(galleryKey: galleryKey),
-            )
+          if (!gallery.isOpen)
+            MaterialPage(child: AuthenticationPage())
+          else ...[
+            MaterialPage(child: AlbumListingPage()),
+            if (gallery.openedAlbum.isNotEmpty)
+              MaterialPage(child: MediaListingPage()),
+            if (gallery.openedMedia != null)
+              MaterialPage(child: MediaViewerPage()),
+          ],
         ],
         onPopPage: (route, result) => route.didPop(result),
       ),

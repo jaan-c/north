@@ -1,19 +1,12 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
 import 'package:north/crypto.dart';
 import 'package:provider/provider.dart';
 
+import 'gallery_model.dart';
 import 'password_page.dart';
 
-typedef AuthenticatedCallback = void Function(Uint8List key);
-
 class AuthenticationPage extends StatefulWidget {
-  final AuthenticatedCallback onAuthenticated;
-
-  AuthenticationPage({this.onAuthenticated});
-
   @override
   _AuthenticationPageState createState() => _AuthenticationPageState();
 }
@@ -51,7 +44,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         return _authenticationPage(context);
         break;
       case _AuthenticationPageModelState.open:
-        widget.onAuthenticated?.call(model.key);
         return SizedBox.shrink();
         break;
       default:
@@ -74,7 +66,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       loadingDescription: 'Unlocking gallery',
       onSubmitPassword: (password) async {
         await model.authenticate(context, password);
-        if (model.key.isEmpty) {
+        if (model.state != _AuthenticationPageModelState.open) {
           _showSnackBar(context, 'Wrong password');
         }
       },
@@ -96,11 +88,9 @@ enum _AuthenticationPageModelState { unconfigured, close, open }
 class _AuthenticationPageModel with ChangeNotifier {
   bool get isInitialized => _isInitialized;
   _AuthenticationPageModelState get state => _state;
-  Uint8List get key => _key;
 
   var _isInitialized = false;
   var _state = _AuthenticationPageModelState.unconfigured;
-  var _key = Uint8List.fromList([]);
 
   Future<void> initialize(BuildContext context) async {
     if (_isInitialized) {
@@ -121,6 +111,7 @@ class _AuthenticationPageModel with ChangeNotifier {
   Future<void> setupAuthentication(
       BuildContext context, String password) async {
     final prefs = context.read<AppPreferences>();
+    final gallery = context.read<GalleryModel>();
 
     final hash = await derivePasswordHash(password);
     final salt = await prefs.salt;
@@ -128,18 +119,22 @@ class _AuthenticationPageModel with ChangeNotifier {
     await prefs.setSalt(salt);
 
     _state = _AuthenticationPageModelState.open;
-    _key = await deriveKey(password, salt);
+    final key = await deriveKey(password, salt);
+    await gallery.open(key);
+
     notifyListeners();
   }
 
   Future<void> authenticate(BuildContext context, String password) async {
     final prefs = context.read<AppPreferences>();
+    final gallery = context.read<GalleryModel>();
 
     final hash = await prefs.passwordHash;
     if (await verifyPassword(password, hash)) {
       final salt = await prefs.salt;
       _state = _AuthenticationPageModelState.open;
-      _key = await deriveKey(password, salt);
+      final key = await deriveKey(password, salt);
+      await gallery.open(key);
 
       notifyListeners();
     }

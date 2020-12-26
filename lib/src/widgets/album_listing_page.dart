@@ -2,39 +2,32 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
+import 'package:provider/provider.dart';
 
 import 'async_queue.dart';
-import 'media_listing_page.dart';
+import 'gallery_model.dart';
 import 'prompt_dialog.dart';
-import 'selection_controller.dart';
+import 'selection_model.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
-typedef AlbumTapCallback = void Function(String albumName);
-
 class AlbumListingPage extends StatefulWidget {
-  final PrivateGallery gallery;
-
-  AlbumListingPage(this.gallery);
-
   @override
   _AlbumListingPageState createState() => _AlbumListingPageState();
 }
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
-  Future<List<Album>> futureAlbums;
   AsyncQueue<File> thumbnailLoaderQueue;
-  SelectionController<Album> albumSelection;
+  SelectionModel<Album> albumSelection;
 
   @override
   void initState() {
     super.initState();
 
-    futureAlbums = widget.gallery.getAllAlbums();
     thumbnailLoaderQueue = AsyncQueue();
     albumSelection =
-        SelectionController(singularName: 'album', pluralName: 'albums');
+        SelectionModel(singularName: 'album', pluralName: 'albums');
     albumSelection.addListener(() => setState(() {}));
   }
 
@@ -49,7 +42,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _appBar(context),
-      body: _body(),
+      body: _body(context),
     );
   }
 
@@ -78,7 +71,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
             context: context,
-            builder: (_) => _deleteSelectionDialog(),
+            builder: (context) => _deleteSelectionDialog(context),
             barrierDismissible: false,
           ),
         ),
@@ -96,40 +89,29 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  Widget _deleteSelectionDialog() {
+  Widget _deleteSelectionDialog(BuildContext context) {
     return PromptDialog(
       title: 'Delete ${albumSelection.name}?',
       content:
           'This will permanently delete ${albumSelection.count} ${albumSelection.name}',
       positiveButtonText: 'DELETE',
-      onPositivePressed: _deleteSelectedAlbums,
+      onPositivePressed: () => _deleteSelectedAlbums(context),
     );
   }
 
-  Widget _body() {
-    return FutureBuilder(
-      future: futureAlbums,
-      builder: (context, AsyncSnapshot<List<Album>> snapshot) {
-        if (snapshot.hasError) {
-          throw StateError('Failed to load albums: ${snapshot.error}');
-        }
+  Widget _body(BuildContext context) {
+    final albums = context
+        .select<GalleryModel, List<Album>>((gallery) => gallery.allAlbums);
 
-        if (snapshot.hasData) {
-          return Padding(
-            child: ThumbnailGrid(
-              builder: (context, ix) =>
-                  _thumbnailTile(context, snapshot.data[ix]),
-              itemCount: snapshot.data.length,
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-            ),
-            padding: EdgeInsets.all(16),
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
+    return Padding(
+      child: ThumbnailGrid(
+        builder: (context, ix) => _thumbnailTile(context, albums[ix]),
+        itemCount: albums.length,
+        crossAxisCount: 2,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      padding: EdgeInsets.all(16),
     );
   }
 
@@ -146,8 +128,8 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     return ThumbnailTile(
       name: album.name,
       count: album.mediaCount,
-      loader: () => thumbnailLoaderQueue
-          .add(() => widget.gallery.loadAlbumThumbnail(album.name)),
+      loader: () => thumbnailLoaderQueue.add(
+          () => context.read<GalleryModel>().loadAlbumThumbnail(album.name)),
       mode: mode,
       borderRadius: BorderRadius.circular(24),
       onTap: mode == ThumbnailTileMode.normal
@@ -161,7 +143,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   void _resetState() {
     setState(() {
-      futureAlbums = widget.gallery.getAllAlbums();
       thumbnailLoaderQueue.clear();
       albumSelection.clear();
     });
@@ -169,45 +150,39 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   Future<void> _renameSelectedAlbum(
       BuildContext context, String newName) async {
+    final gallery = context.read<GalleryModel>();
+
     final selectedAlbum = albumSelection.single;
     try {
-      await widget.gallery.renameAlbum(selectedAlbum.name, newName);
+      await gallery.renameAlbum(selectedAlbum.name, newName);
     } on PrivateGalleryException catch (_) {
-      _showFailedToRenameSnackBar(context, newName);
+      _showSnackBar("Can't rename to an already existing album $newName");
     }
 
     _resetState();
   }
 
-  void _showFailedToRenameSnackBar(BuildContext context, String newName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Can't rename to an already existing album $newName"),
-        duration: Duration(seconds: 3),
-      ),
+  void _showSnackBar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 3),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<void> _deleteSelectedAlbums() async {
-    final mediasForDeletion = <Media>[];
-    for (final album in albumSelection.toList()) {
-      final medias = await widget.gallery.getAlbumMedias(album.name);
-      mediasForDeletion.addAll(medias);
-    }
+  Future<void> _deleteSelectedAlbums(BuildContext context) async {
+    final gallery = context.read<GalleryModel>();
 
-    for (final media in mediasForDeletion) {
-      await widget.gallery.delete(media.id);
+    for (final album in albumSelection.toList()) {
+      await gallery.deleteAlbum(album.name);
     }
 
     _resetState();
   }
 
   void _openAlbum(BuildContext context, String name) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MediaListingPage(widget.gallery, name),
-      ),
-    );
+    final gallery = context.read<GalleryModel>();
+    gallery.openAlbum(name);
   }
 }
