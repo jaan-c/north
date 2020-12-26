@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:north/app_preferences.dart';
-import 'package:provider/provider.dart';
 
 import 'authentication_page.dart';
 import 'private_gallery_page.dart';
+import 'providers.dart';
 
 class NorthApp extends StatefulWidget {
   @override
@@ -17,7 +16,7 @@ class _NorthAppState extends State<NorthApp> {
 
   @override
   Widget build(BuildContext context) {
-    return _Providers(
+    return Providers(
       builder: (_, __) {
         return _app(context);
       },
@@ -42,22 +41,6 @@ class _NorthAppState extends State<NorthApp> {
         ],
         onPopPage: (route, result) => route.didPop(result),
       ),
-    );
-  }
-}
-
-class _Providers extends StatelessWidget {
-  final Widget Function(BuildContext, Widget) builder;
-  final Widget child;
-
-  _Providers({this.builder, this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureProvider(
-      create: (_) => AppPreferences.instantiate(),
-      builder: builder,
-      child: child,
     );
   }
 }
