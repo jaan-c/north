@@ -3,18 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 typedef SubmitPasswordCallback = FutureOr<void> Function(String password);
-typedef CheckPasswordCallback = FutureOr<bool> Function(String password);
 
 /// A page for accepting a password from user.
 class PasswordPage extends StatefulWidget {
   final String title;
+  final String loadingDescription;
   final SubmitPasswordCallback onSubmitPassword;
-  final CheckPasswordCallback onCheckPassword;
 
   PasswordPage(
       {@required this.title,
-      @required this.onSubmitPassword,
-      this.onCheckPassword});
+      @required this.loadingDescription,
+      this.onSubmitPassword});
 
   @override
   _PasswordPageState createState() => _PasswordPageState();
@@ -22,14 +21,15 @@ class PasswordPage extends StatefulWidget {
 
 class _PasswordPageState extends State<PasswordPage> {
   final passwordController = TextEditingController();
-  var obscurePassword = true;
-  var isCheckingPassword = false;
+  var isPasswordObscured = true;
   var isPasswordValid = false;
+  var isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    passwordController.addListener(_setIsPasswordValidState);
+    passwordController
+        .addListener(() => isPasswordValid = passwordController.text.isEmpty);
   }
 
   @override
@@ -38,15 +38,11 @@ class _PasswordPageState extends State<PasswordPage> {
     super.dispose();
   }
 
-  void _setIsPasswordValidState() {
-    setState(() => isPasswordValid = passwordController.text.isNotEmpty);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(child: _body(context)),
-      floatingActionButton: _submitFab(),
+      floatingActionButton: isPasswordValid ? _submitFab() : null,
     );
   }
 
@@ -57,13 +53,10 @@ class _PasswordPageState extends State<PasswordPage> {
           children: [
             _titleText(context),
             SizedBox(height: 32),
-            if (isCheckingPassword) ...[
-              LinearProgressIndicator(),
-              SizedBox(height: 8),
-              _checkingPasswordText(context)
-            ] else ...[
+            if (isSubmitting)
+              _loadingIndicator(context)
+            else
               _passwordField(context),
-            ]
           ],
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -78,6 +71,20 @@ class _PasswordPageState extends State<PasswordPage> {
     return Text(widget.title, style: textTheme.headline5);
   }
 
+  Widget _loadingIndicator(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        LinearProgressIndicator(),
+        SizedBox(height: 8),
+        Text(widget.loadingDescription, style: textTheme.subtitle1),
+      ],
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+
   Widget _passwordField(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
@@ -86,68 +93,34 @@ class _PasswordPageState extends State<PasswordPage> {
       style: textTheme.subtitle1,
       decoration: InputDecoration(
         suffixIcon: IconButton(
-          icon: Icon(obscurePassword
+          icon: Icon(isPasswordObscured
               ? Icons.visibility_rounded
               : Icons.visibility_off_rounded),
           onPressed: _toggleObscurePassword,
         ),
         border: OutlineInputBorder(),
       ),
-      obscureText: obscurePassword,
+      obscureText: isPasswordObscured,
       autofocus: true,
       autocorrect: false,
     );
   }
 
-  Widget _checkingPasswordText(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Text('Checking password', style: textTheme.subtitle2);
-  }
-
   Widget _submitFab() {
-    if (!isPasswordValid || isCheckingPassword) {
-      return null;
-    }
-
     return FloatingActionButton(
       child: Icon(Icons.check),
       onPressed: _submitPassword,
     );
   }
 
+  void _toggleObscurePassword() {
+    setState(() => isPasswordObscured = !isPasswordObscured);
+  }
+
   Future<void> _submitPassword() async {
     final password = passwordController.text;
-    if (await _checkPassword(password)) {
-      await widget.onSubmitPassword(password);
-    }
-  }
-
-  Future<bool> _checkPassword(String password) async {
-    if (widget.onCheckPassword == null) {
-      return true;
-    }
-
-    setState(() => isCheckingPassword = true);
-    final result = await widget.onCheckPassword(password);
-    setState(() => isCheckingPassword = false);
-
-    if (!result) {
-      _showSnackbar(context, 'Invalid password');
-    }
-
-    return result;
-  }
-
-  void _showSnackbar(BuildContext context, String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-      duration: Duration(seconds: 2),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  void _toggleObscurePassword() {
-    setState(() => obscurePassword = !obscurePassword);
+    setState(() => isSubmitting = true);
+    await widget.onSubmitPassword?.call(password);
+    setState(() => isSubmitting = false);
   }
 }
