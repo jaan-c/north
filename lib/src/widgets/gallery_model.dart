@@ -111,9 +111,11 @@ class GalleryModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteAlbum(String albumName) async {
-    for (final media in await _gallery.getAlbumMedias(albumName)) {
-      await _gallery.delete(media.id);
+  Future<void> deleteAlbums(List<String> albumNames) async {
+    for (final name in albumNames) {
+      for (final media in await _gallery.getAlbumMedias(name)) {
+        await _gallery.delete(media.id);
+      }
     }
 
     notifyListeners();
