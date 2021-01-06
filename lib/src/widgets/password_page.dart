@@ -10,6 +10,10 @@ class PasswordPage extends StatefulWidget {
   final String loadingDescription;
   final SubmitPasswordCallback onSubmitPassword;
 
+  /// Creates a password page.
+  ///
+  /// If [onSubmitPassword] returns a Future the page displays a progress
+  /// indicator while awaiting it.
   PasswordPage(
       {@required this.title,
       @required this.loadingDescription,
