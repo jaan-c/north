@@ -20,6 +20,7 @@ class AlbumListingPage extends StatefulWidget {
 class _AlbumListingPageState extends State<AlbumListingPage> {
   FutureQueue<File> thumbnailLoaderQueue;
   SelectionModel<Album> albumSelection;
+  Future<List<Album>> futureAlbums;
 
   @override
   void initState() {
@@ -29,6 +30,15 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     albumSelection =
         SelectionModel(singularName: 'album', pluralName: 'albums');
     albumSelection.addListener(() => setState(() {}));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final gallery = context.read<GalleryModel>();
+    futureAlbums = gallery.getAllAlbums();
+    _resetState();
   }
 
   @override
@@ -100,19 +110,29 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _body(BuildContext context) {
-    final albums = context
-        .select<GalleryModel, List<Album>>((gallery) => gallery.allAlbums);
+    return FutureBuilder(
+        future: futureAlbums,
+        builder: (context, AsyncSnapshot<List<Album>> snapshot) {
+          if (snapshot.hasError) {
+            throw snapshot.error;
+          }
 
-    return Padding(
-      child: ThumbnailGrid(
-        builder: (context, ix) => _thumbnailTile(context, albums[ix]),
-        itemCount: albums.length,
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-      ),
-      padding: EdgeInsets.all(16),
-    );
+          if (!snapshot.hasData) {
+            return SizedBox.shrink();
+          }
+
+          return Padding(
+            child: ThumbnailGrid(
+              builder: (context, ix) =>
+                  _thumbnailTile(context, snapshot.data[ix]),
+              itemCount: snapshot.data.length,
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+            ),
+            padding: EdgeInsets.all(16),
+          );
+        });
   }
 
   Widget _thumbnailTile(BuildContext context, Album album) {
@@ -174,9 +194,8 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   Future<void> _deleteSelectedAlbums(BuildContext context) async {
     final gallery = context.read<GalleryModel>();
 
-    for (final album in albumSelection.toList()) {
-      await gallery.deleteAlbum(album.name);
-    }
+    final albumNames = albumSelection.toList().map((a) => a.name).toList();
+    await gallery.deleteAlbums(albumNames);
 
     _resetState();
   }
