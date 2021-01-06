@@ -77,12 +77,19 @@ class GalleryModel with ChangeNotifier {
     });
   }
 
-  CancellableFuture<void> copyMedia(Uuid id, String destinationAlbum) {
+  CancellableFuture<void> copyMedias(List<Uuid> ids, String destinationAlbum) {
     return CancellableFuture((state) async {
-      await _gallery
-          .copyMedia(id, destinationAlbum, Uuid.generate())
-          .rebindState(state);
-      notifyListeners();
+      try {
+        for (final id in ids) {
+          await _gallery
+              .copyMedia(id, destinationAlbum, Uuid.generate())
+              .rebindState(state);
+        }
+
+        notifyListeners();
+      } on CancelledException {
+        notifyListeners();
+      }
     });
   }
 
