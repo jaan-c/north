@@ -31,12 +31,15 @@ class AuthenticationModel with ChangeNotifier {
   AuthenticationModel._internal(this._prefs, AuthenticationStatus initialStatus)
       : _status = initialStatus;
 
-  Future<void> setupAuthentication(String password) async {
+  Future<void> setup(String password) async {
     final passwordHash = await derivePasswordHash(password);
     final salt = generateSalt();
 
     await _prefs.setPasswordHash(passwordHash);
     await _prefs.setSalt(salt);
+
+    _status = AuthenticationStatus.close;
+    notifyListeners();
   }
 
   Future<void> authenticate(String password) async {
