@@ -1,11 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Wrapper over [SharedPreferences] only exposing preferences that will
 /// actually be used by the app.
 ///
 /// Only one instance should exist at runtime, otherwise behavior is undefined.
-class AppPreferences with ChangeNotifier {
+class AppPreferences {
   static const _passwordHashKey = 'passwordHash';
   static const _saltKey = 'salt';
 
@@ -25,17 +24,18 @@ class AppPreferences with ChangeNotifier {
 
   Future<void> setPasswordHash(String newHash) async {
     await _prefs.setString(_passwordHashKey, newHash);
-    notifyListeners();
   }
 
   Future<void> setSalt(List<int> newSalt) async {
     await _prefs.setStringList(
         _saltKey, newSalt.map((i) => i.toString()).toList());
-    notifyListeners();
+  }
+
+  Future<void> reload() async {
+    await _prefs.reload();
   }
 
   Future<void> clear() async {
     await _prefs.clear();
-    notifyListeners();
   }
 }
