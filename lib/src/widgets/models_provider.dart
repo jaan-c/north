@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:north/app_preferences.dart';
 import 'package:provider/provider.dart';
 
+import 'authentication_model.dart';
 import 'gallery_model.dart';
 
 class ModelsProvider extends StatelessWidget {
@@ -12,12 +13,21 @@ class ModelsProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        FutureProvider(create: (_) => AppPreferences.instantiate()),
-        Provider(create: (_) => GalleryModel()),
-      ],
-      builder: builder,
+    return FutureProvider(
+      create: (_) => AppPreferences.instantiate(),
+      builder: (context, child) {
+        final auth = context.watch<AuthenticationModel>();
+
+        if (auth.status == AuthenticationStatus.open) {
+          return FutureProvider(
+            create: (_) => GalleryModel.instantiate(auth.key),
+            builder: builder,
+            child: child,
+          );
+        } else {
+          return builder(context, child);
+        }
+      },
       child: child,
     );
   }
