@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 import 'package:provider/provider.dart';
 
-import 'async_queue.dart';
+import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'operation_dialog.dart';
 import 'prompt_dialog.dart';
@@ -21,14 +21,14 @@ class MediaListingPage extends StatefulWidget {
 }
 
 class _MediaListingPageState extends State<MediaListingPage> {
-  AsyncQueue<File> thumbnailLoaderQueue;
+  FutureQueue<File> thumbnailLoaderQueue;
   SelectionModel<Media> mediaSelection;
 
   @override
   void initState() {
     super.initState();
 
-    thumbnailLoaderQueue = AsyncQueue();
+    thumbnailLoaderQueue = FutureQueue();
     mediaSelection = SelectionModel(singularName: 'media');
     mediaSelection.addListener(() => setState(() {}));
   }

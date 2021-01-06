@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:collection';
 
-typedef AsyncCallback<T> = Future<T> Function();
+typedef FutureCallback<T> = Future<T> Function();
 
-/// A queue of async callbacks that is ran one by one in FIFO order.
-class AsyncQueue<T> {
-  final Queue<_Pair<AsyncCallback<T>, Completer<T>>> _queue = Queue();
+/// A queue of future callbacks that is ran one by one in FIFO order.
+class FutureQueue<T> {
+  final Queue<_Pair<FutureCallback<T>, Completer<T>>> _queue = Queue();
 
   var _isRunning = false;
   var _isDisposed = false;
 
-  Future<T> add(AsyncCallback<T> callback) {
+  Future<T> add(FutureCallback<T> callback) {
     if (_isDisposed) {
       throw StateError(
-          'Attempting to add on already disposed ${(AsyncQueue)}.');
+          'Attempting to add on already disposed ${(FutureQueue)}.');
     }
 
     final completer = Completer<T>();

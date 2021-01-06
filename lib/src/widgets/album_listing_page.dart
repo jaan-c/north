@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
 import 'package:provider/provider.dart';
 
-import 'async_queue.dart';
+import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'prompt_dialog.dart';
 import 'selection_model.dart';
@@ -18,14 +18,14 @@ class AlbumListingPage extends StatefulWidget {
 }
 
 class _AlbumListingPageState extends State<AlbumListingPage> {
-  AsyncQueue<File> thumbnailLoaderQueue;
+  FutureQueue<File> thumbnailLoaderQueue;
   SelectionModel<Album> albumSelection;
 
   @override
   void initState() {
     super.initState();
 
-    thumbnailLoaderQueue = AsyncQueue();
+    thumbnailLoaderQueue = FutureQueue();
     albumSelection =
         SelectionModel(singularName: 'album', pluralName: 'albums');
     albumSelection.addListener(() => setState(() {}));

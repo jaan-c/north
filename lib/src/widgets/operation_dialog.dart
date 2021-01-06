@@ -5,7 +5,7 @@ import 'package:north/private_gallery.dart';
 import 'package:quiver/iterables.dart';
 import 'package:provider/provider.dart';
 
-import 'async_queue.dart';
+import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
@@ -45,8 +45,8 @@ class _OperationDialog extends StatefulWidget {
 }
 
 class _OperationDialogState extends State<_OperationDialog> {
-  AsyncQueue<File> thumbnailLoaderQueue;
-  AsyncQueue<void> operationQueue;
+  FutureQueue<File> thumbnailLoaderQueue;
+  FutureQueue<void> operationQueue;
 
   var destinationAlbum = '';
   var progress = 0.0;
@@ -55,8 +55,8 @@ class _OperationDialogState extends State<_OperationDialog> {
   void initState() {
     super.initState();
 
-    thumbnailLoaderQueue = AsyncQueue();
-    operationQueue = AsyncQueue();
+    thumbnailLoaderQueue = FutureQueue();
+    operationQueue = FutureQueue();
   }
 
   @override
