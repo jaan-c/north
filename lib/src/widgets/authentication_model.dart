@@ -38,6 +38,7 @@ class AuthenticationModel with ChangeNotifier {
     await _prefs.setPasswordHash(passwordHash);
     await _prefs.setSalt(salt);
 
+    _key = Uint8List.fromList([]);
     _status = AuthenticationStatus.close;
     notifyListeners();
   }
