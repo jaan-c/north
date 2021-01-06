@@ -1,8 +1,18 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:north/private_gallery.dart';
+
+enum MediaOperation { delete, copy, move }
+
+class MediaOperationStatus {
+  final double progress;
+  final MediaOperation operation;
+
+  MediaOperationStatus({@required this.progress, @required this.operation});
+}
 
 class GalleryModel with ChangeNotifier {
   static Future<GalleryModel> instantiate(Uint8List key) async {
@@ -99,8 +109,11 @@ class GalleryModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteMedia(Uuid id) async {
-    await _gallery.delete(id);
+  Future<void> deleteMedias(List<Uuid> ids) async {
+    for (final id in ids) {
+      await _gallery.delete(id);
+    }
+
     notifyListeners();
   }
 
