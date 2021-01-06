@@ -30,7 +30,7 @@ class GalleryModel with ChangeNotifier {
 
   GalleryModel._internal(this._gallery);
 
-  Future<void> openAlbum(String albumName) async {
+  void openAlbum(String albumName) {
     _openedAlbum = albumName;
     notifyListeners();
   }
