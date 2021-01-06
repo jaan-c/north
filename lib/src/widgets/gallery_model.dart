@@ -86,8 +86,11 @@ class GalleryModel with ChangeNotifier {
     });
   }
 
-  Future<void> moveMediaToAlbum(Uuid id, String destinationAlbum) async {
-    await _gallery.moveMediaToAlbum(id, destinationAlbum);
+  Future<void> moveMedias(List<Uuid> ids, String destinationAlbum) async {
+    for (final id in ids) {
+      await _gallery.moveMediaToAlbum(id, destinationAlbum);
+    }
+
     notifyListeners();
   }
 
