@@ -23,6 +23,7 @@ class MediaListingPage extends StatefulWidget {
 class _MediaListingPageState extends State<MediaListingPage> {
   FutureQueue<File> thumbnailLoaderQueue;
   SelectionModel<Media> mediaSelection;
+  Future<List<Media>> futureMedias;
 
   @override
   void initState() {
@@ -31,6 +32,16 @@ class _MediaListingPageState extends State<MediaListingPage> {
     thumbnailLoaderQueue = FutureQueue();
     mediaSelection = SelectionModel(singularName: 'media');
     mediaSelection.addListener(() => setState(() {}));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final gallery = context.read<GalleryModel>();
+    futureMedias = gallery.getAlbumMedias(gallery.openedAlbum);
+
+    _resetState();
   }
 
   @override
@@ -154,13 +165,23 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _body(BuildContext context) {
-    final medias = context.select<GalleryModel, List<Media>>(
-        (gallery) => gallery.openedAlbumMedias);
+    return FutureBuilder(
+      future: futureMedias,
+      builder: (context, AsyncSnapshot<List<Media>> snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error;
+        }
 
-    return ThumbnailGrid(
-      builder: (_, ix) => _thumbnailTile(context, medias[ix]),
-      itemCount: medias.length,
-      crossAxisCount: 3,
+        if (!snapshot.hasData) {
+          return SizedBox.shrink();
+        }
+
+        return ThumbnailGrid(
+          builder: (context, ix) => _thumbnailTile(context, snapshot.data[ix]),
+          itemCount: snapshot.data.length,
+          crossAxisCount: 3,
+        );
+      },
     );
   }
 
@@ -199,9 +220,8 @@ class _MediaListingPageState extends State<MediaListingPage> {
   Future<void> _deleteSelectedMedia() async {
     final gallery = context.read<GalleryModel>();
 
-    for (final media in mediaSelection.toList()) {
-      await gallery.deleteMedia(media.id);
-    }
+    final ids = mediaSelection.toList().map((m) => m.id).toList();
+    await gallery.deleteMedias(ids);
 
     _resetState();
   }
