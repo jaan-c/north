@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'future_queue.dart';
 import 'gallery_model.dart';
-import 'operation_dialog.dart';
+import 'media_operation_dialog.dart';
 import 'prompt_dialog.dart';
 import 'selection_model.dart';
 import 'text_field_dialog.dart';
@@ -137,7 +137,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
   void _onCopy(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => CopyDialog(
+      builder: (context) => CopyMediaDialog(
         medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
@@ -147,7 +147,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
   void _onMove(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => MoveDialog(
+      builder: (context) => MoveMediaDialog(
         medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,

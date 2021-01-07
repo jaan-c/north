@@ -9,41 +9,43 @@ import 'gallery_model.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
-class CopyDialog extends StatelessWidget {
+class CopyMediaDialog extends StatelessWidget {
   final List<Media> medias;
 
-  CopyDialog({@required this.medias});
+  CopyMediaDialog({@required this.medias});
 
   @override
   Widget build(BuildContext context) {
-    return _OperationDialog(medias: medias, operation: _Operation.copy);
+    return _MediaOperationDialog(
+        medias: medias, operation: _MediaOperation.copy);
   }
 }
 
-class MoveDialog extends StatelessWidget {
+class MoveMediaDialog extends StatelessWidget {
   final List<Media> medias;
 
-  MoveDialog({@required this.medias});
+  MoveMediaDialog({@required this.medias});
 
   @override
   Widget build(BuildContext context) {
-    return _OperationDialog(medias: medias, operation: _Operation.move);
+    return _MediaOperationDialog(
+        medias: medias, operation: _MediaOperation.move);
   }
 }
 
-enum _Operation { copy, move }
+enum _MediaOperation { copy, move }
 
-class _OperationDialog extends StatefulWidget {
+class _MediaOperationDialog extends StatefulWidget {
   final List<Media> medias;
-  final _Operation operation;
+  final _MediaOperation operation;
 
-  _OperationDialog({@required this.medias, @required this.operation});
+  _MediaOperationDialog({@required this.medias, @required this.operation});
 
   @override
-  _OperationDialogState createState() => _OperationDialogState();
+  _MediaOperationDialogState createState() => _MediaOperationDialogState();
 }
 
-class _OperationDialogState extends State<_OperationDialog> {
+class _MediaOperationDialogState extends State<_MediaOperationDialog> {
   FutureQueue<File> thumbnailLoaderQueue;
   Future<List<Album>> futureAlbums;
   var destinationAlbum = '';
@@ -136,10 +138,10 @@ class _OperationDialogState extends State<_OperationDialog> {
     final ids = widget.medias.map((m) => m.id).toList();
     final gallery = context.read<GalleryModel>();
     switch (widget.operation) {
-      case _Operation.copy:
+      case _MediaOperation.copy:
         await gallery.copyMedias(ids, destinationAlbum);
         break;
-      case _Operation.move:
+      case _MediaOperation.move:
         await gallery.moveMedias(ids, destinationAlbum);
         break;
       default:
@@ -152,10 +154,10 @@ class _OperationDialogState extends State<_OperationDialog> {
   Widget _operationProgressDialog(BuildContext context) {
     var operationName = '';
     switch (widget.operation) {
-      case _Operation.copy:
+      case _MediaOperation.copy:
         operationName = 'Copying';
         break;
-      case _Operation.move:
+      case _MediaOperation.move:
         operationName = 'Moving';
         break;
       default:
