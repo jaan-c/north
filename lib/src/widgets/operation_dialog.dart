@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:north/private_gallery.dart';
-import 'package:quiver/iterables.dart';
 import 'package:provider/provider.dart';
 
 import 'future_queue.dart';
@@ -46,23 +45,28 @@ class _OperationDialog extends StatefulWidget {
 
 class _OperationDialogState extends State<_OperationDialog> {
   FutureQueue<File> thumbnailLoaderQueue;
-  FutureQueue<void> operationQueue;
-
+  Future<List<Album>> futureAlbums;
   var destinationAlbum = '';
-  var progress = 0.0;
 
   @override
   void initState() {
     super.initState();
 
     thumbnailLoaderQueue = FutureQueue();
-    operationQueue = FutureQueue();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final gallery = context.read<GalleryModel>();
+    futureAlbums = gallery.getAllAlbums();
+    thumbnailLoaderQueue.clear();
   }
 
   @override
   void dispose() {
     thumbnailLoaderQueue.dispose();
-    operationQueue.dispose();
     super.dispose();
   }
 
@@ -89,15 +93,25 @@ class _OperationDialogState extends State<_OperationDialog> {
   }
 
   Widget _thumbnailGrid(BuildContext context) {
-    final albums = context
-        .select<GalleryModel, List<Album>>((gallery) => gallery.allAlbums);
+    return FutureBuilder(
+      future: futureAlbums,
+      builder: (_, AsyncSnapshot<List<Album>> snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error;
+        }
 
-    return ThumbnailGrid(
-      builder: (_, ix) => _thumbnailTile(context, albums[ix]),
-      itemCount: albums.length,
-      crossAxisCount: 2,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
+        if (!snapshot.hasData) {
+          return SizedBox.shrink();
+        }
+
+        return ThumbnailGrid(
+          builder: (context, ix) => _thumbnailTile(context, snapshot.data[ix]),
+          itemCount: snapshot.data.length,
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+        );
+      },
     );
   }
 
@@ -119,31 +133,23 @@ class _OperationDialogState extends State<_OperationDialog> {
   }
 
   Future<void> _runOperation(BuildContext context) async {
-    for (final media in enumerate(widget.medias)) {
-      switch (widget.operation) {
-        case _Operation.copy:
-          await operationQueue.add(() => context
-              .read<GalleryModel>()
-              .copyMedia(media.value.id, destinationAlbum));
-          break;
-        case _Operation.move:
-          await operationQueue.add(() => context
-              .read<GalleryModel>()
-              .moveMediaToAlbum(media.value.id, destinationAlbum));
-          break;
-        default:
-          throw StateError('Unhandled operation ${widget.operation}.');
-      }
-
-      setState(() => progress = (media.index + 1) / widget.medias.length);
+    final ids = widget.medias.map((m) => m.id).toList();
+    final gallery = context.read<GalleryModel>();
+    switch (widget.operation) {
+      case _Operation.copy:
+        await gallery.copyMedias(ids, destinationAlbum);
+        break;
+      case _Operation.move:
+        await gallery.moveMedias(ids, destinationAlbum);
+        break;
+      default:
+        throw StateError('Unhandled operation ${widget.operation}.');
     }
+
+    Navigator.pop(context);
   }
 
   Widget _operationProgressDialog(BuildContext context) {
-    if (progress >= 1.0) {
-      Future.delayed(Duration.zero, () => Navigator.pop(context));
-    }
-
     var operationName = '';
     switch (widget.operation) {
       case _Operation.copy:
@@ -160,22 +166,13 @@ class _OperationDialogState extends State<_OperationDialog> {
       title: Text('$operationName media'),
       content: Column(
         children: [
-          LinearProgressIndicator(value: progress),
+          LinearProgressIndicator(),
           Text(
               '$operationName ${widget.medias.length} media to $destinationAlbum'),
         ],
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
-      actions: [
-        TextButton(
-          child: Text('STOP'),
-          onPressed: () {
-            operationQueue.clear();
-            Navigator.pop(context);
-          },
-        ),
-      ],
     );
   }
 }
