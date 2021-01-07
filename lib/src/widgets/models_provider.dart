@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:north/app_preferences.dart';
 import 'package:provider/provider.dart';
 
 import 'authentication_model.dart';
@@ -14,7 +13,7 @@ class ModelsProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureProvider(
-      create: (_) => AppPreferences.instantiate(),
+      create: (_) => AuthenticationModel.instantiate(),
       builder: (context, child) {
         final auth = context.watch<AuthenticationModel>();
 
