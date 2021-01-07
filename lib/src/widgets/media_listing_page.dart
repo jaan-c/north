@@ -39,7 +39,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     super.didChangeDependencies();
 
     final gallery = context.read<GalleryModel>();
-    futureMedias = gallery.getAlbumMedias(gallery.openedAlbum);
+    futureMedias = gallery.getAlbumMedias(gallery.openedAlbum.name);
 
     _resetState();
   }
@@ -65,7 +65,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
     if (mediaSelection.isEmpty) {
       return AppBar(
-        title: Text(gallery.openedAlbum),
+        title: Text(gallery.openedAlbum.name),
         centerTitle: true,
         automaticallyImplyLeading: true,
       );
@@ -235,6 +235,6 @@ class _MediaListingPageState extends State<MediaListingPage> {
 
   void _openMedia(BuildContext context, Media media) {
     final gallery = context.read<GalleryModel>();
-    gallery.openMedia(media.id);
+    gallery.openMedia(media);
   }
 }

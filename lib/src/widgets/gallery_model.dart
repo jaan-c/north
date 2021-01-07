@@ -22,26 +22,26 @@ class GalleryModel with ChangeNotifier {
 
   final PrivateGallery _gallery;
 
-  String get openedAlbum => _openedAlbum;
-  Uuid get openedMedia => _openedMedia;
+  Album get openedAlbum => _openedAlbum;
+  Media get openedMedia => _openedMedia;
 
-  String _openedAlbum = '';
-  Uuid _openedMedia;
+  Album _openedAlbum;
+  Media _openedMedia;
 
   GalleryModel._internal(this._gallery);
 
-  void openAlbum(String albumName) {
-    _openedAlbum = albumName;
+  void openAlbum(Album album) {
+    _openedAlbum = album;
     notifyListeners();
   }
 
   void closeAlbum() {
-    _openedAlbum = '';
+    _openedAlbum = null;
     notifyListeners();
   }
 
-  void openMedia(Uuid id) {
-    _openedMedia = id;
+  void openMedia(Media media) {
+    _openedMedia = media;
     notifyListeners();
   }
 
@@ -55,7 +55,7 @@ class GalleryModel with ChangeNotifier {
   }
 
   Future<void> getAlbumMedias(String albumName) async {
-    return _gallery.getAlbumMedias(openedAlbum);
+    return _gallery.getAlbumMedias(openedAlbum.name);
   }
 
   Future<File> loadAlbumThumbnail(String albumName) async {

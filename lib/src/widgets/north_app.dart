@@ -37,10 +37,9 @@ class _NorthAppState extends State<NorthApp> {
       home: Navigator(
         pages: [
           MaterialPage(child: AlbumListingPage()),
-          if (gallery.openedAlbum.isNotEmpty)
+          if (gallery.openedAlbum != null)
             MaterialPage(child: MediaListingPage()),
-          if (gallery.openedMedia != null)
-            MaterialPage(child: MediaViewerPage()),
+          if (gallery.openedMedia != null) MaterialPage(child: MediaViewPage()),
         ],
         onPopPage: (route, result) => route.didPop(result),
       ),

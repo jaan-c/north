@@ -153,7 +153,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       mode: mode,
       borderRadius: BorderRadius.circular(24),
       onTap: mode == ThumbnailTileMode.normal
-          ? () => _openAlbum(context, album.name)
+          ? () => _openAlbum(context, album)
           : () => albumSelection.toggle(album),
       onLongPress: mode == ThumbnailTileMode.normal
           ? () => albumSelection.toggle(album)
@@ -200,8 +200,8 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     _resetState();
   }
 
-  void _openAlbum(BuildContext context, String name) {
+  void _openAlbum(BuildContext context, Album album) {
     final gallery = context.read<GalleryModel>();
-    gallery.openAlbum(name);
+    gallery.openAlbum(album);
   }
 }
