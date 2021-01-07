@@ -1,57 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:mime/mime.dart';
-
-typedef MediaLoaderCallback = Future<File> Function();
-
-class MediaView extends StatefulWidget {
-  final MediaLoaderCallback loader;
-
-  MediaView({@required this.loader});
-
-  @override
-  _MediaViewState createState() => _MediaViewState();
-}
-
-class _MediaViewState extends State<MediaView> {
-  Future<File> futureMediaFile;
-  Future<_MediaType> futureMediaType;
-
-  @override
-  void initState() {
-    super.initState();
-    futureMediaFile = widget.loader();
-    futureMediaType = futureMediaFile.then((file) => _getMediaType(file));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder()
-
-    return FutureBuilder(
-      future: futureMediaType,
-      builder: (_, AsyncSnapshot<_MediaType> snapshot) {
-        if (snapshot.hasError) {
-          throw snapshot.error;
-        }
-
-        if (!snapshot.hasData) {
-          return SizedBox.expand();
-        }
-
-        switch (snapshot.data) {
-          case _MediaType.image:
-            return ImageView(image: widget.media);
-          case _MediaType.video:
-            return VideoView(video: widget.media);
-          default:
-            throw StateError('Unhandled media type ${snapshot.data}.');
-        }
-      },
-    );
-  }
-}
+import 'package:video_player/video_player.dart';
 
 class ImageView extends StatelessWidget {
   final File image;
@@ -60,38 +10,42 @@ class ImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return FittedBox(
+      child: Image.file(image),
+      fit: BoxFit.contain,
+    );
   }
 }
 
-class VideoView extends StatelessWidget {
+class VideoView extends StatefulWidget {
   final File video;
 
   VideoView({@required this.video});
 
   @override
+  _VideoViewState createState() => _VideoViewState();
+}
+
+class _VideoViewState extends State<VideoView> {
+  VideoPlayerController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = VideoPlayerController.file(widget.video);
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container();
+    return FittedBox(
+      child: VideoPlayer(controller),
+      fit: BoxFit.contain,
+    );
   }
-}
-
-enum _MediaType { image, video }
-
-Future<_MediaType> _getMediaType(File file) async {
-  final header = await _readHeader(file);
-  final mime = lookupMimeType(file.path, headerBytes: header);
-
-  if (mime.startsWith('image')) {
-    return _MediaType.image;
-  } else if (mime.startsWith('video')) {
-    return _MediaType.video;
-  } else {
-    throw StateError('Not a media file ${file.path}: $mime.');
-  }
-}
-
-Future<List<int>> _readHeader(File file) async {
-  return (await file.openRead(0, defaultMagicNumbersMaxLength).toList())
-      .expand((chunk) => chunk)
-      .toList();
 }
