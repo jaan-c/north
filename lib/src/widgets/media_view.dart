@@ -10,9 +10,11 @@ class ImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FittedBox(
-      child: Image.file(image),
-      fit: BoxFit.contain,
+    return Center(
+      child: FittedBox(
+        child: Image.file(image),
+        fit: BoxFit.contain,
+      ),
     );
   }
 }
@@ -43,9 +45,11 @@ class _VideoViewState extends State<VideoView> {
 
   @override
   Widget build(BuildContext context) {
-    return FittedBox(
-      child: VideoPlayer(controller),
-      fit: BoxFit.contain,
+    return Center(
+      child: FittedBox(
+        child: VideoPlayer(controller),
+        fit: BoxFit.contain,
+      ),
     );
   }
 }
