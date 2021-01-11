@@ -50,11 +50,11 @@ class GalleryModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getAllAlbums() async {
+  Future<List<Album>> getAllAlbums() async {
     return _gallery.getAllAlbums();
   }
 
-  Future<void> getAlbumMedias(String albumName) async {
+  Future<List<Media>> getAlbumMedias(String albumName) async {
     return _gallery.getAlbumMedias(openedAlbum.name);
   }
 
