@@ -12,7 +12,10 @@ class ImageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: FittedBox(
-        child: Image.file(image),
+        child: ConstrainedBox(
+          child: Image.file(image),
+          constraints: BoxConstraints(minWidth: 1, minHeight: 1),
+        ),
         fit: BoxFit.contain,
       ),
     );
