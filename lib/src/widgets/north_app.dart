@@ -17,9 +17,7 @@ class NorthApp extends StatefulWidget {
 class _NorthAppState extends State<NorthApp> {
   @override
   Widget build(BuildContext context) {
-    return ModelsProvider(
-      builder: (context, __) => _app(context),
-    );
+    return ModelsProvider(builder: _app);
   }
 
   Widget _app(BuildContext context) {

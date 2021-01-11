@@ -5,29 +5,76 @@ import 'authentication_model.dart';
 import 'gallery_model.dart';
 
 class ModelsProvider extends StatelessWidget {
-  final Widget Function(BuildContext, Widget) builder;
-  final Widget child;
+  final WidgetBuilder builder;
 
-  ModelsProvider({this.builder, this.child});
+  ModelsProvider({this.builder});
 
   @override
   Widget build(BuildContext context) {
-    return FutureProvider(
-      create: (_) => AuthenticationModel.instantiate(),
-      builder: (context, child) {
+    return FutureChangeNotifierProvider(
+      create: AuthenticationModel.instantiate,
+      builder: (context) {
         final auth = context.watch<AuthenticationModel>();
 
         if (auth.status == AuthenticationStatus.open) {
-          return FutureProvider(
-            create: (_) => GalleryModel.instantiate(auth.key),
+          return FutureChangeNotifierProvider(
+            create: () => GalleryModel.instantiate(auth.key),
             builder: builder,
-            child: child,
           );
         } else {
-          return builder(context, child);
+          return builder(context);
         }
       },
-      child: child,
+    );
+  }
+}
+
+class FutureChangeNotifierProvider<T extends ChangeNotifier>
+    extends StatefulWidget {
+  final Future<T> Function() create;
+  final WidgetBuilder builder;
+
+  FutureChangeNotifierProvider({@required this.create, @required this.builder});
+
+  @override
+  _FutureChangeNotifierProviderState<T> createState() =>
+      _FutureChangeNotifierProviderState<T>();
+}
+
+class _FutureChangeNotifierProviderState<T extends ChangeNotifier>
+    extends State<FutureChangeNotifierProvider<T>> {
+  Future<T> futureChangeNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    futureChangeNotifier = widget.create();
+  }
+
+  @override
+  void dispose() {
+    futureChangeNotifier.then((cn) => cn.dispose());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: futureChangeNotifier,
+      builder: (context, AsyncSnapshot<T> snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error;
+        }
+
+        if (snapshot.hasData) {
+          return ChangeNotifierProvider.value(
+            value: snapshot.data,
+            builder: (context, _) => widget.builder(context),
+          );
+        } else {
+          return SizedBox.shrink();
+        }
+      },
     );
   }
 }
