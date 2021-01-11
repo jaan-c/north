@@ -55,6 +55,7 @@ class _MediaViewPageState extends State<MediaViewPage> {
       child: Column(
         children: [
           CircularProgressIndicator(),
+          SizedBox(height: 8),
           Text('Decrypting media', style: textTheme.subtitle1),
         ],
         mainAxisSize: MainAxisSize.min,
