@@ -39,7 +39,19 @@ class _NorthAppState extends State<NorthApp> {
             MaterialPage(child: MediaListingPage()),
           if (gallery.openedMedia != null) MaterialPage(child: MediaViewPage()),
         ],
-        onPopPage: (route, result) => route.didPop(result),
+        onPopPage: (route, result) {
+          if (route.didPop(result)) {
+            if (gallery.openedMedia != null) {
+              gallery.closeMedia();
+            } else if (gallery.openedAlbum != null) {
+              gallery.closeAlbum();
+            }
+
+            return true;
+          } else {
+            return false;
+          }
+        },
       ),
     );
   }
