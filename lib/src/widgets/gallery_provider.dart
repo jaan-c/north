@@ -1,40 +1,32 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'authentication_model.dart';
 import 'gallery_model.dart';
 
-class ModelsProvider extends StatelessWidget {
+class GalleryProvider extends StatelessWidget {
+  final Uint8List galleryKey;
   final WidgetBuilder builder;
 
-  ModelsProvider({this.builder});
+  GalleryProvider(this.galleryKey, {this.builder});
 
   @override
   Widget build(BuildContext context) {
-    return FutureChangeNotifierProvider(
-      create: AuthenticationModel.instantiate,
-      builder: (context) {
-        final auth = context.watch<AuthenticationModel>();
-
-        if (auth.status == AuthenticationStatus.open) {
-          return FutureChangeNotifierProvider(
-            create: () => GalleryModel.instantiate(auth.key),
-            builder: builder,
-          );
-        } else {
-          return builder(context);
-        }
-      },
+    return _FutureChangeNotifierProvider(
+      create: () => GalleryModel.instantiate(galleryKey),
+      builder: builder,
     );
   }
 }
 
-class FutureChangeNotifierProvider<T extends ChangeNotifier>
+class _FutureChangeNotifierProvider<T extends ChangeNotifier>
     extends StatefulWidget {
   final Future<T> Function() create;
   final WidgetBuilder builder;
 
-  FutureChangeNotifierProvider({@required this.create, @required this.builder});
+  _FutureChangeNotifierProvider(
+      {@required this.create, @required this.builder});
 
   @override
   _FutureChangeNotifierProviderState<T> createState() =>
@@ -42,7 +34,7 @@ class FutureChangeNotifierProvider<T extends ChangeNotifier>
 }
 
 class _FutureChangeNotifierProviderState<T extends ChangeNotifier>
-    extends State<FutureChangeNotifierProvider<T>> {
+    extends State<_FutureChangeNotifierProvider<T>> {
   Future<T> futureChangeNotifier;
 
   @override

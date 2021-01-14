@@ -1,10 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'album_listing_page.dart';
-import 'authentication_model.dart';
 import 'authentication_page.dart';
-import 'models_provider.dart';
+import 'gallery_provider.dart';
 
 class NorthApp extends StatefulWidget {
   @override
@@ -12,18 +12,25 @@ class NorthApp extends StatefulWidget {
 }
 
 class _NorthAppState extends State<NorthApp> {
+  Uint8List key;
+
   @override
   Widget build(BuildContext context) {
-    return ModelsProvider(builder: _app);
+    if (key == null) {
+      return MaterialApp(
+        home: AuthenticationPage(onSubmitKey: _setKey),
+      );
+    }
+
+    return GalleryProvider(
+      key,
+      builder: (_) => MaterialApp(
+        home: AlbumListingPage(),
+      ),
+    );
   }
 
-  Widget _app(BuildContext context) {
-    final auth = context.watch<AuthenticationModel>();
-
-    return MaterialApp(
-      home: auth.status != AuthenticationStatus.open
-          ? AuthenticationPage()
-          : AlbumListingPage(),
-    );
+  void _setKey(Uint8List newKey) {
+    setState(() => key = newKey);
   }
 }
