@@ -46,7 +46,8 @@ class _PasswordPageState extends State<PasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(child: _body(context)),
-      floatingActionButton: isPasswordValid ? _submitFab() : null,
+      floatingActionButton:
+          isPasswordValid && !isSubmitting ? _submitFab() : null,
     );
   }
 
