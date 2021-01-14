@@ -3,7 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:north/private_gallery.dart';
+import 'package:path/path.dart' as pathlib;
 
 enum MediaOperation { delete, copy, move }
 
@@ -22,40 +24,14 @@ class GalleryModel with ChangeNotifier {
 
   final PrivateGallery _gallery;
 
-  Album get openedAlbum => _openedAlbum;
-  Media get openedMedia => _openedMedia;
-
-  Album _openedAlbum;
-  Media _openedMedia;
-
   GalleryModel._internal(this._gallery);
-
-  void openAlbum(Album album) {
-    _openedAlbum = album;
-    notifyListeners();
-  }
-
-  void closeAlbum() {
-    _openedAlbum = null;
-    notifyListeners();
-  }
-
-  void openMedia(Media media) {
-    _openedMedia = media;
-    notifyListeners();
-  }
-
-  void closeMedia() {
-    _openedMedia = null;
-    notifyListeners();
-  }
 
   Future<List<Album>> getAllAlbums() async {
     return _gallery.getAllAlbums();
   }
 
   Future<List<Media>> getAlbumMedias(String albumName) async {
-    return _gallery.getAlbumMedias(openedAlbum.name);
+    return _gallery.getAlbumMedias(albumName);
   }
 
   Future<File> loadAlbumThumbnail(String albumName) async {
