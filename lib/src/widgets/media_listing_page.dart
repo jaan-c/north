@@ -43,9 +43,8 @@ class _MediaListingPageState extends State<MediaListingPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final gallery = context.read<GalleryModel>();
+    final gallery = Provider.of<GalleryModel>(context, listen: true);
     futureMedias = gallery.getAlbumMedias(widget.album.name);
-
     _resetState();
   }
 

@@ -37,7 +37,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final gallery = context.read<GalleryModel>();
+    final gallery = Provider.of<GalleryModel>(context, listen: true);
     futureAlbums = gallery.getAllAlbums();
     _resetState();
   }

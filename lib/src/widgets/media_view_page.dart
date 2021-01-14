@@ -25,7 +25,7 @@ class _MediaViewPageState extends State<MediaViewPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final gallery = context.read<GalleryModel>();
+    final gallery = Provider.of<GalleryModel>(context, listen: true);
     futureMediaFile = gallery.loadMedia(widget.media.id);
     futureMediaType = futureMediaFile.then(_getMediaType);
   }
