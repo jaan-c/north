@@ -208,7 +208,8 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  void _renameSelectedMedia(BuildContext context, String newName) async {
+  Future<void> _renameSelectedMedia(
+      BuildContext context, String newName) async {
     final gallery = context.read<GalleryModel>();
 
     final selectedMedia = mediaSelection.single;
