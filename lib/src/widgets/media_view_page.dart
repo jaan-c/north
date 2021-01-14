@@ -2,12 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
+import 'package:north/private_gallery.dart';
 import 'package:provider/provider.dart';
 
 import 'gallery_model.dart';
 import 'media_view.dart';
 
 class MediaViewPage extends StatefulWidget {
+  final Media media;
+
+  MediaViewPage(this.media);
+
   @override
   _MediaViewPageState createState() => _MediaViewPageState();
 }
@@ -21,16 +26,14 @@ class _MediaViewPageState extends State<MediaViewPage> {
     super.didChangeDependencies();
 
     final gallery = context.read<GalleryModel>();
-    futureMediaFile = gallery.loadMedia(gallery.openedMedia.id);
+    futureMediaFile = gallery.loadMedia(widget.media.id);
     futureMediaType = futureMediaFile.then(_getMediaType);
   }
 
   @override
   Widget build(BuildContext context) {
-    final gallery = context.watch<GalleryModel>();
-
     return Scaffold(
-      appBar: AppBar(title: Text(gallery.openedMedia.name)),
+      appBar: AppBar(title: Text(widget.media.name)),
       body: FutureBuilder(
         future: futureMediaFile,
         builder: (context, AsyncSnapshot<File> snapshot) {
@@ -91,13 +94,12 @@ class _MediaViewPageState extends State<MediaViewPage> {
   }
 
   Widget _invalidMediaView(BuildContext context) {
-    final gallery = context.watch<GalleryModel>();
     final textTheme = Theme.of(context).textTheme;
 
     return Center(
       child: Padding(
         child: Text(
-          "'${gallery.openedMedia.name}' is an invalid media file.",
+          "'${widget.media.name}' is an invalid media file.",
           style: textTheme.subtitle1,
         ),
         padding: EdgeInsets.all(16),

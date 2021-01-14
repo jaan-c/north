@@ -4,9 +4,6 @@ import 'package:provider/provider.dart';
 import 'album_listing_page.dart';
 import 'authentication_model.dart';
 import 'authentication_page.dart';
-import 'gallery_model.dart';
-import 'media_listing_page.dart';
-import 'media_view_page.dart';
 import 'models_provider.dart';
 
 class NorthApp extends StatefulWidget {
@@ -23,36 +20,10 @@ class _NorthAppState extends State<NorthApp> {
   Widget _app(BuildContext context) {
     final auth = context.watch<AuthenticationModel>();
 
-    if (auth.status != AuthenticationStatus.open) {
-      return MaterialApp(
-        home: AuthenticationPage(),
-      );
-    }
-
-    final gallery = context.watch<GalleryModel>();
-
     return MaterialApp(
-      home: Navigator(
-        pages: [
-          MaterialPage(child: AlbumListingPage()),
-          if (gallery.openedAlbum != null)
-            MaterialPage(child: MediaListingPage()),
-          if (gallery.openedMedia != null) MaterialPage(child: MediaViewPage()),
-        ],
-        onPopPage: (route, result) {
-          if (route.didPop(result)) {
-            if (gallery.openedMedia != null) {
-              gallery.closeMedia();
-            } else if (gallery.openedAlbum != null) {
-              gallery.closeAlbum();
-            }
-
-            return true;
-          } else {
-            return false;
-          }
-        },
-      ),
+      home: auth.status != AuthenticationStatus.open
+          ? AuthenticationPage()
+          : AlbumListingPage(),
     );
   }
 }

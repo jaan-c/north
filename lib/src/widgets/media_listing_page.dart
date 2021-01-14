@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'media_operation_dialog.dart';
+import 'media_view_page.dart';
 import 'prompt_dialog.dart';
 import 'selection_model.dart';
 import 'text_field_dialog.dart';
@@ -16,6 +17,10 @@ import 'thumbnail_tile.dart';
 enum _ExtraAppBarActions { rename, copy, move }
 
 class MediaListingPage extends StatefulWidget {
+  final Album album;
+
+  MediaListingPage(this.album);
+
   @override
   _MediaListingPageState createState() => _MediaListingPageState();
 }
@@ -39,7 +44,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     super.didChangeDependencies();
 
     final gallery = context.read<GalleryModel>();
-    futureMedias = gallery.getAlbumMedias(gallery.openedAlbum.name);
+    futureMedias = gallery.getAlbumMedias(widget.album.name);
 
     _resetState();
   }
@@ -61,11 +66,9 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   Widget _appBar(BuildContext context) {
-    final gallery = context.watch<GalleryModel>();
-
     if (mediaSelection.isEmpty) {
       return AppBar(
-        title: Text(gallery.openedAlbum.name),
+        title: Text(widget.album.name),
         centerTitle: true,
         automaticallyImplyLeading: true,
       );
@@ -235,7 +238,10 @@ class _MediaListingPageState extends State<MediaListingPage> {
   }
 
   void _openMedia(BuildContext context, Media media) {
-    final gallery = context.read<GalleryModel>();
-    gallery.openMedia(media);
+    final route = MaterialPageRoute(
+      builder: (_) => MediaViewPage(media),
+    );
+
+    Navigator.of(context).push(route);
   }
 }

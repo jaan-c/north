@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'future_queue.dart';
 import 'gallery_model.dart';
+import 'media_listing_page.dart';
 import 'prompt_dialog.dart';
 import 'selection_model.dart';
 import 'text_field_dialog.dart';
@@ -201,7 +202,10 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   void _openAlbum(BuildContext context, Album album) {
-    final gallery = context.read<GalleryModel>();
-    gallery.openAlbum(album);
+    final route = MaterialPageRoute(
+      builder: (_) => MediaListingPage(album),
+    );
+
+    Navigator.of(context).push(route);
   }
 }
