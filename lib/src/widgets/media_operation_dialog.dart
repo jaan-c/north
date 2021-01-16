@@ -125,13 +125,15 @@ class _MediaOperationDialogState extends State<_MediaOperationDialog> {
           () => context.read<GalleryModel>().loadAlbumThumbnail(album.name)),
       mode: ThumbnailTileMode.normal,
       borderRadius: BorderRadius.circular(24),
-      onTap: () => _pickDestinationAlbum(context, album.name),
+      onTap: () async {
+        _setDestinationAlbum(album.name);
+        await _runOperation(context);
+      },
     );
   }
 
-  void _pickDestinationAlbum(BuildContext context, String albumName) {
+  void _setDestinationAlbum(String albumName) {
     setState(() => destinationAlbum = albumName);
-    _runOperation(context);
   }
 
   Future<void> _runOperation(BuildContext context) async {
