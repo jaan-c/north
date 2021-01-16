@@ -107,7 +107,7 @@ class _MediaOperationDialogState extends State<_MediaOperationDialog> {
         }
 
         return ThumbnailGrid(
-          builder: (context, ix) => _thumbnailTile(context, snapshot.data[ix]),
+          builder: (_, ix) => _thumbnailTile(context, snapshot.data[ix]),
           itemCount: snapshot.data.length,
           crossAxisCount: 2,
           mainAxisSpacing: 16,
