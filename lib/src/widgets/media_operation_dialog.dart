@@ -91,6 +91,7 @@ class _MediaOperationDialogState extends State<_MediaOperationDialog> {
           onPressed: () => Navigator.pop(context),
         ),
       ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     );
   }
 
@@ -177,6 +178,7 @@ class _MediaOperationDialogState extends State<_MediaOperationDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     );
   }
 }
