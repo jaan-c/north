@@ -172,7 +172,12 @@ class _MediaListingPageState extends State<MediaListingPage> {
       future: futureMedias,
       builder: (context, AsyncSnapshot<List<Media>> snapshot) {
         if (snapshot.hasError) {
-          throw snapshot.error;
+          if (snapshot.error is PrivateGalleryException) {
+            Future.delayed(Duration.zero, () => Navigator.pop(context));
+            return SizedBox.shrink();
+          } else {
+            throw snapshot.error;
+          }
         }
 
         if (!snapshot.hasData) {
