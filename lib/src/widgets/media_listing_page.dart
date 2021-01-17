@@ -8,7 +8,7 @@ import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'media_operation_dialog.dart';
 import 'media_view_page.dart';
-import 'prompt_dialog.dart';
+import 'operation_prompt_dialog.dart';
 import 'selection_model.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
@@ -84,7 +84,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
             context: context,
-            builder: (_) => _deleteSelectionDialog(),
+            builder: (_) => _deleteSelectionDialog(context),
             barrierDismissible: false,
           ),
         ),
@@ -156,14 +156,15 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  Widget _deleteSelectionDialog() {
-    return PromptDialog(
-      title: 'Delete ${mediaSelection.name}?',
-      content:
-          'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.',
-      positiveButtonText: 'DELETE',
-      onPositivePressed: _deleteSelectedMedia,
-    );
+  Widget _deleteSelectionDialog(BuildContext context) {
+    return OperationPromptDialog(
+        title: 'Delete ${mediaSelection.name}?',
+        description:
+            'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.',
+        positiveButtonText: 'DELETE',
+        operationDescription:
+            'Deleting ${mediaSelection.count} ${mediaSelection.name}',
+        onPositivePressed: () => _deleteSelectedMedia(context));
   }
 
   Widget _body(BuildContext context) {
@@ -220,7 +221,7 @@ class _MediaListingPageState extends State<MediaListingPage> {
     _resetState();
   }
 
-  Future<void> _deleteSelectedMedia() async {
+  Future<void> _deleteSelectedMedia(BuildContext context) async {
     final gallery = context.read<GalleryModel>();
 
     final ids = mediaSelection.toList().map((m) => m.id).toList();

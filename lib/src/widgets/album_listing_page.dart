@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'future_queue.dart';
 import 'gallery_model.dart';
 import 'media_listing_page.dart';
-import 'prompt_dialog.dart';
+import 'operation_prompt_dialog.dart';
 import 'selection_model.dart';
 import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
@@ -101,11 +101,13 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
   }
 
   Widget _deleteSelectionDialog(BuildContext context) {
-    return PromptDialog(
+    return OperationPromptDialog(
       title: 'Delete ${albumSelection.name}?',
-      content:
-          'This will permanently delete ${albumSelection.count} ${albumSelection.name}',
+      description:
+          'This will permanently delete ${albumSelection.count} ${albumSelection.name}.',
       positiveButtonText: 'DELETE',
+      operationDescription:
+          'Deleting ${albumSelection.count} ${albumSelection.name}',
       onPositivePressed: () => _deleteSelectedAlbums(context),
     );
   }
