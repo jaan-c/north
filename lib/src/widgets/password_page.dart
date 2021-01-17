@@ -105,6 +105,8 @@ class _PasswordPageState extends State<PasswordPage> {
         ),
         border: OutlineInputBorder(),
       ),
+      textInputAction: TextInputAction.done,
+      onSubmitted: isPasswordValid ? (_) => _submitPassword() : null,
       obscureText: isPasswordObscured,
       autofocus: true,
       autocorrect: false,
