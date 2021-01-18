@@ -35,6 +35,23 @@ class SelectionModel<T> with ChangeNotifier {
     notifyListeners();
   }
 
+  void selectAll(List<T> items) {
+    final newSelection = _selection.toList();
+    for (final i in items) {
+      if (!newSelection.contains(i)) {
+        newSelection.add(i);
+      }
+    }
+
+    _selection = newSelection;
+    notifyListeners();
+  }
+
+  void deselectAll(List<T> items) {
+    _selection = [];
+    notifyListeners();
+  }
+
   void clear() {
     _selection = [];
     notifyListeners();

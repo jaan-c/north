@@ -13,6 +13,8 @@ import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
+enum _OverflowMenuActions { selectAll, deselectAll, rename }
+
 class AlbumListingPage extends StatefulWidget {
   @override
   _AlbumListingPageState createState() => _AlbumListingPageState();
@@ -69,15 +71,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       ),
       title: Text('${albumSelection.count} selected ${albumSelection.name}'),
       actions: [
-        if (albumSelection.isSingle)
-          IconButton(
-            icon: Icon(Icons.edit_rounded),
-            onPressed: () => showDialog(
-              context: context,
-              builder: _renameDialog,
-              barrierDismissible: false,
-            ),
-          ),
         IconButton(
           icon: Icon(Icons.delete_rounded),
           onPressed: () => showDialog(
@@ -86,7 +79,62 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
             barrierDismissible: false,
           ),
         ),
+        _overflowMenuButton(),
       ],
+    );
+  }
+
+  Widget _overflowMenuButton() {
+    return FutureBuilder(
+      future: futureAlbums,
+      builder: (context, AsyncSnapshot<List<Album>> snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error;
+        }
+
+        if (!snapshot.hasData) {
+          return SizedBox.shrink();
+        }
+
+        return PopupMenuButton<_OverflowMenuActions>(
+          itemBuilder: (_) => [
+            if (albumSelection.count != snapshot.data.length)
+              PopupMenuItem(
+                child: Text('Select All'),
+                value: _OverflowMenuActions.selectAll,
+              )
+            else
+              PopupMenuItem(
+                child: Text('Deselect All'),
+                value: _OverflowMenuActions.deselectAll,
+              ),
+            if (albumSelection.isSingle)
+              PopupMenuItem(
+                child: Text('Rename'),
+                value: _OverflowMenuActions.rename,
+              )
+          ],
+          onSelected: (action) async {
+            switch (action) {
+              case _OverflowMenuActions.selectAll:
+                await _selectAll();
+                break;
+              case _OverflowMenuActions.deselectAll:
+                await _deselectAll();
+                break;
+              case _OverflowMenuActions.rename:
+                await showDialog(
+                  context: context,
+                  builder: _renameDialog,
+                  barrierDismissible: false,
+                );
+                break;
+              default:
+                throw StateError('Unhandled overflow menu action $action.');
+            }
+          },
+        );
+      },
     );
   }
 
@@ -169,6 +217,14 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       thumbnailLoaderQueue.clear();
       albumSelection.clear();
     });
+  }
+
+  Future<void> _selectAll() async {
+    albumSelection.selectAll(await futureAlbums);
+  }
+
+  Future<void> _deselectAll() async {
+    albumSelection.deselectAll(await futureAlbums);
   }
 
   Future<void> _renameSelectedAlbum(
