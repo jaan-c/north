@@ -47,7 +47,7 @@ class SelectionModel<T> with ChangeNotifier {
     notifyListeners();
   }
 
-  void deselectAll(List<T> items) {
+  void deselectAll() {
     _selection = [];
     notifyListeners();
   }
