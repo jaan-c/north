@@ -73,14 +73,26 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       actions: [
         IconButton(
           icon: Icon(Icons.delete_rounded),
-          onPressed: () => showDialog(
-            context: context,
-            builder: (context) => _deleteSelectionDialog(context),
-            barrierDismissible: false,
-          ),
+          onPressed: () => _showDeleteSelectionDialog(context),
         ),
         _overflowMenuButton(),
       ],
+    );
+  }
+
+  Future<void> _showDeleteSelectionDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => OperationPromptDialog(
+        title: 'Delete ${albumSelection.name}?',
+        description:
+            'This will permanently delete ${albumSelection.count} ${albumSelection.name}.',
+        positiveButtonText: 'DELETE',
+        operationDescription:
+            'Deleting ${albumSelection.count} ${albumSelection.name}',
+        onPositivePressed: () => _deleteSelectedAlbums(context),
+      ),
+      barrierDismissible: false,
     );
   }
 
@@ -123,11 +135,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
                 await _deselectAll();
                 break;
               case _OverflowMenuActions.rename:
-                await showDialog(
-                  context: context,
-                  builder: _renameDialog,
-                  barrierDismissible: false,
-                );
+                await _showRenameDialog(context);
                 break;
               default:
                 throw StateError('Unhandled overflow menu action $action.');
@@ -138,25 +146,16 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
     );
   }
 
-  Widget _renameDialog(BuildContext context) {
-    return TextFieldDialog(
-      title: 'Rename album',
-      initialText: albumSelection.single.name,
-      positiveTextButton: 'RENAME',
-      onCheckText: (name) => name.trim().isNotEmpty,
-      onSubmitText: (newName) => _renameSelectedAlbum(context, newName),
-    );
-  }
-
-  Widget _deleteSelectionDialog(BuildContext context) {
-    return OperationPromptDialog(
-      title: 'Delete ${albumSelection.name}?',
-      description:
-          'This will permanently delete ${albumSelection.count} ${albumSelection.name}.',
-      positiveButtonText: 'DELETE',
-      operationDescription:
-          'Deleting ${albumSelection.count} ${albumSelection.name}',
-      onPositivePressed: () => _deleteSelectedAlbums(context),
+  Future<void> _showRenameDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => TextFieldDialog(
+        title: 'Rename album',
+        initialText: albumSelection.single.name,
+        positiveTextButton: 'RENAME',
+        onCheckText: (name) => name.trim().isNotEmpty,
+        onSubmitText: (newName) => _renameSelectedAlbum(context, newName),
+      ),
     );
   }
 
