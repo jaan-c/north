@@ -156,6 +156,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         onCheckText: (name) => name.trim().isNotEmpty,
         onSubmitText: (newName) => _renameSelectedAlbum(context, newName),
       ),
+      barrierDismissible: false,
     );
   }
 
