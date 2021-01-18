@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 typedef CheckTextCallback = bool Function(String text);
-typedef SubmitTextCallback = void Function(String text);
+typedef SubmitTextCallback = FutureOr<void> Function(String text);
 
 class TextFieldDialog extends StatefulWidget {
   final String title;
@@ -55,8 +57,8 @@ class _TextFieldDialogState extends State<TextFieldDialog> {
         TextButton(
           child: Text(widget.positiveTextButton),
           onPressed: isTextValid
-              ? () {
-                  widget.onSubmitText(fieldController.text);
+              ? () async {
+                  await widget.onSubmitText(fieldController.text);
                   Navigator.pop(context);
                 }
               : null,
