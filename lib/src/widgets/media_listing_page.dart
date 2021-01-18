@@ -14,7 +14,7 @@ import 'text_field_dialog.dart';
 import 'thumbnail_grid.dart';
 import 'thumbnail_tile.dart';
 
-enum _ExtraAppBarActions { rename, copy, move }
+enum _OverflowMenuActions { selectAll, deselectAll, rename, copy, move }
 
 class MediaListingPage extends StatefulWidget {
   final Album album;
@@ -82,62 +82,109 @@ class _MediaListingPageState extends State<MediaListingPage> {
       actions: [
         IconButton(
           icon: Icon(Icons.delete_rounded),
-          onPressed: () => showDialog(
-            context: context,
-            builder: (_) => _deleteSelectionDialog(context),
-            barrierDismissible: false,
-          ),
+          onPressed: () => _showDeleteSelectionDialog(context),
         ),
-        _extraActionsMenuButton(context),
+        _overflowMenuButton(),
       ],
     );
   }
 
-  Widget _extraActionsMenuButton(BuildContext context) {
-    return PopupMenuButton<_ExtraAppBarActions>(
-      itemBuilder: (context) => [
-        if (mediaSelection.isSingle)
-          PopupMenuItem(
-            child: Text('Rename'),
-            value: _ExtraAppBarActions.rename,
-          ),
-        PopupMenuItem(child: Text('Copy'), value: _ExtraAppBarActions.copy),
-        PopupMenuItem(child: Text('Move'), value: _ExtraAppBarActions.move),
-      ],
-      onSelected: (action) {
-        switch (action) {
-          case _ExtraAppBarActions.rename:
-            showDialog(
-              context: context,
-              builder: (context) => _renameDialog(context),
-              barrierDismissible: false,
-            );
-            break;
-          case _ExtraAppBarActions.copy:
-            _onCopy(context);
-            break;
-          case _ExtraAppBarActions.move:
-            _onMove(context);
-            break;
-          default:
-            throw StateError('Unhandled extra action $action');
+  Future<void> _showDeleteSelectionDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => OperationPromptDialog(
+        title: 'Delete ${mediaSelection.name}?',
+        description:
+            'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.',
+        positiveButtonText: 'DELETE',
+        operationDescription:
+            'Deleting ${mediaSelection.count} ${mediaSelection.name}',
+        onPositivePressed: () => _deleteSelectedMedia(context),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Widget _overflowMenuButton() {
+    return FutureBuilder(
+      future: futureMedias,
+      builder: (context, AsyncSnapshot<List<Media>> snapshot) {
+        if (snapshot.hasError) {
+          throw snapshot.error;
         }
+
+        if (!snapshot.hasData) {
+          return SizedBox.shrink();
+        }
+
+        return PopupMenuButton<_OverflowMenuActions>(
+          itemBuilder: (_) => [
+            if (mediaSelection.count != snapshot.data.length)
+              PopupMenuItem(
+                child: Text('Select All'),
+                value: _OverflowMenuActions.selectAll,
+              )
+            else
+              PopupMenuItem(
+                child: Text('Deselect All'),
+                value: _OverflowMenuActions.deselectAll,
+              ),
+            if (mediaSelection.isSingle)
+              PopupMenuItem(
+                child: Text('Rename'),
+                value: _OverflowMenuActions.rename,
+              ),
+            PopupMenuItem(
+              child: Text('Copy'),
+              value: _OverflowMenuActions.copy,
+            ),
+            PopupMenuItem(
+              child: Text('Move'),
+              value: _OverflowMenuActions.move,
+            ),
+          ],
+          onSelected: (action) async {
+            switch (action) {
+              case _OverflowMenuActions.selectAll:
+                mediaSelection.selectAll(snapshot.data);
+                break;
+              case _OverflowMenuActions.deselectAll:
+                mediaSelection.deselectAll();
+                break;
+              case _OverflowMenuActions.rename:
+                await _showRenameSelectionDialog(context);
+                break;
+              case _OverflowMenuActions.copy:
+                await _showCopySelectionDialog(context);
+                break;
+              case _OverflowMenuActions.move:
+                await _showMoveSelectionDialog(context);
+                break;
+              default:
+                throw StateError('Unhandled extra action $action');
+            }
+          },
+        );
       },
     );
   }
 
-  Widget _renameDialog(BuildContext context) {
-    return TextFieldDialog(
-      title: 'Rename media',
-      initialText: mediaSelection.single.name,
-      positiveTextButton: 'RENAME',
-      onCheckText: (name) => name.trim().isNotEmpty,
-      onSubmitText: (newName) => _renameSelectedMedia(context, newName),
+  Future<void> _showRenameSelectionDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) => TextFieldDialog(
+        title: 'Rename media',
+        initialText: mediaSelection.single.name,
+        positiveTextButton: 'RENAME',
+        onCheckText: (name) => name.trim().isNotEmpty,
+        onSubmitText: (newName) => _renameSelectedMedia(context, newName),
+      ),
+      barrierDismissible: false,
     );
   }
 
-  void _onCopy(BuildContext context) {
-    showDialog(
+  Future<void> _showCopySelectionDialog(BuildContext context) async {
+    await showDialog(
       context: context,
       builder: (context) => CopyMediaDialog(
         medias: mediaSelection.toList(),
@@ -146,25 +193,14 @@ class _MediaListingPageState extends State<MediaListingPage> {
     );
   }
 
-  void _onMove(BuildContext context) {
-    showDialog(
+  Future<void> _showMoveSelectionDialog(BuildContext context) async {
+    await showDialog(
       context: context,
       builder: (context) => MoveMediaDialog(
         medias: mediaSelection.toList(),
       ),
       barrierDismissible: false,
     );
-  }
-
-  Widget _deleteSelectionDialog(BuildContext context) {
-    return OperationPromptDialog(
-        title: 'Delete ${mediaSelection.name}?',
-        description:
-            'This will permanently delete ${mediaSelection.count} ${mediaSelection.name}.',
-        positiveButtonText: 'DELETE',
-        operationDescription:
-            'Deleting ${mediaSelection.count} ${mediaSelection.name}',
-        onPositivePressed: () => _deleteSelectedMedia(context));
   }
 
   Widget _body(BuildContext context) {
