@@ -129,10 +129,10 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
           onSelected: (action) async {
             switch (action) {
               case _OverflowMenuActions.selectAll:
-                await _selectAll();
+                albumSelection.selectAll(snapshot.data);
                 break;
               case _OverflowMenuActions.deselectAll:
-                await _deselectAll();
+                albumSelection.deselectAll();
                 break;
               case _OverflowMenuActions.rename:
                 await _showRenameDialog(context);
@@ -217,14 +217,6 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
       thumbnailLoaderQueue.clear();
       albumSelection.clear();
     });
-  }
-
-  Future<void> _selectAll() async {
-    albumSelection.selectAll(await futureAlbums);
-  }
-
-  Future<void> _deselectAll() async {
-    albumSelection.deselectAll(await futureAlbums);
   }
 
   Future<void> _renameSelectedAlbum(
