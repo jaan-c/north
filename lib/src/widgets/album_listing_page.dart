@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'future_queue.dart';
 import 'gallery_model.dart';
+import 'import_media_dialog.dart';
 import 'media_listing_page.dart';
 import 'operation_prompt_dialog.dart';
 import 'selection_model.dart';
@@ -61,7 +62,16 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
 
   Widget _appBar(BuildContext context) {
     if (albumSelection.isEmpty) {
-      return AppBar(title: Text('North'), centerTitle: true);
+      return AppBar(
+        title: Text('North'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add_photo_alternate_rounded),
+            onPressed: () => _showImportMediaDialog(context),
+          ),
+        ],
+      );
     }
 
     return AppBar(
@@ -124,7 +134,7 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
               PopupMenuItem(
                 child: Text('Rename'),
                 value: _OverflowMenuActions.rename,
-              )
+              ),
           ],
           onSelected: (action) async {
             switch (action) {
@@ -156,6 +166,14 @@ class _AlbumListingPageState extends State<AlbumListingPage> {
         onCheckText: (name) => name.trim().isNotEmpty,
         onSubmitText: (newName) => _renameSelectedAlbum(context, newName),
       ),
+      barrierDismissible: false,
+    );
+  }
+
+  Future<void> _showImportMediaDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (_) => ImportMediaDialog(),
       barrierDismissible: false,
     );
   }
