@@ -3,9 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:north/private_gallery.dart';
-import 'package:path/path.dart' as pathlib;
 
 enum MediaOperation { delete, copy, move }
 
